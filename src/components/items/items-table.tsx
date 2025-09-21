@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { StatusBadge } from './status-badge'
+import { ItemDetailDrawer } from './item-detail-drawer'
+import { Eye, Paperclip } from 'lucide-react'
 import type { Item } from "@/types"
 
 interface ItemsTableProps {
@@ -20,6 +22,8 @@ interface ItemsTableProps {
 export function ItemsTable({ items }: ItemsTableProps) {
   const [sortField, setSortField] = useState<keyof Item>('name')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   const sortedItems = [...items].sort((a, b) => {
     const aVal = a[sortField] || ''
@@ -39,6 +43,16 @@ export function ItemsTable({ items }: ItemsTableProps) {
       setSortField(field)
       setSortDirection('asc')
     }
+  }
+
+  const handleRowClick = (item: Item) => {
+    setSelectedItem(item)
+    setDrawerOpen(true)
+  }
+
+  const handleDrawerClose = () => {
+    setDrawerOpen(false)
+    setSelectedItem(null)
   }
 
   return (
@@ -70,13 +84,28 @@ export function ItemsTable({ items }: ItemsTableProps) {
             <TableHead>Kategorie</TableHead>
             <TableHead>Flags</TableHead>
             <TableHead>Notizen</TableHead>
+            <TableHead className="w-12"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {sortedItems.map((item) => (
-            <TableRow key={item.id} className="hover:bg-muted/50">
+            <TableRow
+              key={item.id}
+              className="hover:bg-muted/50 cursor-pointer"
+              onClick={() => handleRowClick(item)}
+            >
               <TableCell className="font-medium">
-                {item.name}
+                <div className="flex items-center gap-2">
+                  {item.name}
+                  {item.files && item.files.length > 0 && (
+                    <div className="flex items-center gap-1">
+                      <Paperclip className="h-3 w-3 text-blue-600" />
+                      <span className="text-xs text-blue-600">
+                        {item.files.length}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </TableCell>
               <TableCell>
                 <Badge variant={item.type === 'prop' ? 'default' : 'secondary'}>
@@ -128,10 +157,19 @@ export function ItemsTable({ items }: ItemsTableProps) {
                   {item.notes || '—'}
                 </div>
               </TableCell>
+              <TableCell>
+                <Eye className="h-4 w-4 text-muted-foreground" />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+
+      <ItemDetailDrawer
+        item={selectedItem}
+        open={drawerOpen}
+        onClose={handleDrawerClose}
+      />
     </div>
   )
 }
