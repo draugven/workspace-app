@@ -1,4 +1,4 @@
-import { LoginForm } from '@/components/auth/login-form'
+import { AuthSetup } from '@/components/auth/auth-setup'
 
 export default function LoginPage() {
   return (
@@ -7,10 +7,10 @@ export default function LoginPage() {
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold">Theater Production App</h1>
           <p className="text-muted-foreground">
-            Sign in to manage your production
+            Access your theater production tools
           </p>
         </div>
-        <LoginForm />
+        <AuthSetup />
       </div>
     </div>
   )
