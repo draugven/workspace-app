@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { Navigation } from '@/components/layout/navigation'
 import { NoteCard } from '@/components/notes/note-card'
@@ -8,7 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Plus, Search } from 'lucide-react'
+import { useRealtimeNotes } from '@/hooks/use-realtime-notes'
+import { supabase } from '@/lib/supabase'
+import { Plus, Search, Users } from 'lucide-react'
 import type { Note, Department, User } from '@/types'
 
 // Mock data for now
@@ -133,9 +135,49 @@ Anstatt double bei "Zu Ende":
 ]
 
 export default function NotesPage() {
-  const [notes, setNotes] = useState<Note[]>(mockNotes)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterDepartment, setFilterDepartment] = useState<string | null>(null)
+  const [departments, setDepartments] = useState<Department[]>(mockDepartments)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+
+  const {
+    notes,
+    loading,
+    error,
+    activeEditors,
+    saveNote,
+    createNote,
+    startEditing,
+    stopEditing,
+    getActiveEditors
+  } = useRealtimeNotes()
+
+  // Load user and departments data
+  useEffect(() => {
+    const loadUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setCurrentUser({
+          id: user.id,
+          email: user.email || '',
+          full_name: user.user_metadata?.full_name || user.email || '',
+          created_at: user.created_at || ''
+        })
+      }
+
+      // Load departments from database
+      const { data: deptData } = await supabase
+        .from('departments')
+        .select('*')
+        .order('name')
+
+      if (deptData) {
+        setDepartments(deptData)
+      }
+    }
+
+    loadUserData()
+  }, [])
 
   const filteredNotes = notes.filter(note => {
     const matchesSearch = note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -145,44 +187,43 @@ export default function NotesPage() {
   })
 
   const handleSaveNote = async (noteId: string, content: string, title?: string) => {
-    setNotes(prevNotes =>
-      prevNotes.map(note =>
-        note.id === noteId
-          ? {
-              ...note,
-              content,
-              title: title || note.title,
-              updated_at: new Date().toISOString(),
-              is_locked: false,
-              locked_by: undefined,
-              locked_at: undefined
-            }
-          : note
-      )
-    )
-    console.log('Saving note:', { noteId, content, title })
+    try {
+      await saveNote(noteId, content, title)
+      await stopEditing(noteId)
+    } catch (error) {
+      console.error('Failed to save note:', error)
+    }
   }
 
   const handleLockNote = async (noteId: string, lock: boolean) => {
-    setNotes(prevNotes =>
-      prevNotes.map(note =>
-        note.id === noteId
-          ? {
-              ...note,
-              is_locked: lock,
-              locked_by: lock ? mockCurrentUser.id : undefined,
-              locked_at: lock ? new Date().toISOString() : undefined
-            }
-          : note
-      )
-    )
-    console.log('Locking note:', { noteId, lock })
+    try {
+      if (lock) {
+        await startEditing(noteId)
+      } else {
+        await stopEditing(noteId)
+      }
+    } catch (error) {
+      console.error('Failed to lock/unlock note:', error)
+    }
+  }
+
+  const handleCreateNote = async () => {
+    try {
+      await createNote({
+        title: 'Neue Notiz',
+        content: '',
+        department_id: filterDepartment || undefined
+      })
+    } catch (error) {
+      console.error('Failed to create note:', error)
+    }
   }
 
   const statsData = {
     total: notes.length,
     locked: notes.filter(n => n.is_locked).length,
-    byDepartment: mockDepartments.map(dept => ({
+    activeEditors: activeEditors.length,
+    byDepartment: departments.map(dept => ({
       ...dept,
       count: notes.filter(n => n.department_id === dept.id).length
     }))
@@ -199,7 +240,7 @@ export default function NotesPage() {
               Kollaborative Notizen für die Produktion
             </p>
           </div>
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={handleCreateNote} disabled={loading}>
             <Plus className="h-4 w-4" />
             Neue Notiz
           </Button>
@@ -231,8 +272,13 @@ export default function NotesPage() {
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardDescription>Abteilungen</CardDescription>
-              <CardTitle className="text-2xl">{mockDepartments.length}</CardTitle>
+              <CardDescription className="flex items-center gap-1">
+                <Users className="h-3 w-3" />
+                Aktive Bearbeiter
+              </CardDescription>
+              <CardTitle className="text-2xl text-blue-600">
+                {statsData.activeEditors}
+              </CardTitle>
             </CardHeader>
           </Card>
         </div>
@@ -283,21 +329,58 @@ export default function NotesPage() {
           </CardContent>
         </Card>
 
-        {/* Notes Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredNotes.map((note) => (
-            <NoteCard
-              key={note.id}
-              note={note}
-              currentUser={mockCurrentUser}
-              onSave={handleSaveNote}
-              onLock={handleLockNote}
-              departments={mockDepartments}
-            />
-          ))}
-        </div>
+        {/* Loading and Error States */}
+        {loading && (
+          <Card>
+            <CardContent className="py-8 text-center">
+              <div className="text-muted-foreground">Notizen werden geladen...</div>
+            </CardContent>
+          </Card>
+        )}
 
-        {filteredNotes.length === 0 && (
+        {error && (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="py-6 text-center">
+              <div className="text-red-800">{error}</div>
+              <Button
+                variant="outline"
+                className="mt-2"
+                onClick={() => window.location.reload()}
+              >
+                Neu laden
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Notes Grid */}
+        {!loading && !error && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {filteredNotes.map((note) => {
+              const editors = getActiveEditors(note.id)
+              const isBeingEdited = editors.length > 0 &&
+                editors.some(e => e.userId !== currentUser?.id)
+
+              return (
+                <NoteCard
+                  key={note.id}
+                  note={{
+                    ...note,
+                    // Add real-time editing indicators
+                    activeEditors: editors
+                  }}
+                  currentUser={currentUser}
+                  onSave={handleSaveNote}
+                  onLock={handleLockNote}
+                  departments={departments}
+                  isBeingEditedByOthers={isBeingEdited}
+                />
+              )
+            })}
+          </div>
+        )}
+
+        {!loading && !error && filteredNotes.length === 0 && (
           <Card>
             <CardContent className="py-8 text-center">
               <div className="text-muted-foreground">
