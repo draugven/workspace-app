@@ -12,7 +12,10 @@ const navItems = [
   { name: 'Notes', href: '/notes' },
 ]
 
-export function Navigation({ userEmail }: { userEmail?: string }) {
+import { useAuth } from '../auth/auth-provider'
+
+export function Navigation() {
+  const { user } = useAuth()
   const pathname = usePathname()
 
   const handleSignOut = async () => {
@@ -44,10 +47,10 @@ export function Navigation({ userEmail }: { userEmail?: string }) {
             </div>
           </div>
 
-          {userEmail && (
+          {user && (
             <div className="flex items-center space-x-4">
               <span className="text-sm text-muted-foreground">
-                {userEmail}
+                {user.email}
               </span>
               <Button variant="outline" size="sm" onClick={handleSignOut}>
                 Sign Out
