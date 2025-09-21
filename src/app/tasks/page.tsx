@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { Navigation } from '@/components/layout/navigation'
 import { TaskBoard } from '@/components/tasks/task-board'
@@ -8,6 +8,8 @@ import { TasksTable } from '@/components/tasks/tasks-table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { supabase } from '@/lib/supabase'
+import { RefreshCw, Plus, Users } from 'lucide-react'
 import type { Task, Department, User, TaskTag } from '@/types'
 
 // Mock data for now - this will be replaced with actual Supabase queries
@@ -113,14 +115,123 @@ const mockTasks: Task[] = [
 
 export default function TasksPage() {
   const [viewMode, setViewMode] = useState<'board' | 'table'>('board')
+  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null)
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [tags, setTags] = useState<TaskTag[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const totalTasks = mockTasks.length
-  const statusCounts = mockTasks.reduce((acc, task) => {
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const loadData = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      // Load all data in parallel
+      const [tasksResponse, departmentsResponse, tagsResponse] = await Promise.all([
+        supabase
+          .from('tasks')
+          .select(`
+            *,
+            department:departments(*),
+            assignee:users(*),
+            tags:task_tag_assignments(tag:task_tags(*))
+          `)
+          .order('updated_at', { ascending: false }),
+
+        supabase
+          .from('departments')
+          .select('*')
+          .order('name'),
+
+        supabase
+          .from('task_tags')
+          .select('*')
+          .order('name')
+      ])
+
+      if (tasksResponse.error) throw tasksResponse.error
+      if (departmentsResponse.error) throw departmentsResponse.error
+      if (tagsResponse.error) throw tagsResponse.error
+
+      // Transform tasks data to match our interface
+      const transformedTasks: Task[] = (tasksResponse.data || []).map(task => ({
+        ...task,
+        tags: task.tags?.map((tt: any) => tt.tag) || []
+      }))
+
+      setTasks(transformedTasks)
+      setDepartments(departmentsResponse.data || [])
+      setTags(tagsResponse.data || [])
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load tasks')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleTaskUpdate = async (updatedTask: Task) => {
+    try {
+      const { error } = await supabase
+        .from('tasks')
+        .update({
+          title: updatedTask.title,
+          description: updatedTask.description,
+          status: updatedTask.status,
+          priority: updatedTask.priority,
+          due_date: updatedTask.due_date,
+          department_id: updatedTask.department_id,
+          assigned_to: updatedTask.assigned_to
+        })
+        .eq('id', updatedTask.id)
+
+      if (error) throw error
+
+      // Reload tasks to get updated data
+      await loadData()
+    } catch (error) {
+      console.error('Failed to update task:', error)
+    }
+  }
+
+  const handleTaskStatusChange = async (taskId: string, newStatus: Task['status']) => {
+    try {
+      const { error } = await supabase
+        .from('tasks')
+        .update({ status: newStatus })
+        .eq('id', taskId)
+
+      if (error) throw error
+
+      // Update local state immediately for better UX
+      setTasks(prev => prev.map(task =>
+        task.id === taskId ? { ...task, status: newStatus } : task
+      ))
+    } catch (error) {
+      console.error('Failed to update task status:', error)
+    }
+  }
+
+  // Filter tasks based on department and tags
+  const filteredTasks = tasks.filter(task => {
+    const matchesDepartment = !selectedDepartment || task.department_id === selectedDepartment
+    const matchesTags = selectedTags.length === 0 ||
+      (task.tags && task.tags.some(tag => selectedTags.includes(tag.id)))
+    return matchesDepartment && matchesTags
+  })
+
+  const totalTasks = tasks.length
+  const statusCounts = tasks.reduce((acc, task) => {
     acc[task.status] = (acc[task.status] || 0) + 1
     return acc
   }, {} as Record<string, number>)
 
-  const priorityCounts = mockTasks.reduce((acc, task) => {
+  const priorityCounts = tasks.reduce((acc, task) => {
     acc[task.priority] = (acc[task.priority] || 0) + 1
     return acc
   }, {} as Record<string, number>)
@@ -221,24 +332,81 @@ export default function TasksPage() {
           </CardContent>
         </Card>
 
-        {/* Task View */}
-        {viewMode === 'board' ? (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Kanban Board</h2>
-            <TaskBoard tasks={mockTasks} />
-          </div>
-        ) : (
+        {/* Loading and Error States */}
+        {loading && (
           <Card>
-            <CardHeader>
-              <CardTitle>Alle Aufgaben</CardTitle>
-              <CardDescription>
-                Klicke auf die Spaltenüberschriften zum Sortieren
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <TasksTable tasks={mockTasks} />
+            <CardContent className="py-8 text-center">
+              <div className="text-muted-foreground">Tasks werden geladen...</div>
             </CardContent>
           </Card>
+        )}
+
+        {error && (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="py-6 text-center">
+              <div className="text-red-800 mb-2">{error}</div>
+              <Button
+                variant="outline"
+                onClick={loadData}
+                className="gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Erneut versuchen
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Task View */}
+        {!loading && !error && (
+          <>
+            {tasks.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center">
+                  <div className="text-muted-foreground">
+                    Noch keine Tasks vorhanden. Nutze die Import-Funktion um Tasks zu erstellen!
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {viewMode === 'board' ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-semibold">Kanban Board</h2>
+                      <span className="text-sm text-muted-foreground">
+                        {filteredTasks.length} von {totalTasks} Tasks
+                      </span>
+                    </div>
+                    <TaskBoard
+                      tasks={filteredTasks}
+                      onTaskStatusChange={handleTaskStatusChange}
+                    />
+                  </div>
+                ) : (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span>Alle Aufgaben</span>
+                        <span className="text-sm font-normal text-muted-foreground">
+                          {filteredTasks.length} Tasks
+                        </span>
+                      </CardTitle>
+                      <CardDescription>
+                        Klicke auf die Spaltenüberschriften zum Sortieren
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <TasksTable
+                        tasks={filteredTasks}
+                        onTaskUpdate={handleTaskUpdate}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            )}
+          </>
         )}
       </div>
     </ProtectedRoute>
