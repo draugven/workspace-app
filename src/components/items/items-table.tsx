@@ -17,9 +17,10 @@ import type { Item } from "@/types"
 
 interface ItemsTableProps {
   items: Item[]
+  onEditItem?: (item: Item) => void
 }
 
-export function ItemsTable({ items }: ItemsTableProps) {
+export function ItemsTable({ items, onEditItem }: ItemsTableProps) {
   const [sortField, setSortField] = useState<keyof Item>('name')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [selectedItem, setSelectedItem] = useState<Item | null>(null)
@@ -169,6 +170,7 @@ export function ItemsTable({ items }: ItemsTableProps) {
         item={selectedItem}
         open={drawerOpen}
         onClose={handleDrawerClose}
+        onEdit={onEditItem}
       />
     </div>
   )

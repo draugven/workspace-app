@@ -22,7 +22,8 @@ import {
   CheckCircle,
   Clock,
   Package,
-  FileImage
+  FileImage,
+  Edit
 } from 'lucide-react'
 import type { Item, ItemFile } from '@/types'
 
@@ -30,9 +31,10 @@ interface ItemDetailDrawerProps {
   item: Item | null
   open: boolean
   onClose: () => void
+  onEdit?: (item: Item) => void
 }
 
-export function ItemDetailDrawer({ item, open, onClose }: ItemDetailDrawerProps) {
+export function ItemDetailDrawer({ item, open, onClose, onEdit }: ItemDetailDrawerProps) {
   const [files, setFiles] = useState<ItemFile[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -112,14 +114,29 @@ export function ItemDetailDrawer({ item, open, onClose }: ItemDetailDrawerProps)
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader>
-          <SheetTitle className="flex items-center gap-2">
-            {getStatusIcon(item.status)}
-            {item.name}
-          </SheetTitle>
-          <SheetDescription>
-            {item.type === 'prop' ? 'Requisite' : 'Kostüm'} •
-            {item.category?.name && ` ${item.category.name}`}
-          </SheetDescription>
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <SheetTitle className="flex items-center gap-2">
+                {getStatusIcon(item.status)}
+                {item.name}
+              </SheetTitle>
+              <SheetDescription>
+                {item.type === 'prop' ? 'Requisite' : 'Kostüm'} •
+                {item.category?.name && ` ${item.category.name}`}
+              </SheetDescription>
+            </div>
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(item)}
+                className="gap-2"
+              >
+                <Edit className="h-4 w-4" />
+                Bearbeiten
+              </Button>
+            )}
+          </div>
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
