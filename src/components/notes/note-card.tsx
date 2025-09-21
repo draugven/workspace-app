@@ -6,14 +6,22 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { TiptapEditor } from './tiptap-editor'
 import type { Note, Department, User } from "@/types"
-import { Edit, Lock, History, Save } from 'lucide-react'
+import { Edit, Lock, History, Save, Users, AlertTriangle } from 'lucide-react'
 
 interface NoteCardProps {
-  note: Note
-  currentUser?: User
+  note: Note & {
+    activeEditors?: Array<{
+      noteId: string
+      userId: string
+      userEmail: string
+      timestamp: number
+    }>
+  }
+  currentUser?: User | null
   onSave: (noteId: string, content: string, title?: string) => void
   onLock?: (noteId: string, lock: boolean) => void
   departments?: Department[]
+  isBeingEditedByOthers?: boolean
 }
 
 export function NoteCard({
@@ -21,7 +29,8 @@ export function NoteCard({
   currentUser,
   onSave,
   onLock,
-  departments = []
+  departments = [],
+  isBeingEditedByOthers = false
 }: NoteCardProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(note.content || '')
@@ -107,7 +116,21 @@ export function NoteCard({
               </Badge>
             )}
 
-            {!isEditing && !isLocked && (
+            {isBeingEditedByOthers && !isLocked && (
+              <Badge variant="outline" className="gap-1 bg-yellow-50 text-yellow-700 border-yellow-300">
+                <Users className="h-3 w-3" />
+                In Bearbeitung
+              </Badge>
+            )}
+
+            {note.activeEditors && note.activeEditors.length > 0 && !isLocked && (
+              <div className="flex items-center gap-1 text-xs text-blue-600">
+                <Users className="h-3 w-3" />
+                {note.activeEditors.length}
+              </div>
+            )}
+
+            {!isEditing && !isLocked && !isBeingEditedByOthers && (
               <Button
                 variant="outline"
                 size="sm"
@@ -116,6 +139,19 @@ export function NoteCard({
               >
                 <Edit className="h-4 w-4" />
                 Bearbeiten
+              </Button>
+            )}
+
+            {!isEditing && !isLocked && isBeingEditedByOthers && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled
+                className="gap-2 opacity-50"
+                title="Wird gerade von einem anderen Benutzer bearbeitet"
+              >
+                <AlertTriangle className="h-4 w-4" />
+                In Bearbeitung
               </Button>
             )}
 
