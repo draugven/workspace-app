@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Button } from '@/components/ui/button'
@@ -19,7 +20,7 @@ import {
   Save
 } from 'lucide-react'
 
-interface TiptapEditorProps {
+export interface TiptapEditorProps {
   content: string
   onChange: (content: string) => void
   onSave: () => void
@@ -71,7 +72,7 @@ export function TiptapEditor({
         class: 'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 border rounded-md',
       },
     },
-  })
+  }, [content, onChange, isLocked])
 
   if (!editor) {
     return null

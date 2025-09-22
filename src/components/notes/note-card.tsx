@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { TiptapEditor } from './tiptap-editor'
+import { TiptapEditorWrapper } from './tiptap-editor-wrapper'
 import type { Note, Department, User } from "@/types"
 import { Edit, Lock, History, Save, Users, AlertTriangle } from 'lucide-react'
 
@@ -172,7 +172,7 @@ export function NoteCard({
       <CardContent>
         {isEditing ? (
           <div className="space-y-4">
-            <TiptapEditor
+            <TiptapEditorWrapper
               content={editContent}
               onChange={setEditContent}
               onSave={handleSave}
