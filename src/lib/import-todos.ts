@@ -107,10 +107,10 @@ export class TodoImporter {
       .from('departments')
       .select('id')
       .eq('name', name)
-      .single()
+      .limit(1)
 
-    if (existing) {
-      return existing.id
+    if (existing && existing.length > 0) {
+      return existing[0].id
     }
 
     // Create new department with default color
@@ -161,10 +161,10 @@ export class TodoImporter {
       .from('users')
       .select('id')
       .eq('email', userData.email)
-      .single()
+      .limit(1)
 
-    if (existing) {
-      return existing.id
+    if (existing && existing.length > 0) {
+      return existing[0].id
     }
 
     // For demo purposes, create placeholder users
@@ -194,10 +194,10 @@ export class TodoImporter {
       .from('task_tags')
       .select('id')
       .eq('name', cleanName)
-      .single()
+      .limit(1)
 
-    if (existing) {
-      return existing.id
+    if (existing && existing.length > 0) {
+      return existing[0].id
     }
 
     // Tag color mapping
@@ -303,6 +303,19 @@ export class TodoImporter {
 
         // Get or create department
         const departmentId = await this.getOrCreateDepartment(task.department_name!)
+
+        // Check if task already exists to prevent duplicates
+        const { data: existingTask } = await supabase
+          .from('tasks')
+          .select('id')
+          .eq('title', task.title)
+          .limit(1)
+
+        if (existingTask && existingTask.length > 0) {
+          console.log(`Task "${task.title}" already exists, skipping...`)
+          success++
+          continue
+        }
 
         // Get assigned user ID if person tag exists
         let assignedUserId = null

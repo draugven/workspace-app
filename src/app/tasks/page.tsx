@@ -138,7 +138,6 @@ export default function TasksPage() {
           .select(`
             *,
             department:departments(*),
-            assignee:users(*),
             tags:task_tag_assignments(tag:task_tags(*))
           `)
           .order('updated_at', { ascending: false }),
