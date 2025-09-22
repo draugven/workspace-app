@@ -8,7 +8,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
-import { Calendar, Save, X } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Calendar, Save, X, Tag } from 'lucide-react'
 import type { Task, Department, TaskTag } from '@/types'
 
 interface TaskEditDialogProps {
@@ -29,21 +30,30 @@ export function TaskEditDialog({
   tags
 }: TaskEditDialogProps) {
   const [editedTask, setEditedTask] = useState<Task | null>(null)
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
 
   // Initialize edited task when dialog opens
   if (task && !editedTask && open) {
     setEditedTask(task)
+    setSelectedTagIds(task.tags?.map(tag => tag.id) || [])
   }
 
   // Reset when dialog closes
   if (!open && editedTask) {
     setEditedTask(null)
+    setSelectedTagIds([])
   }
 
   if (!editedTask) return null
 
   const handleSave = () => {
-    onSave(editedTask)
+    // Update task with selected tags
+    const selectedTags = tags.filter(tag => selectedTagIds.includes(tag.id))
+    const taskWithTags = {
+      ...editedTask,
+      tags: selectedTags
+    }
+    onSave(taskWithTags)
     onOpenChange(false)
     setEditedTask(null)
   }
@@ -51,6 +61,15 @@ export function TaskEditDialog({
   const handleCancel = () => {
     onOpenChange(false)
     setEditedTask(null)
+    setSelectedTagIds([])
+  }
+
+  const handleTagToggle = (tagId: string) => {
+    setSelectedTagIds(prev =>
+      prev.includes(tagId)
+        ? prev.filter(id => id !== tagId)
+        : [...prev, tagId]
+    )
   }
 
   return (
@@ -165,24 +184,56 @@ export function TaskEditDialog({
             </div>
           </div>
 
-          {/* Current Tags Display */}
-          {editedTask.tags && editedTask.tags.length > 0 && (
-            <div className="grid gap-2">
-              <Label>Aktuelle Tags</Label>
-              <div className="flex flex-wrap gap-2">
-                {editedTask.tags.map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    variant="outline"
-                    style={{ borderColor: tag.color, color: tag.color }}
-                    className="text-xs"
-                  >
-                    #{tag.name}
-                  </Badge>
-                ))}
-              </div>
+          {/* Tags Selection */}
+          <div className="grid gap-2">
+            <Label>Tags</Label>
+            <div className="border rounded-md p-3 max-h-40 overflow-y-auto">
+              {tags.length > 0 ? (
+                <div className="space-y-2">
+                  {tags.map((tag) => (
+                    <div key={tag.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`tag-${tag.id}`}
+                        checked={selectedTagIds.includes(tag.id)}
+                        onCheckedChange={() => handleTagToggle(tag.id)}
+                      />
+                      <Label
+                        htmlFor={`tag-${tag.id}`}
+                        className="flex items-center gap-2 cursor-pointer text-sm"
+                      >
+                        <Tag className="h-3 w-3" style={{ color: tag.color }} />
+                        <span>#{tag.name}</span>
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Keine Tags verfügbar
+                </p>
+              )}
             </div>
-          )}
+
+            {/* Selected Tags Preview */}
+            {selectedTagIds.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                {selectedTagIds.map((tagId) => {
+                  const tag = tags.find(t => t.id === tagId)
+                  if (!tag) return null
+                  return (
+                    <Badge
+                      key={tag.id}
+                      variant="outline"
+                      style={{ borderColor: tag.color, color: tag.color }}
+                      className="text-xs"
+                    >
+                      #{tag.name}
+                    </Badge>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         <DialogFooter>

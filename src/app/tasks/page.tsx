@@ -180,7 +180,8 @@ export default function TasksPage() {
 
   const handleTaskUpdate = async (updatedTask: Task) => {
     try {
-      const { error } = await supabase
+      // Update task basic properties
+      const { error: taskError } = await supabase
         .from('tasks')
         .update({
           title: updatedTask.title,
@@ -193,7 +194,32 @@ export default function TasksPage() {
         })
         .eq('id', updatedTask.id)
 
-      if (error) throw error
+      if (taskError) throw taskError
+
+      // Handle tag assignments if tags are provided
+      if (updatedTask.tags !== undefined) {
+        // First, delete existing tag assignments
+        const { error: deleteError } = await supabase
+          .from('task_tag_assignments')
+          .delete()
+          .eq('task_id', updatedTask.id)
+
+        if (deleteError) throw deleteError
+
+        // Then, create new tag assignments
+        if (updatedTask.tags.length > 0) {
+          const tagAssignments = updatedTask.tags.map(tag => ({
+            task_id: updatedTask.id,
+            tag_id: tag.id
+          }))
+
+          const { error: insertError } = await supabase
+            .from('task_tag_assignments')
+            .insert(tagAssignments)
+
+          if (insertError) throw insertError
+        }
+      }
 
       // Reload tasks to get updated data
       await loadData()
