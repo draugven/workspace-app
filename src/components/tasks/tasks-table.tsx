@@ -12,15 +12,26 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { TaskStatusBadge } from './task-status-badge'
 import { PriorityBadge } from './priority-badge'
-import type { Task } from "@/types"
+import { TaskEditDialog } from './task-edit-dialog'
+import type { Task, Department, TaskTag } from "@/types"
 
 interface TasksTableProps {
   tasks: Task[]
+  onTaskUpdate?: (updatedTask: Task) => void
+  departments?: Department[]
+  tags?: TaskTag[]
 }
 
-export function TasksTable({ tasks }: TasksTableProps) {
+export function TasksTable({
+  tasks,
+  onTaskUpdate,
+  departments = [],
+  tags = []
+}: TasksTableProps) {
   const [sortField, setSortField] = useState<keyof Task>('priority')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
 
   const priorityOrder = { 'urgent': 4, 'high': 3, 'medium': 2, 'low': 1 }
 
@@ -53,6 +64,17 @@ export function TasksTable({ tasks }: TasksTableProps) {
     } else {
       setSortField(field)
       setSortDirection('desc')
+    }
+  }
+
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task)
+    setEditDialogOpen(true)
+  }
+
+  const handleTaskSave = (updatedTask: Task) => {
+    if (onTaskUpdate) {
+      onTaskUpdate(updatedTask)
     }
   }
 
@@ -92,7 +114,11 @@ export function TasksTable({ tasks }: TasksTableProps) {
         </TableHeader>
         <TableBody>
           {sortedTasks.map((task) => (
-            <TableRow key={task.id} className="hover:bg-muted/50">
+            <TableRow
+              key={task.id}
+              className="hover:bg-muted/50 cursor-pointer"
+              onClick={() => handleTaskClick(task)}
+            >
               <TableCell>
                 <div className="space-y-1">
                   <div className="font-medium">{task.title}</div>
@@ -151,6 +177,15 @@ export function TasksTable({ tasks }: TasksTableProps) {
           ))}
         </TableBody>
       </Table>
+
+      <TaskEditDialog
+        task={selectedTask}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSave={handleTaskSave}
+        departments={departments}
+        tags={tags}
+      />
     </div>
   )
 }

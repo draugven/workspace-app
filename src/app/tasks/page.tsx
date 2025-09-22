@@ -8,8 +8,10 @@ import { TasksTable } from '@/components/tasks/tasks-table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { supabase } from '@/lib/supabase'
-import { RefreshCw, Plus, Users } from 'lucide-react'
+import { RefreshCw, Plus, Users, Filter, X } from 'lucide-react'
 import type { Task, Department, User, TaskTag } from '@/types'
 
 // Mock data for now - this will be replaced with actual Supabase queries
@@ -117,6 +119,8 @@ export default function TasksPage() {
   const [viewMode, setViewMode] = useState<'board' | 'table'>('board')
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
+  const [selectedPriority, setSelectedPriority] = useState<string | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
   const [tags, setTags] = useState<TaskTag[]>([])
@@ -216,12 +220,14 @@ export default function TasksPage() {
     }
   }
 
-  // Filter tasks based on department and tags
+  // Filter tasks based on department, tags, status, and priority
   const filteredTasks = tasks.filter(task => {
     const matchesDepartment = !selectedDepartment || task.department_id === selectedDepartment
     const matchesTags = selectedTags.length === 0 ||
       (task.tags && task.tags.some(tag => selectedTags.includes(tag.id)))
-    return matchesDepartment && matchesTags
+    const matchesStatus = !selectedStatus || task.status === selectedStatus
+    const matchesPriority = !selectedPriority || task.priority === selectedPriority
+    return matchesDepartment && matchesTags && matchesStatus && matchesPriority
   })
 
   const totalTasks = tasks.length
@@ -261,6 +267,201 @@ export default function TasksPage() {
             </Button>
           </div>
         </div>
+
+        {/* Filter Controls */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Filter className="h-5 w-5" />
+              Filter
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Department Filter */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Abteilung</label>
+                <Select
+                  value={selectedDepartment || ''}
+                  onValueChange={(value) => setSelectedDepartment(value === 'all' ? null : value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Alle Abteilungen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Abteilungen</SelectItem>
+                    {departments.map((department) => (
+                      <SelectItem key={department.id} value={department.id}>
+                        {department.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Status Filter */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Status</label>
+                <Select
+                  value={selectedStatus || ''}
+                  onValueChange={(value) => setSelectedStatus(value === 'all' ? null : value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Alle Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Status</SelectItem>
+                    <SelectItem value="not_started">Zu erledigen</SelectItem>
+                    <SelectItem value="in_progress">In Bearbeitung</SelectItem>
+                    <SelectItem value="done">Erledigt</SelectItem>
+                    <SelectItem value="blocked">Blockiert</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Priority Filter */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Priorität</label>
+                <Select
+                  value={selectedPriority || ''}
+                  onValueChange={(value) => setSelectedPriority(value === 'all' ? null : value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Alle Prioritäten" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Prioritäten</SelectItem>
+                    <SelectItem value="urgent">Dringend</SelectItem>
+                    <SelectItem value="high">Hoch</SelectItem>
+                    <SelectItem value="medium">Mittel</SelectItem>
+                    <SelectItem value="low">Niedrig</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Tags Filter */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Tags</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="justify-between w-full"
+                    >
+                      {selectedTags.length > 0
+                        ? `${selectedTags.length} Tags ausgewählt`
+                        : 'Tags auswählen'
+                      }
+                      <Filter className="ml-2 h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 p-3">
+                    <div className="space-y-2">
+                      {tags.map((tag) => (
+                        <div key={tag.id} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id={`tag-${tag.id}`}
+                            checked={selectedTags.includes(tag.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedTags([...selectedTags, tag.id])
+                              } else {
+                                setSelectedTags(selectedTags.filter(id => id !== tag.id))
+                              }
+                            }}
+                            className="rounded border-gray-300"
+                          />
+                          <label
+                            htmlFor={`tag-${tag.id}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            <Badge
+                              variant="outline"
+                              style={{ borderColor: tag.color, color: tag.color }}
+                            >
+                              {tag.name}
+                            </Badge>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            {/* Active Filters and Clear Button */}
+            {(selectedDepartment || selectedStatus || selectedPriority || selectedTags.length > 0) && (
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
+                <span className="text-sm text-muted-foreground">Aktive Filter:</span>
+
+                {selectedDepartment && (
+                  <Badge variant="secondary" className="gap-1">
+                    {departments.find(d => d.id === selectedDepartment)?.name}
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => setSelectedDepartment(null)}
+                    />
+                  </Badge>
+                )}
+
+                {selectedStatus && (
+                  <Badge variant="secondary" className="gap-1">
+                    {selectedStatus === 'not_started' ? 'Zu erledigen' :
+                     selectedStatus === 'in_progress' ? 'In Bearbeitung' :
+                     selectedStatus === 'done' ? 'Erledigt' :
+                     selectedStatus === 'blocked' ? 'Blockiert' : selectedStatus}
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => setSelectedStatus(null)}
+                    />
+                  </Badge>
+                )}
+
+                {selectedPriority && (
+                  <Badge variant="secondary" className="gap-1">
+                    {selectedPriority === 'urgent' ? 'Dringend' :
+                     selectedPriority === 'high' ? 'Hoch' :
+                     selectedPriority === 'medium' ? 'Mittel' :
+                     selectedPriority === 'low' ? 'Niedrig' : selectedPriority}
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => setSelectedPriority(null)}
+                    />
+                  </Badge>
+                )}
+
+                {selectedTags.map(tagId => {
+                  const tag = tags.find(t => t.id === tagId)
+                  return tag ? (
+                    <Badge key={tagId} variant="secondary" className="gap-1">
+                      {tag.name}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => setSelectedTags(selectedTags.filter(id => id !== tagId))}
+                      />
+                    </Badge>
+                  ) : null
+                })}
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedDepartment(null)
+                    setSelectedStatus(null)
+                    setSelectedPriority(null)
+                    setSelectedTags([])
+                  }}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Alle Filter löschen
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -380,6 +581,9 @@ export default function TasksPage() {
                     <TaskBoard
                       tasks={filteredTasks}
                       onTaskStatusChange={handleTaskStatusChange}
+                      onTaskUpdate={handleTaskUpdate}
+                      departments={departments}
+                      tags={tags}
                     />
                   </div>
                 ) : (
@@ -399,6 +603,8 @@ export default function TasksPage() {
                       <TasksTable
                         tasks={filteredTasks}
                         onTaskUpdate={handleTaskUpdate}
+                        departments={departments}
+                        tags={tags}
                       />
                     </CardContent>
                   </Card>
