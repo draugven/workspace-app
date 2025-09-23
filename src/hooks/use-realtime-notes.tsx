@@ -269,12 +269,11 @@ export function useRealtimeNotes({
       })
     }
 
-    channel.on('broadcast', { event: 'start-editing' }, handlePresence)
-    channel.on('broadcast', { event: 'stop-editing' }, handlePresence)
+    const startEditingSubscription = channel.on('broadcast', { event: 'start-editing' }, handlePresence)
+    const stopEditingSubscription = channel.on('broadcast', { event: 'stop-editing' }, handlePresence)
 
     return () => {
-      channel.off('broadcast', { event: 'start-editing' }, handlePresence)
-      channel.off('broadcast', { event: 'stop-editing' }, handlePresence)
+      // Supabase channels don't have an off method - unsubscribe is handled when the channel is removed
     }
   }, [channel])
 
