@@ -93,7 +93,7 @@ Tiptap SSR error ⇒ DOM API access during SSR, resolved with dynamic imports an
 ### Background
 Theater production app built from git history analysis with 12 commits covering authentication, CRUD operations, real-time collaboration, file uploads, and data import system.
 
-## 22:27 22.09.2025 – Compact Session
+## 22:27 22.09.2025 – Compact Session #Deprecated
 
 ### CurrentFocus
 Added interactive task editing functionality to both Kanban board and table views with comprehensive edit dialog.
@@ -113,3 +113,52 @@ No current bugs - interactive editing working as expected
 
 ### Background
 Continued from previous session - user requested making Kanban and table views interactive for task editing after fixing import function issues.
+
+## 23:01 22.09.2025 – Compact Session #Deprecated
+
+### CurrentFocus
+Implemented drag-and-drop Kanban functionality and comprehensive task tag editing system.
+
+### SessionChanges
+- Added drag-and-drop to Kanban board using @dnd-kit with cross-column task movement and visual feedback
+- Implemented task tag editing with checkbox interface in TaskEditDialog showing real-time tag preview
+- Created Checkbox UI component with Radix UI integration for tag selection
+- Fixed drop zone detection issues by switching to rectIntersection collision detection
+- Enhanced task update handlers to manage tag assignments through database junction table
+- Installed @dnd-kit libraries and @radix-ui/react-checkbox dependencies
+- Resolved Next.js cache corruption by cleaning .next directory and restarting dev server
+- Committed comprehensive changes with proper git message and co-authorship
+
+### NextSteps
+Theater production app fully functional with drag-and-drop Kanban and complete tag management
+
+### BugsAndTheories
+Initial drag-and-drop not working ⇒ SortableContext interference with cross-column drops, fixed by removing SortableContext
+Next.js 404 errors on static assets ⇒ corrupted build cache, resolved with cache cleanup
+
+### Background
+Extended task management with modern drag-and-drop interactions and comprehensive tag editing, maintaining German localization and design consistency.
+
+## 19:33 23.09.2025 – Compact Session
+
+### CurrentFocus
+Enhanced Kanban with drag handles, added task creation UI, and resolved Select component validation errors.
+
+### SessionChanges
+- Fixed aggressive drag behavior by adding grip icon handles and 8px activation distance for precise drag vs click interactions
+- Created TaskAddDialog component with comprehensive form including title, description, status, priority, department, due date, and tag selection
+- Integrated Add Task button in main tasks page header with full CRUD functionality and real-time list updates
+- Resolved Radix Select empty string validation errors in both TaskAddDialog and ItemForm by using 'none' placeholder values
+- Enhanced task creation with automatic user record management and foreign key constraint handling
+- Updated all form components to handle Select placeholder values properly with conversion logic for database storage
+
+### NextSteps
+Clean up database schema to use real Supabase Auth users instead of mock data and remove user-department relationships
+
+### BugsAndTheories
+Drag preventing click access ⇒ entire card was draggable, fixed with dedicated grip handles and activation constraints
+Select empty string error ⇒ Radix UI validation, resolved by using 'none' placeholder with proper conversion logic
+Task creation foreign key error ⇒ missing user records in custom users table, handled with automatic user creation
+
+### Background
+Extended UI with comprehensive task creation while maintaining existing drag-and-drop and editing functionality. Session focused on UX improvements and form validation fixes.
