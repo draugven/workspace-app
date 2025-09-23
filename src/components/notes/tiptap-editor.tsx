@@ -42,12 +42,17 @@ export function TiptapEditor({
       StarterKit.configure({
         bulletList: {
           HTMLAttributes: {
-            class: 'list-disc list-inside',
+            class: 'list-disc list-outside ml-4',
           },
         },
         orderedList: {
           HTMLAttributes: {
-            class: 'list-decimal list-inside',
+            class: 'list-decimal list-outside ml-4',
+          },
+        },
+        listItem: {
+          HTMLAttributes: {
+            class: 'mb-1',
           },
         },
         blockquote: {
@@ -64,15 +69,30 @@ export function TiptapEditor({
     ],
     content,
     editable: !isLocked,
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 border rounded-md',
+        class: 'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 border rounded-md [&_h1]:!text-2xl [&_h1]:!font-bold [&_h2]:!text-xl [&_h2]:!font-bold [&_h3]:!text-lg [&_h3]:!font-bold [&_h1]:!mt-4 [&_h1]:!mb-2 [&_h2]:!mt-4 [&_h2]:!mb-2 [&_h3]:!mt-4 [&_h3]:!mb-2',
       },
     },
-  }, [content, onChange, isLocked])
+  })
+
+  // Update content when it changes externally (without breaking focus)
+  useEffect(() => {
+    if (editor && editor.getHTML() !== content) {
+      editor.commands.setContent(content, false)
+    }
+  }, [editor, content])
+
+  // Update editable state when lock status changes
+  useEffect(() => {
+    if (editor) {
+      editor.setEditable(!isLocked)
+    }
+  }, [editor, isLocked])
 
   if (!editor) {
     return null
@@ -218,17 +238,11 @@ export function TiptapEditor({
       </div>
 
       {/* Status Bar */}
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span>
-          {editor.storage.characterCount?.characters() || 0} Zeichen, {' '}
-          {editor.storage.characterCount?.words() || 0} Wörter
-        </span>
-        {isLocked ? (
+      {isLocked && (
+        <div className="flex justify-end text-xs text-muted-foreground">
           <span className="text-yellow-600">Schreibgeschützt</span>
-        ) : (
-          <span className="text-green-600">Bearbeitbar</span>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

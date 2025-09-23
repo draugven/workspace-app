@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { Navigation } from '@/components/layout/navigation'
 import { NoteCard } from '@/components/notes/note-card'
+import { NoteAddDialog } from '@/components/notes/note-add-dialog'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -139,6 +140,7 @@ export default function NotesPage() {
   const [filterDepartment, setFilterDepartment] = useState<string | null>(null)
   const [departments, setDepartments] = useState<Department[]>(mockDepartments)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [showAddDialog, setShowAddDialog] = useState(false)
 
   const {
     notes,
@@ -207,16 +209,16 @@ export default function NotesPage() {
     }
   }
 
-  const handleCreateNote = async () => {
+  const handleCreateNote = async (noteData: Partial<Note>) => {
     try {
-      await createNote({
-        title: 'Neue Notiz',
-        content: '',
-        department_id: filterDepartment || undefined
-      })
+      await createNote(noteData)
     } catch (error) {
       console.error('Failed to create note:', error)
     }
+  }
+
+  const handleOpenAddDialog = () => {
+    setShowAddDialog(true)
   }
 
   const statsData = {
@@ -240,7 +242,7 @@ export default function NotesPage() {
               Kollaborative Notizen für die Produktion
             </p>
           </div>
-          <Button className="gap-2" onClick={handleCreateNote} disabled={loading}>
+          <Button className="gap-2" onClick={handleOpenAddDialog} disabled={loading}>
             <Plus className="h-4 w-4" />
             Neue Notiz
           </Button>
@@ -392,6 +394,15 @@ export default function NotesPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Add Note Dialog */}
+        <NoteAddDialog
+          open={showAddDialog}
+          onOpenChange={setShowAddDialog}
+          onSave={handleCreateNote}
+          departments={departments}
+          defaultDepartmentId={filterDepartment || undefined}
+        />
       </div>
     </ProtectedRoute>
   )

@@ -71,7 +71,13 @@ export function useRealtimeNotes({
 
           switch (payload.eventType) {
             case 'INSERT':
-              setNotes(prev => [payload.new as Note, ...prev])
+              // Only add if not already in the list (avoid duplicates from local createNote)
+              setNotes(prev => {
+                if (prev.some(note => note.id === payload.new.id)) {
+                  return prev
+                }
+                return [payload.new as Note, ...prev]
+              })
               break
 
             case 'UPDATE':
@@ -221,12 +227,17 @@ export function useRealtimeNotes({
           created_by: user.id,
           is_locked: false
         })
-        .select()
+        .select(`
+          *,
+          department:departments(*)
+        `)
         .single()
 
       if (error) throw error
 
-      // The real-time subscription will handle updating the local state
+      // Immediately add to local state to ensure UI updates instantly
+      setNotes(prev => [data, ...prev])
+
       return data
     } catch (error) {
       console.error('Failed to create note:', error)
