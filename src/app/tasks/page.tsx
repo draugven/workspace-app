@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/components/auth/protected-route'
 import { Navigation } from '@/components/layout/navigation'
 import { TaskBoard } from '@/components/tasks/task-board'
 import { TasksTable } from '@/components/tasks/tasks-table'
+import { TaskAddDialog } from '@/components/tasks/task-add-dialog'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -12,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { supabase } from '@/lib/supabase'
 import { RefreshCw, Plus, Users, Filter, X } from 'lucide-react'
-import type { Task, Department, User, TaskTag } from '@/types'
+import type { Task, Department, TaskTag } from '@/types'
 
 // Mock data for now - this will be replaced with actual Supabase queries
 const mockDepartments: Department[] = [
@@ -22,11 +23,6 @@ const mockDepartments: Department[] = [
   { id: '4', name: 'Administrative', description: 'Production admin', color: '#6b7280', created_at: '2024-01-01' }
 ]
 
-const mockUsers: User[] = [
-  { id: '1', email: 'liza@theater.com', full_name: 'Liza', created_at: '2024-01-01' },
-  { id: '2', email: 'tanja@theater.com', full_name: 'Tanja', created_at: '2024-01-01' },
-  { id: '3', email: 'werner.d@theater.com', full_name: 'Werner D.', created_at: '2024-01-01' }
-]
 
 const mockTags: TaskTag[] = [
   { id: '1', name: 'neu-besetzt', color: '#f97316', created_at: '2024-01-01' },
@@ -35,85 +31,7 @@ const mockTags: TaskTag[] = [
   { id: '4', name: 'bestellung', color: '#3b82f6', created_at: '2024-01-01' }
 ]
 
-const mockTasks: Task[] = [
-  {
-    id: '1',
-    title: 'Vampire Kostüm für Toska',
-    description: 'Neues Kostüm für neu besetzte Rolle erstellen',
-    status: 'not_started',
-    priority: 'high',
-    due_date: '2024-12-15',
-    department_id: '1',
-    assigned_to: '1',
-    created_by: '1',
-    created_at: '2024-01-01',
-    updated_at: '2024-01-01',
-    department: mockDepartments[0],
-    assignee: mockUsers[0],
-    tags: [mockTags[0], mockTags[1]]
-  },
-  {
-    id: '2',
-    title: 'Servierwagen Griff reparieren',
-    description: 'Griff am Servierwagen ist kaputt und muss repariert werden',
-    status: 'in_progress',
-    priority: 'medium',
-    due_date: '2024-12-10',
-    department_id: '2',
-    assigned_to: '1',
-    created_by: '1',
-    created_at: '2024-01-01',
-    updated_at: '2024-01-01',
-    department: mockDepartments[1],
-    assignee: mockUsers[0],
-    tags: [mockTags[2]]
-  },
-  {
-    id: '3',
-    title: 'Video Wall vorprogrammieren',
-    description: 'Beide Video Walls für die Aufführung programmieren',
-    status: 'not_started',
-    priority: 'urgent',
-    due_date: '2024-12-20',
-    department_id: '3',
-    assigned_to: '3',
-    created_by: '1',
-    created_at: '2024-01-01',
-    updated_at: '2024-01-01',
-    department: mockDepartments[2],
-    assignee: mockUsers[2]
-  },
-  {
-    id: '4',
-    title: 'Inventur abschließen',
-    description: 'Vollständige Inventur aller Kostüme und Requisiten',
-    status: 'done',
-    priority: 'medium',
-    department_id: '4',
-    assigned_to: '1',
-    created_by: '1',
-    created_at: '2024-01-01',
-    updated_at: '2024-01-01',
-    department: mockDepartments[3],
-    assignee: mockUsers[0]
-  },
-  {
-    id: '5',
-    title: 'Batterien für Kerzen bestellen',
-    description: 'LED Kerzen brauchen neue Batterien',
-    status: 'blocked',
-    priority: 'low',
-    due_date: '2024-12-12',
-    department_id: '2',
-    assigned_to: '2',
-    created_by: '1',
-    created_at: '2024-01-01',
-    updated_at: '2024-01-01',
-    department: mockDepartments[1],
-    assignee: mockUsers[1],
-    tags: [mockTags[3]]
-  }
-]
+// Mock tasks removed - using live data from Supabase
 
 export default function TasksPage() {
   const [viewMode, setViewMode] = useState<'board' | 'table'>('board')
@@ -126,6 +44,7 @@ export default function TasksPage() {
   const [tags, setTags] = useState<TaskTag[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [addDialogOpen, setAddDialogOpen] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -246,6 +165,51 @@ export default function TasksPage() {
     }
   }
 
+  const handleTaskCreate = async (newTaskData: Partial<Task>) => {
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
+      // Create the task - assigned_to is set to null initially as requested
+      const { data: createdTask, error: taskError } = await supabase
+        .from('tasks')
+        .insert({
+          title: newTaskData.title,
+          description: newTaskData.description,
+          status: newTaskData.status || 'not_started',
+          priority: newTaskData.priority || 'medium',
+          department_id: newTaskData.department_id,
+          due_date: newTaskData.due_date,
+          created_by: user.id,
+          assigned_to: null // No assignee initially as per requirements
+        })
+        .select()
+        .single()
+
+      if (taskError) throw taskError
+
+      // Handle tag assignments if tags are provided
+      if (newTaskData.tags && newTaskData.tags.length > 0) {
+        const tagAssignments = newTaskData.tags.map(tag => ({
+          task_id: createdTask.id,
+          tag_id: tag.id
+        }))
+
+        const { error: tagError } = await supabase
+          .from('task_tag_assignments')
+          .insert(tagAssignments)
+
+        if (tagError) throw tagError
+      }
+
+      // Reload tasks to get updated data with relations
+      await loadData()
+    } catch (error) {
+      console.error('Failed to create task:', error)
+    }
+  }
+
   // Filter tasks based on department, tags, status, and priority
   const filteredTasks = tasks.filter(task => {
     const matchesDepartment = !selectedDepartment || task.department_id === selectedDepartment
@@ -279,6 +243,13 @@ export default function TasksPage() {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button
+              onClick={() => setAddDialogOpen(true)}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Neue Aufgabe
+            </Button>
             <Button
               variant={viewMode === 'board' ? 'default' : 'outline'}
               onClick={() => setViewMode('board')}
@@ -639,6 +610,15 @@ export default function TasksPage() {
             )}
           </>
         )}
+
+        {/* Add Task Dialog */}
+        <TaskAddDialog
+          open={addDialogOpen}
+          onOpenChange={setAddDialogOpen}
+          onSave={handleTaskCreate}
+          departments={departments}
+          tags={tags}
+        />
       </div>
     </ProtectedRoute>
   )

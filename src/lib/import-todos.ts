@@ -304,15 +304,15 @@ export class TodoImporter {
         // Get or create department
         const departmentId = await this.getOrCreateDepartment(task.department_name!)
 
-        // Check if task already exists to prevent duplicates
+        // Check if task already exists to prevent duplicates (improved check)
         const { data: existingTask } = await supabase
           .from('tasks')
-          .select('id')
+          .select('id, title')
           .eq('title', task.title)
           .limit(1)
 
         if (existingTask && existingTask.length > 0) {
-          console.log(`Task "${task.title}" already exists, skipping...`)
+          console.log(`✓ Task "${task.title}" already exists (ID: ${existingTask[0].id}), skipping...`)
           success++
           continue
         }

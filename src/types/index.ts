@@ -75,7 +75,6 @@ export interface Task {
   updated_at: string
   // Relations
   department?: Department
-  assignee?: User
   tags?: TaskTag[]
 }
 

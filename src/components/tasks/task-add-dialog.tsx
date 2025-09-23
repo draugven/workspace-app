@@ -1,0 +1,275 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Plus, X, Tag } from 'lucide-react'
+import type { Task, Department, TaskTag } from '@/types'
+
+interface TaskAddDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSave: (newTask: Partial<Task>) => void
+  departments: Department[]
+  tags: TaskTag[]
+}
+
+interface NewTaskData {
+  title: string
+  description: string
+  status: Task['status']
+  priority: Task['priority']
+  department_id: string | 'none'
+  due_date: string | null
+  tags: string[]
+}
+
+export function TaskAddDialog({
+  open,
+  onOpenChange,
+  onSave,
+  departments,
+  tags
+}: TaskAddDialogProps) {
+  const [newTask, setNewTask] = useState<NewTaskData>({
+    title: '',
+    description: '',
+    status: 'not_started',
+    priority: 'medium',
+    department_id: 'none',
+    due_date: null,
+    tags: []
+  })
+
+  // Reset form when dialog opens/closes
+  useEffect(() => {
+    if (open) {
+      setNewTask({
+        title: '',
+        description: '',
+        status: 'not_started',
+        priority: 'medium',
+        department_id: 'none',
+        due_date: null,
+        tags: []
+      })
+    }
+  }, [open])
+
+  const handleSave = () => {
+    if (!newTask.title.trim()) {
+      return // Don't save without title
+    }
+
+    // Convert to the format expected by parent component
+    const taskToSave: Partial<Task> = {
+      title: newTask.title.trim(),
+      description: newTask.description.trim() || null,
+      status: newTask.status,
+      priority: newTask.priority,
+      department_id: newTask.department_id === 'none' ? null : newTask.department_id,
+      due_date: newTask.due_date,
+      tags: newTask.tags.map(tagId => tags.find(t => t.id === tagId)).filter(Boolean) as TaskTag[]
+    }
+
+    onSave(taskToSave)
+    onOpenChange(false)
+  }
+
+  const handleCancel = () => {
+    onOpenChange(false)
+  }
+
+  const handleTagToggle = (tagId: string) => {
+    setNewTask(prev => ({
+      ...prev,
+      tags: prev.tags.includes(tagId)
+        ? prev.tags.filter(id => id !== tagId)
+        : [...prev.tags, tagId]
+    }))
+  }
+
+  const isFormValid = newTask.title.trim().length > 0
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Neue Aufgabe erstellen</DialogTitle>
+          <DialogDescription>
+            Erstelle eine neue Aufgabe für dein Team
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid gap-4 py-4">
+          {/* Title */}
+          <div className="grid gap-2">
+            <Label htmlFor="title">Titel *</Label>
+            <Input
+              id="title"
+              value={newTask.title}
+              onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+              placeholder="Aufgabentitel..."
+              className={!isFormValid && newTask.title.length === 0 ? 'border-red-500' : ''}
+            />
+            {!isFormValid && newTask.title.length === 0 && (
+              <p className="text-sm text-red-600">Titel ist erforderlich</p>
+            )}
+          </div>
+
+          {/* Description */}
+          <div className="grid gap-2">
+            <Label htmlFor="description">Beschreibung</Label>
+            <Textarea
+              id="description"
+              value={newTask.description}
+              onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+              placeholder="Beschreibung der Aufgabe..."
+              rows={3}
+            />
+          </div>
+
+          {/* Status and Priority Row */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={newTask.status}
+                onValueChange={(value: Task['status']) => setNewTask({ ...newTask, status: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="not_started">Zu erledigen</SelectItem>
+                  <SelectItem value="in_progress">In Bearbeitung</SelectItem>
+                  <SelectItem value="done">Erledigt</SelectItem>
+                  <SelectItem value="blocked">Blockiert</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="priority">Priorität</Label>
+              <Select
+                value={newTask.priority}
+                onValueChange={(value: Task['priority']) => setNewTask({ ...newTask, priority: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="urgent">Dringend</SelectItem>
+                  <SelectItem value="high">Hoch</SelectItem>
+                  <SelectItem value="medium">Mittel</SelectItem>
+                  <SelectItem value="low">Niedrig</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Department and Due Date Row */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="department">Abteilung</Label>
+              <Select
+                value={newTask.department_id}
+                onValueChange={(value) => setNewTask({ ...newTask, department_id: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Abteilung wählen..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Keine Abteilung</SelectItem>
+                  {departments.map((dept) => (
+                    <SelectItem key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="due_date">Fälligkeitsdatum</Label>
+              <Input
+                id="due_date"
+                type="date"
+                value={newTask.due_date || ''}
+                onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value || null })}
+              />
+            </div>
+          </div>
+
+          {/* Tags Selection */}
+          <div className="grid gap-2">
+            <Label>Tags</Label>
+            <div className="border rounded-md p-3 max-h-40 overflow-y-auto">
+              {tags.length > 0 ? (
+                <div className="space-y-2">
+                  {tags.map((tag) => (
+                    <div key={tag.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`tag-${tag.id}`}
+                        checked={newTask.tags.includes(tag.id)}
+                        onCheckedChange={() => handleTagToggle(tag.id)}
+                      />
+                      <Label
+                        htmlFor={`tag-${tag.id}`}
+                        className="flex items-center gap-2 cursor-pointer text-sm"
+                      >
+                        <Tag className="h-3 w-3" style={{ color: tag.color }} />
+                        <span>#{tag.name}</span>
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Keine Tags verfügbar
+                </p>
+              )}
+            </div>
+
+            {/* Selected Tags Preview */}
+            {newTask.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                {newTask.tags.map((tagId) => {
+                  const tag = tags.find(t => t.id === tagId)
+                  if (!tag) return null
+                  return (
+                    <Badge
+                      key={tag.id}
+                      variant="outline"
+                      style={{ borderColor: tag.color, color: tag.color }}
+                      className="text-xs"
+                    >
+                      #{tag.name}
+                    </Badge>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={handleCancel}>
+            <X className="h-4 w-4 mr-2" />
+            Abbrechen
+          </Button>
+          <Button onClick={handleSave} disabled={!isFormValid}>
+            <Plus className="h-4 w-4 mr-2" />
+            Aufgabe erstellen
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}

@@ -102,7 +102,6 @@ export function TasksTable({
               Priorität {sortField === 'priority' && (sortDirection === 'asc' ? '↑' : '↓')}
             </TableHead>
             <TableHead>Abteilung</TableHead>
-            <TableHead>Zugewiesen</TableHead>
             <TableHead
               className="cursor-pointer hover:bg-muted/50"
               onClick={() => handleSort('due_date')}
@@ -144,9 +143,6 @@ export function TasksTable({
                     {task.department.name}
                   </Badge>
                 )}
-              </TableCell>
-              <TableCell className="text-sm">
-                {task.assignee?.full_name || '—'}
               </TableCell>
               <TableCell className="text-sm">
                 {task.due_date

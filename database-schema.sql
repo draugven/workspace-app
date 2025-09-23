@@ -4,16 +4,6 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Users table (simple authentication)
-CREATE TABLE users (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  email TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  full_name TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
 -- Departments table
 CREATE TABLE departments (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -21,13 +11,6 @@ CREATE TABLE departments (
   description TEXT,
   color TEXT DEFAULT '#6b7280', -- Default gray color
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- User-Department relationships (many-to-many)
-CREATE TABLE user_departments (
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  department_id UUID REFERENCES departments(id) ON DELETE CASCADE,
-  PRIMARY KEY (user_id, department_id)
 );
 
 -- Characters table
@@ -59,7 +42,7 @@ CREATE TABLE items (
   source TEXT CHECK (source IN ('Staatstheater', 'Gekauft', 'Produziert', 'Darsteller*in')),
   notes TEXT,
   category_id UUID REFERENCES categories(id),
-  created_by UUID REFERENCES users(id),
+  created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -79,7 +62,7 @@ CREATE TABLE item_files (
   file_path TEXT NOT NULL,
   file_type TEXT NOT NULL,
   file_size INTEGER,
-  uploaded_by UUID REFERENCES users(id),
+  uploaded_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -92,8 +75,8 @@ CREATE TABLE tasks (
   priority TEXT CHECK (priority IN ('low', 'medium', 'high', 'urgent')) DEFAULT 'medium',
   due_date DATE,
   department_id UUID REFERENCES departments(id),
-  assigned_to UUID REFERENCES users(id),
-  created_by UUID REFERENCES users(id),
+  assigned_to UUID REFERENCES auth.users(id),
+  created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -120,10 +103,10 @@ CREATE TABLE notes (
   content TEXT, -- Markdown content
   content_html TEXT, -- Rendered HTML for display
   is_locked BOOLEAN DEFAULT FALSE,
-  locked_by UUID REFERENCES users(id),
+  locked_by UUID REFERENCES auth.users(id),
   locked_at TIMESTAMP WITH TIME ZONE,
   department_id UUID REFERENCES departments(id),
-  created_by UUID REFERENCES users(id),
+  created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -135,7 +118,7 @@ CREATE TABLE note_versions (
   content TEXT NOT NULL,
   content_html TEXT,
   version_number INTEGER NOT NULL,
-  created_by UUID REFERENCES users(id),
+  created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

@@ -17,6 +17,7 @@ import {
   Over,
   useDroppable
 } from '@dnd-kit/core'
+import { GripVertical } from 'lucide-react'
 import {
   arrayMove,
   SortableContext,
@@ -141,59 +142,64 @@ function DraggableTaskCard({ task, onClick }: DraggableTaskCardProps) {
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners}
-      className="bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-      onClick={() => onClick(task)}
+      className="bg-white shadow-sm hover:shadow-md transition-shadow relative"
     >
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-sm line-clamp-2">{task.title}</CardTitle>
-          <PriorityBadge priority={task.priority} />
-        </div>
-        {task.description && (
-          <CardDescription className="text-xs line-clamp-2">
-            {task.description}
-          </CardDescription>
-        )}
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="flex flex-col gap-2">
-          {task.department && (
-            <Badge variant="outline" className="text-xs w-fit">
-              {task.department.name}
-            </Badge>
+      {/* Drag Handle */}
+      <div
+        {...listeners}
+        className="absolute top-2 left-2 p-1 opacity-30 hover:opacity-60 cursor-grab active:cursor-grabbing"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <GripVertical className="h-3 w-3 text-gray-400" />
+      </div>
+
+      {/* Clickable Card Content */}
+      <div onClick={() => onClick(task)} className="cursor-pointer pl-6">
+        <CardHeader className="pb-2">
+          <div className="flex items-start justify-between gap-2">
+            <CardTitle className="text-sm line-clamp-2">{task.title}</CardTitle>
+            <PriorityBadge priority={task.priority} />
+          </div>
+          {task.description && (
+            <CardDescription className="text-xs line-clamp-2">
+              {task.description}
+            </CardDescription>
           )}
-          {task.assignee && (
-            <div className="text-xs text-muted-foreground">
-              👤 {task.assignee.full_name}
-            </div>
-          )}
-          {task.due_date && (
-            <div className="text-xs text-muted-foreground">
-              📅 {new Date(task.due_date).toLocaleDateString('de-DE')}
-            </div>
-          )}
-          {task.tags && task.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {task.tags.slice(0, 2).map((tag) => (
-                <Badge
-                  key={tag.id}
-                  variant="outline"
-                  className="text-xs"
-                  style={{ backgroundColor: tag.color + '20', borderColor: tag.color }}
-                >
-                  #{tag.name}
-                </Badge>
-              ))}
-              {task.tags.length > 2 && (
-                <Badge variant="outline" className="text-xs">
-                  +{task.tags.length - 2}
-                </Badge>
-              )}
-            </div>
-          )}
-        </div>
-      </CardContent>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="flex flex-col gap-2">
+            {task.department && (
+              <Badge variant="outline" className="text-xs w-fit">
+                {task.department.name}
+              </Badge>
+            )}
+            {task.due_date && (
+              <div className="text-xs text-muted-foreground">
+                📅 {new Date(task.due_date).toLocaleDateString('de-DE')}
+              </div>
+            )}
+            {task.tags && task.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {task.tags.slice(0, 2).map((tag) => (
+                  <Badge
+                    key={tag.id}
+                    variant="outline"
+                    className="text-xs"
+                    style={{ backgroundColor: tag.color + '20', borderColor: tag.color }}
+                  >
+                    #{tag.name}
+                  </Badge>
+                ))}
+                {task.tags.length > 2 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{task.tags.length - 2}
+                  </Badge>
+                )}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </div>
     </Card>
   )
 }
@@ -210,7 +216,11 @@ export function TaskBoard({
   const [activeTask, setActiveTask] = useState<Task | null>(null)
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Require 8px of movement before starting drag
+      }
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })

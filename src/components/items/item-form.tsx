@@ -39,9 +39,9 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
     is_consumable: false,
     needs_clarification: false,
     needed_for_rehearsal: false,
-    source: '' as Item['source'],
+    source: 'none' as Item['source'],
     notes: '',
-    category_id: '',
+    category_id: 'none',
     character_ids: [] as string[]
   })
 
@@ -68,9 +68,9 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
         is_consumable: editingItem.is_consumable,
         needs_clarification: editingItem.needs_clarification,
         needed_for_rehearsal: editingItem.needed_for_rehearsal,
-        source: editingItem.source || '',
+        source: editingItem.source || 'none',
         notes: editingItem.notes || '',
-        category_id: editingItem.category_id || '',
+        category_id: editingItem.category_id || 'none',
         character_ids: editingItem.characters?.map(c => c.id) || []
       })
     } else {
@@ -83,9 +83,9 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
         is_consumable: false,
         needs_clarification: false,
         needed_for_rehearsal: false,
-        source: '',
+        source: 'none',
         notes: '',
-        category_id: '',
+        category_id: 'none',
         character_ids: []
       })
     }
@@ -127,8 +127,8 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
         name: formData.name.trim(),
         scene: formData.scene.trim() || undefined,
         notes: formData.notes.trim() || undefined,
-        source: formData.source || undefined,
-        category_id: formData.category_id || undefined,
+        source: formData.source === 'none' ? undefined : formData.source,
+        category_id: formData.category_id === 'none' ? undefined : formData.category_id,
         character_ids: formData.character_ids
       }
 
@@ -244,7 +244,7 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
                     <SelectValue placeholder="Kategorie auswählen" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Keine Kategorie</SelectItem>
+                    <SelectItem value="none">Keine Kategorie</SelectItem>
                     {categories.map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name}
@@ -264,7 +264,7 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
                     <SelectValue placeholder="Quelle auswählen" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Keine Angabe</SelectItem>
+                    <SelectItem value="none">Keine Angabe</SelectItem>
                     {sourceOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
