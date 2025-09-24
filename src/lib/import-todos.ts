@@ -9,33 +9,19 @@ interface TodoItem {
   completed: boolean
 }
 
-// Tag to property mapping
+// Tag to property mapping for new structure
 const TAG_MAPPINGS = {
-  // People assignments
-  people: {
-    '#liza': 'liza',
-    '#tanja': 'tanja',
-    '#werner-d': 'werner-d',
-    '#werner-k': 'werner-k',
-    '#elisa': 'elisa'
-  },
-
-  // Departments
+  // Departments (Bereich tags)
   departments: {
     '#kostüme': 'Kostüme',
     '#props': 'Requisiten',
     '#technik': 'Technik',
     '#administrative': 'Administrative',
-    '#maske': 'Maske',
-    '#licht': 'Licht',
-    '#audio': 'Audio',
     '#av': 'Audio/Video'
   },
 
-  // Priority mapping
+  // Priority mapping - all tasks are medium priority since no priority tags exist
   priority: {
-    '#dringend': 'urgent',
-    '#wichtig': 'high',
     default: 'medium'
   },
 
@@ -143,49 +129,6 @@ export class TodoImporter {
     return newDept.id
   }
 
-  private async getOrCreateUser(email: string, name: string): Promise<string> {
-    // Map personas to actual users (you might need to adjust these)
-    const userMapping = {
-      'liza': { email: 'liza@theater.com', name: 'Liza' },
-      'tanja': { email: 'tanja@theater.com', name: 'Tanja' },
-      'werner-d': { email: 'werner.d@theater.com', name: 'Werner D.' },
-      'werner-k': { email: 'werner.k@theater.com', name: 'Werner K.' },
-      'elisa': { email: 'elisa@theater.com', name: 'Elisa' }
-    }
-
-    const userData = userMapping[name as keyof typeof userMapping]
-    if (!userData) return '' // Return empty if no mapping found
-
-    // Check if user exists (this would normally be handled by auth)
-    const { data: existing } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', userData.email)
-      .limit(1)
-
-    if (existing && existing.length > 0) {
-      return existing[0].id
-    }
-
-    // For demo purposes, create placeholder users
-    // In production, these would be created through proper auth flow
-    const { data: newUser, error } = await supabase
-      .from('users')
-      .insert({
-        email: userData.email,
-        full_name: userData.name,
-        password_hash: 'placeholder' // This would be properly hashed
-      })
-      .select('id')
-      .single()
-
-    if (error) {
-      console.log('User creation skipped (likely exists):', userData.email)
-      return '' // Return empty if user creation fails
-    }
-
-    return newUser.id
-  }
 
   private async getOrCreateTag(name: string): Promise<string> {
     const cleanName = name.replace('#', '')
@@ -200,30 +143,16 @@ export class TodoImporter {
       return existing[0].id
     }
 
-    // Tag color mapping
-    const tagColors = {
-      'dringend': '#ef4444',
-      'wichtig': '#f97316',
-      'neu-besetzt': '#8b5cf6',
-      'organisation': '#06b6d4',
-      'bestellung': '#10b981',
-      'reparatur': '#f59e0b',
-      'handwerk': '#84cc16',
-      'kommunikation': '#3b82f6',
-      'planung': '#6366f1',
-      'dokumentation': '#64748b',
-      'finanzen': '#059669',
-      'transport': '#0891b2',
-      'aufführung': '#dc2626',
-      'casting': '#7c3aed',
-      'spezialeffekte': '#be123c'
-    }
+    // Since tags should already be populated by the populate-task-tags.sql script,
+    // this shouldn't be called often. Use default color if tag doesn't exist.
+    console.warn(`Tag '${cleanName}' not found in pre-populated tags, creating with default color`)
 
     const { data: newTag, error } = await supabase
       .from('task_tags')
       .insert({
         name: cleanName,
-        color: tagColors[cleanName as keyof typeof tagColors] || '#6b7280'
+        color: '#6b7280', // Default gray
+        category: null    // Unknown category
       })
       .select('id')
       .single()
@@ -246,23 +175,8 @@ export class TodoImporter {
       }
     }
 
-    // Determine priority
-    let priority: 'low' | 'medium' | 'high' | 'urgent' = 'medium'
-    for (const tag of todo.tags) {
-      if (TAG_MAPPINGS.priority[tag]) {
-        priority = TAG_MAPPINGS.priority[tag as keyof typeof TAG_MAPPINGS.priority] as any
-        break
-      }
-    }
-
-    // Determine assigned person
-    let assignedPerson = ''
-    for (const tag of todo.tags) {
-      if (TAG_MAPPINGS.people[tag]) {
-        assignedPerson = TAG_MAPPINGS.people[tag as keyof typeof TAG_MAPPINGS.people]
-        break
-      }
-    }
+    // All tasks have medium priority since no priority tags exist in new structure
+    const priority: 'low' | 'medium' | 'high' | 'urgent' = 'medium'
 
     // Create description with section context
     let description = ''
@@ -278,7 +192,6 @@ export class TodoImporter {
       status: todo.completed ? 'done' : 'not_started',
       priority,
       department_name: departmentName,
-      assigned_person: assignedPerson,
       tags: todo.tags
     }
   }
@@ -317,11 +230,9 @@ export class TodoImporter {
           continue
         }
 
-        // Get assigned user ID if person tag exists
-        let assignedUserId = null
-        if (task.assigned_person) {
-          assignedUserId = await this.getOrCreateUser('', task.assigned_person)
-        }
+        // Get current user to set as creator
+        const { data: { user } } = await supabase.auth.getUser()
+        const currentUserId = user?.id || null
 
         // Create the task
         const { data: newTask, error: taskError } = await supabase
@@ -332,8 +243,8 @@ export class TodoImporter {
             status: task.status,
             priority: task.priority,
             department_id: departmentId,
-            assigned_to: assignedUserId || null,
-            created_by: assignedUserId || null
+            assigned_to: null, // No assignments in new structure
+            created_by: currentUserId
           })
           .select('id')
           .single()

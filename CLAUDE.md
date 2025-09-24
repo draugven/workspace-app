@@ -105,9 +105,6 @@ Added interactive task editing functionality to both Kanban board and table view
 - Added task update handlers and state management for edit dialog in both views
 - Updated main tasks page to pass required props (departments, tags) to both TaskBoard and TasksTable
 
-### NextSteps
-Theater production app fully functional with interactive task management
-
 ### BugsAndTheories
 No current bugs - interactive editing working as expected
 
@@ -129,9 +126,6 @@ Implemented drag-and-drop Kanban functionality and comprehensive task tag editin
 - Resolved Next.js cache corruption by cleaning .next directory and restarting dev server
 - Committed comprehensive changes with proper git message and co-authorship
 
-### NextSteps
-Theater production app fully functional with drag-and-drop Kanban and complete tag management
-
 ### BugsAndTheories
 Initial drag-and-drop not working ⇒ SortableContext interference with cross-column drops, fixed by removing SortableContext
 Next.js 404 errors on static assets ⇒ corrupted build cache, resolved with cache cleanup
@@ -139,7 +133,7 @@ Next.js 404 errors on static assets ⇒ corrupted build cache, resolved with cac
 ### Background
 Extended task management with modern drag-and-drop interactions and comprehensive tag editing, maintaining German localization and design consistency.
 
-## 19:33 23.09.2025 – Compact Session
+## 19:33 23.09.2025 – Compact Session #Deprecated
 
 ### CurrentFocus
 Enhanced Kanban with drag handles, added task creation UI, and resolved Select component validation errors.
@@ -162,3 +156,50 @@ Task creation foreign key error ⇒ missing user records in custom users table, 
 
 ### Background
 Extended UI with comprehensive task creation while maintaining existing drag-and-drop and editing functionality. Session focused on UX improvements and form validation fixes.
+
+## 20:05 23.09.2025 – Compact Session
+
+### CurrentFocus
+Cleaned up database schema to remove custom user management and point tasks to real Supabase Auth users.
+
+### SessionChanges
+- Removed custom users and user_departments tables from database schema, updated all foreign key constraints to reference auth.users
+- Created comprehensive cleanup-migration.sql script to safely migrate existing data and handle foreign key constraint violations
+- Simplified task creation code to use real authenticated users from Supabase Auth without custom user record management
+- Removed assignee functionality from UI components (Kanban board and tasks table) as per requirements
+- Updated Task interface and types to remove user relationship references and assignee fields
+- Cleaned up mock user data and dependencies from task management components
+- Committed comprehensive database cleanup changes with proper git messages and co-authorship
+
+### BugsAndTheories
+Foreign key constraint violation ⇒ existing data referenced old users table, fixed by cleaning data before creating constraints
+Task creation complexity ⇒ custom user management overhead, resolved by using Supabase Auth users directly
+
+### Background
+Completed database architecture cleanup to eliminate mock data and custom user management, transitioning to pure Supabase Auth integration for cleaner and more maintainable codebase.
+
+## 19:50 23.09.2025 – Compact Session
+
+### CurrentFocus
+Enhanced note creation UX and fixed all Tiptap editor issues including focus loss, SSR hydration, and rich text formatting.
+
+### SessionChanges
+- Fixed note creation button showing empty notes immediately by adding proper dialog-based creation flow
+- Created NoteAddDialog component with title, department selection, and optional initial content fields
+- Fixed Tiptap editor focus loss after first keystroke by removing dependency array from useEditor hook
+- Fixed SSR hydration mismatch errors by adding immediatelyRender: false to Tiptap configuration
+- Fixed heading styles not appearing by using !important selectors to override CSS resets with proper H1/H2/H3 sizing
+- Improved list behavior and styling with better indentation using list-outside and proper margins
+- Removed broken character/word counter from editor status bar for cleaner UI
+- Enhanced createNote function to update local state immediately for instant UI feedback
+- Added deduplication logic to prevent duplicate notes from real-time subscription
+- Committed comprehensive note enhancement changes with detailed git message
+
+### BugsAndTheories
+Note creation no immediate feedback ⇒ missing dialog, fixed with NoteAddDialog component
+Tiptap focus lost after keystroke ⇒ editor re-initialization, resolved by removing dependency array
+Heading styles not visible ⇒ CSS reset overrides, fixed with !important selectors
+Character counter not working ⇒ missing extension, removed entirely
+
+### Background
+Session focused on polishing the notes system with professional UX patterns and resolving all Tiptap editor technical issues for seamless rich text collaboration.

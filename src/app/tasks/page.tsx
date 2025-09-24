@@ -15,23 +15,7 @@ import { supabase } from '@/lib/supabase'
 import { RefreshCw, Plus, Users, Filter, X } from 'lucide-react'
 import type { Task, Department, TaskTag } from '@/types'
 
-// Mock data for now - this will be replaced with actual Supabase queries
-const mockDepartments: Department[] = [
-  { id: '1', name: 'Kostüme', description: 'Costume design and wardrobe', color: '#ec4899', created_at: '2024-01-01' },
-  { id: '2', name: 'Requisiten', description: 'Props management', color: '#8b5cf6', created_at: '2024-01-01' },
-  { id: '3', name: 'Technik', description: 'Technical production', color: '#10b981', created_at: '2024-01-01' },
-  { id: '4', name: 'Administrative', description: 'Production admin', color: '#6b7280', created_at: '2024-01-01' }
-]
-
-
-const mockTags: TaskTag[] = [
-  { id: '1', name: 'neu-besetzt', color: '#f97316', created_at: '2024-01-01' },
-  { id: '2', name: 'dringend', color: '#ef4444', created_at: '2024-01-01' },
-  { id: '3', name: 'reparatur', color: '#ef4444', created_at: '2024-01-01' },
-  { id: '4', name: 'bestellung', color: '#3b82f6', created_at: '2024-01-01' }
-]
-
-// Mock tasks removed - using live data from Supabase
+// All data is now loaded from Supabase - no mock data needed
 
 export default function TasksPage() {
   const [viewMode, setViewMode] = useState<'board' | 'table'>('board')
