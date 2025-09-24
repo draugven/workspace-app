@@ -47,10 +47,10 @@ A Next.js web application for small theater production teams to manage props, co
 
 3. **Initialize the database**:
    - In your Supabase SQL editor, run:
-     - `database-schema.sql` (creates tables)
-     - `seed-data.sql` (creates departments, users, etc.)
-     - `items-seed-data.sql` (imports props/costumes data)
-     - `tasks-seed-data.sql` (imports tasks data)
+     - `scripts/database-setup/database-schema.sql` (creates tables)
+     - `scripts/data-import/seed-data.sql` (creates departments, users, etc.)
+     - `scripts/data-import/items-seed-data.sql` (imports props/costumes data)
+     - `scripts/data-import/tasks-seed-data.sql` (imports tasks data)
 
 4. **Run the development server**:
    ```bash
@@ -69,9 +69,11 @@ A Next.js web application for small theater production teams to manage props, co
 │   │   └── ui/             # Shadcn/ui components
 │   ├── lib/                # Utilities and configurations
 │   └── types/              # TypeScript type definitions
-├── scripts/                # Data processing scripts
+├── scripts/
+│   ├── database-setup/      # SQL schema and setup scripts
+│   ├── data-import/         # SQL seed data and import scripts
+│   └── *.js                # Data processing utilities
 ├── seed data/             # Original CSV and markdown files
-├── *.sql                  # Database schema and seed files
 └── README.md
 ```
 
@@ -99,8 +101,19 @@ The app uses a PostgreSQL database with the following main tables:
 
 ### Data Import
 
-The project includes scripts to parse existing CSV and markdown data:
+The project includes organized scripts for database management and data import:
 
+**Database Setup:**
+- `scripts/database-setup/database-schema.sql` - Main database schema
+- `scripts/database-setup/supabase-storage-setup.sql` - File storage configuration
+- `scripts/database-setup/cleanup-migration.sql` - Schema cleanup utilities
+
+**Data Import:**
+- `scripts/data-import/seed-data.sql` - Basic departments and categories
+- `scripts/data-import/items-seed-data.sql` - Props and costumes data
+- `scripts/data-import/tasks-seed-data.sql` - Production tasks data
+
+**Processing Utilities:**
 - `scripts/parse-csv-data.js` - Converts props CSV to SQL inserts
 - `scripts/parse-todos.js` - Converts todo markdown to task SQL inserts
 
