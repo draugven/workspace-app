@@ -34,7 +34,7 @@ import { Badge } from "@/components/ui/badge"
 import { TaskStatusBadge } from './task-status-badge'
 import { PriorityBadge } from './priority-badge'
 import { TaskEditDialog } from './task-edit-dialog'
-import type { Task, Department, TaskTag } from "@/types"
+import type { Task, Department, TaskTag, User } from "@/types"
 
 interface TaskBoardProps {
   tasks: Task[]
@@ -42,6 +42,7 @@ interface TaskBoardProps {
   onTaskUpdate?: (updatedTask: Task) => void
   departments?: Department[]
   tags?: TaskTag[]
+  users?: User[]
 }
 
 const statusColumns = [
@@ -59,9 +60,10 @@ interface DroppableColumnProps {
   tasks: Task[]
   activeTask: Task | null
   onTaskClick: (task: Task) => void
+  users?: User[]
 }
 
-function DroppableColumn({ status, title, color, tasks, activeTask, onTaskClick }: DroppableColumnProps) {
+function DroppableColumn({ status, title, color, tasks, activeTask, onTaskClick, users = [] }: DroppableColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: status,
     data: {
@@ -96,6 +98,7 @@ function DroppableColumn({ status, title, color, tasks, activeTask, onTaskClick 
             key={task.id}
             task={task}
             onClick={onTaskClick}
+            users={users}
           />
         ))}
 
@@ -113,9 +116,10 @@ function DroppableColumn({ status, title, color, tasks, activeTask, onTaskClick 
 interface DraggableTaskCardProps {
   task: Task
   onClick: (task: Task) => void
+  users?: User[]
 }
 
-function DraggableTaskCard({ task, onClick }: DraggableTaskCardProps) {
+function DraggableTaskCard({ task, onClick, users = [] }: DraggableTaskCardProps) {
   const {
     attributes,
     listeners,
@@ -173,6 +177,11 @@ function DraggableTaskCard({ task, onClick }: DraggableTaskCardProps) {
                 {task.department.name}
               </Badge>
             )}
+            {task.assigned_to && (
+              <div className="text-xs text-muted-foreground flex items-center gap-1">
+                👤 {users.find(u => u.id === task.assigned_to)?.full_name || 'Unknown User'}
+              </div>
+            )}
             {task.due_date && (
               <div className="text-xs text-muted-foreground">
                 📅 {new Date(task.due_date).toLocaleDateString('de-DE')}
@@ -213,7 +222,8 @@ export function TaskBoard({
   onTaskStatusChange,
   onTaskUpdate,
   departments = [],
-  tags = []
+  tags = [],
+  users = []
 }: TaskBoardProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
@@ -301,6 +311,7 @@ export function TaskBoard({
                 tasks={columnTasks}
                 activeTask={activeTask}
                 onTaskClick={handleTaskClick}
+                users={users}
               />
             )
           })}
@@ -327,6 +338,7 @@ export function TaskBoard({
         onSave={handleTaskSave}
         departments={departments}
         tags={tags}
+        users={users}
       />
     </>
   )

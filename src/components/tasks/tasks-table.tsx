@@ -13,20 +13,22 @@ import { Badge } from "@/components/ui/badge"
 import { TaskStatusBadge } from './task-status-badge'
 import { PriorityBadge } from './priority-badge'
 import { TaskEditDialog } from './task-edit-dialog'
-import type { Task, Department, TaskTag } from "@/types"
+import type { Task, Department, TaskTag, User } from "@/types"
 
 interface TasksTableProps {
   tasks: Task[]
   onTaskUpdate?: (updatedTask: Task) => void
   departments?: Department[]
   tags?: TaskTag[]
+  users?: User[]
 }
 
 export function TasksTable({
   tasks,
   onTaskUpdate,
   departments = [],
-  tags = []
+  tags = [],
+  users = []
 }: TasksTableProps) {
   const [sortField, setSortField] = useState<keyof Task>('priority')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
@@ -61,6 +63,14 @@ export function TasksTable({
     if (sortField === 'tags') {
       aVal = a.tags?.map(tag => tag.name).sort().join(', ') || ''
       bVal = b.tags?.map(tag => tag.name).sort().join(', ') || ''
+    }
+
+    // Special handling for assignee sorting
+    if (sortField === 'assigned_to') {
+      const aAssignee = users.find(u => u.id === a.assigned_to)
+      const bAssignee = users.find(u => u.id === b.assigned_to)
+      aVal = aAssignee?.full_name || ''
+      bVal = bAssignee?.full_name || ''
     }
 
     if (sortDirection === 'asc') {
@@ -131,6 +141,12 @@ export function TasksTable({
             >
               Tags {sortField === 'tags' && (sortDirection === 'asc' ? '↑' : '↓')}
             </TableHead>
+            <TableHead
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => handleSort('assigned_to')}
+            >
+              Zugewiesen {sortField === 'assigned_to' && (sortDirection === 'asc' ? '↑' : '↓')}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -195,6 +211,16 @@ export function TasksTable({
                   )}
                 </div>
               </TableCell>
+              <TableCell className="text-sm">
+                {task.assigned_to ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">👤</span>
+                    <span>{users.find(u => u.id === task.assigned_to)?.full_name || 'Unknown User'}</span>
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">—</span>
+                )}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -207,6 +233,7 @@ export function TasksTable({
         onSave={handleTaskSave}
         departments={departments}
         tags={tags}
+        users={users}
       />
     </div>
   )

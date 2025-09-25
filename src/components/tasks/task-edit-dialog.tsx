@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { supabase } from '@/lib/supabase'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Calendar, Save, X, Tag } from 'lucide-react'
-import type { Task, Department, TaskTag } from '@/types'
+import type { Task, Department, TaskTag, User } from '@/types'
 
 interface TaskEditDialogProps {
   task: Task | null
@@ -19,6 +20,7 @@ interface TaskEditDialogProps {
   onSave: (updatedTask: Task) => void
   departments: Department[]
   tags: TaskTag[]
+  users?: User[]
 }
 
 export function TaskEditDialog({
@@ -27,7 +29,8 @@ export function TaskEditDialog({
   onOpenChange,
   onSave,
   departments,
-  tags
+  tags,
+  users = []
 }: TaskEditDialogProps) {
   const [editedTask, setEditedTask] = useState<Task | null>(null)
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
@@ -150,13 +153,13 @@ export function TaskEditDialog({
             <div className="grid gap-2">
               <Label htmlFor="department">Abteilung</Label>
               <Select
-                value={editedTask.department_id || ''}
+                value={editedTask.department_id || 'none'}
                 onValueChange={(value) => {
                   const department = departments.find(d => d.id === value)
                   setEditedTask({
                     ...editedTask,
-                    department_id: value || null,
-                    department: department || null
+                    department_id: value === 'none' ? null : value,
+                    department: value === 'none' ? null : department || null
                   })
                 }}
               >
@@ -164,6 +167,7 @@ export function TaskEditDialog({
                   <SelectValue placeholder="Abteilung wählen..." />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="none">Keine Abteilung</SelectItem>
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id}>
                       {dept.name}
@@ -182,6 +186,27 @@ export function TaskEditDialog({
                 onChange={(e) => setEditedTask({ ...editedTask, due_date: e.target.value || null })}
               />
             </div>
+          </div>
+
+          {/* Assignee Row */}
+          <div className="grid gap-2">
+            <Label htmlFor="assigned_to">Zugewiesen an</Label>
+            <Select
+              value={editedTask.assigned_to || 'none'}
+              onValueChange={(value) => setEditedTask({ ...editedTask, assigned_to: value === 'none' ? null : value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Person zuweisen..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Niemandem zugewiesen</SelectItem>
+                {users.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.full_name} ({user.email})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Tags Selection */}

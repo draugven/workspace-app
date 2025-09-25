@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Plus, X, Tag } from 'lucide-react'
-import type { Task, Department, TaskTag } from '@/types'
+import type { Task, Department, TaskTag, User } from '@/types'
 
 interface TaskAddDialogProps {
   open: boolean
@@ -18,6 +19,7 @@ interface TaskAddDialogProps {
   onSave: (newTask: Partial<Task>) => void
   departments: Department[]
   tags: TaskTag[]
+  users?: User[]
 }
 
 interface NewTaskData {
@@ -26,6 +28,7 @@ interface NewTaskData {
   status: Task['status']
   priority: Task['priority']
   department_id: string | 'none'
+  assigned_to: string | 'none'
   due_date: string | null
   tags: string[]
 }
@@ -35,7 +38,8 @@ export function TaskAddDialog({
   onOpenChange,
   onSave,
   departments,
-  tags
+  tags,
+  users = []
 }: TaskAddDialogProps) {
   const [newTask, setNewTask] = useState<NewTaskData>({
     title: '',
@@ -43,24 +47,33 @@ export function TaskAddDialog({
     status: 'not_started',
     priority: 'medium',
     department_id: 'none',
+    assigned_to: 'none',
     due_date: null,
     tags: []
   })
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
 
-  // Reset form when dialog opens/closes
+  // Get current user and reset form when dialog opens/closes
   useEffect(() => {
     if (open) {
-      setNewTask({
-        title: '',
-        description: '',
-        status: 'not_started',
-        priority: 'medium',
-        department_id: 'none',
-        due_date: null,
-        tags: []
+      // Get current user to preselect as assignee
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        const currentUserData = users.find(u => u.id === user?.id)
+        setCurrentUser(currentUserData || null)
+
+        setNewTask({
+          title: '',
+          description: '',
+          status: 'not_started',
+          priority: 'medium',
+          department_id: 'none',
+          assigned_to: currentUserData?.id || 'none',
+          due_date: null,
+          tags: []
+        })
       })
     }
-  }, [open])
+  }, [open, users])
 
   const handleSave = () => {
     if (!newTask.title.trim()) {
@@ -74,6 +87,7 @@ export function TaskAddDialog({
       status: newTask.status,
       priority: newTask.priority,
       department_id: newTask.department_id === 'none' ? null : newTask.department_id,
+      assigned_to: newTask.assigned_to === 'none' ? null : newTask.assigned_to,
       due_date: newTask.due_date,
       tags: newTask.tags.map(tagId => tags.find(t => t.id === tagId)).filter(Boolean) as TaskTag[]
     }
@@ -205,6 +219,27 @@ export function TaskAddDialog({
                 onChange={(e) => setNewTask({ ...newTask, due_date: e.target.value || null })}
               />
             </div>
+          </div>
+
+          {/* Assignee Row */}
+          <div className="grid gap-2">
+            <Label htmlFor="assigned_to">Zugewiesen an</Label>
+            <Select
+              value={newTask.assigned_to}
+              onValueChange={(value) => setNewTask({ ...newTask, assigned_to: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Person zuweisen..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Niemandem zugewiesen</SelectItem>
+                {users.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.full_name} ({user.email})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Tags Selection */}

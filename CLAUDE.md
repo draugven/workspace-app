@@ -75,6 +75,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `login/page.tsx` - Authentication
 - `import/page.tsx` - Data import interface
 - `api/import/dracula-todos/route.ts` - Import API endpoint
+- `api/users/route.ts` - Users API endpoint (secure auth.users fetching)
 
 ### Components (`src/components/`)
 - `auth/` - Authentication (AuthProvider, LoginForm, ProtectedRoute)
@@ -106,13 +107,13 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 ## TODO Backlog
 
 ### Task Management Improvements
-1. **Sort tags alphabetically** - Tasks Kanban + table views: sort tags in ascending order within each task
-2. **Table column sorting** - Tasks table: make "Abteilung" and "Tags" columns sortable
-3. **Restore assignee functionality** - Add back assignee UI components:
-   - Add assignee dropdown to add/edit task dialogs (populate from auth.users, preselect current user)
-   - Show assignee in Kanban task cards
-   - Add assignee column to table view (last position, sortable)
-   - Add assignee filter dropdown
+1. ✅ **Sort tags alphabetically** - COMPLETED: Tasks Kanban + table views now sort tags in ascending order within each task
+2. ✅ **Table column sorting** - COMPLETED: Tasks table now has sortable "Abteilung" and "Tags" columns
+3. ✅ **Restore assignee functionality** - COMPLETED: Full assignee system implemented:
+   - ✅ Assignee dropdown in add/edit task dialogs (populated from auth.users via secure API, preselects current user)
+   - ✅ Assignee display in Kanban task cards
+   - ✅ Assignee column in table view (sortable, last position)
+   - ✅ Assignee filter dropdown with "Unassigned" option
 4. **Add text search** - Tasks: implement text search filter similar to notes
 
 ### Database & Scripts Maintenance

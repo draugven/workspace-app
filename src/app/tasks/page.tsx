@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { supabase } from '@/lib/supabase'
 import { RefreshCw, Plus, Users, Filter, X } from 'lucide-react'
-import type { Task, Department, TaskTag } from '@/types'
+import type { Task, Department, TaskTag, User } from '@/types'
 
 // All data is now loaded from Supabase - no mock data needed
 
@@ -23,9 +23,11 @@ export default function TasksPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
   const [selectedPriority, setSelectedPriority] = useState<string | null>(null)
+  const [selectedAssignee, setSelectedAssignee] = useState<string | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
   const [tags, setTags] = useState<TaskTag[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [addDialogOpen, setAddDialogOpen] = useState(false)
@@ -39,7 +41,7 @@ export default function TasksPage() {
     setError(null)
     try {
       // Load all data in parallel
-      const [tasksResponse, departmentsResponse, tagsResponse] = await Promise.all([
+      const [tasksResponse, departmentsResponse, tagsResponse, usersResponse] = await Promise.all([
         supabase
           .from('tasks')
           .select(`
@@ -57,12 +59,23 @@ export default function TasksPage() {
         supabase
           .from('task_tags')
           .select('*')
-          .order('name')
+          .order('name'),
+
+        // Fetch all users from our API route
+        fetch('/api/users').then(res => res.json())
       ])
 
       if (tasksResponse.error) throw tasksResponse.error
       if (departmentsResponse.error) throw departmentsResponse.error
       if (tagsResponse.error) throw tagsResponse.error
+
+      // Handle users response (it's already JSON from fetch)
+      if (usersResponse.error) {
+        console.warn('Could not fetch users:', usersResponse.error)
+        setUsers([])
+      } else {
+        setUsers(usersResponse)
+      }
 
       // Transform tasks data to match our interface
       const transformedTasks: Task[] = (tasksResponse.data || []).map(task => ({
@@ -155,7 +168,7 @@ export default function TasksPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
-      // Create the task - assigned_to is set to null initially as requested
+      // Create the task with assignee
       const { data: createdTask, error: taskError } = await supabase
         .from('tasks')
         .insert({
@@ -166,7 +179,7 @@ export default function TasksPage() {
           department_id: newTaskData.department_id,
           due_date: newTaskData.due_date,
           created_by: user.id,
-          assigned_to: null // No assignee initially as per requirements
+          assigned_to: newTaskData.assigned_to
         })
         .select()
         .single()
@@ -194,14 +207,16 @@ export default function TasksPage() {
     }
   }
 
-  // Filter tasks based on department, tags, status, and priority
+  // Filter tasks based on department, tags, status, priority, and assignee
   const filteredTasks = tasks.filter(task => {
     const matchesDepartment = !selectedDepartment || task.department_id === selectedDepartment
     const matchesTags = selectedTags.length === 0 ||
       (task.tags && task.tags.some(tag => selectedTags.includes(tag.id)))
     const matchesStatus = !selectedStatus || task.status === selectedStatus
     const matchesPriority = !selectedPriority || task.priority === selectedPriority
-    return matchesDepartment && matchesTags && matchesStatus && matchesPriority
+    const matchesAssignee = !selectedAssignee ||
+      (selectedAssignee === 'unassigned' ? !task.assigned_to : task.assigned_to === selectedAssignee)
+    return matchesDepartment && matchesTags && matchesStatus && matchesPriority && matchesAssignee
   })
 
   const totalTasks = tasks.length
@@ -258,7 +273,7 @@ export default function TasksPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               {/* Department Filter */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Abteilung</label>
@@ -370,10 +385,32 @@ export default function TasksPage() {
                   </PopoverContent>
                 </Popover>
               </div>
+
+              {/* Assignee Filter */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Zugewiesen</label>
+                <Select
+                  value={selectedAssignee || ''}
+                  onValueChange={(value) => setSelectedAssignee(value === 'all' ? null : value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Alle Zuweisungen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Zuweisungen</SelectItem>
+                    <SelectItem value="unassigned">Nicht zugewiesen</SelectItem>
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.full_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Active Filters and Clear Button */}
-            {(selectedDepartment || selectedStatus || selectedPriority || selectedTags.length > 0) && (
+            {(selectedDepartment || selectedStatus || selectedPriority || selectedTags.length > 0 || selectedAssignee) && (
               <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
                 <span className="text-sm text-muted-foreground">Aktive Filter:</span>
 
@@ -426,6 +463,18 @@ export default function TasksPage() {
                   ) : null
                 })}
 
+                {selectedAssignee && (
+                  <Badge variant="secondary" className="gap-1">
+                    {selectedAssignee === 'unassigned'
+                      ? 'Nicht zugewiesen'
+                      : users.find(u => u.id === selectedAssignee)?.full_name || 'Unbekannt'}
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => setSelectedAssignee(null)}
+                    />
+                  </Badge>
+                )}
+
                 <Button
                   variant="ghost"
                   size="sm"
@@ -434,6 +483,7 @@ export default function TasksPage() {
                     setSelectedStatus(null)
                     setSelectedPriority(null)
                     setSelectedTags([])
+                    setSelectedAssignee(null)
                   }}
                   className="text-muted-foreground hover:text-foreground"
                 >
@@ -565,6 +615,7 @@ export default function TasksPage() {
                       onTaskUpdate={handleTaskUpdate}
                       departments={departments}
                       tags={tags}
+                      users={users}
                     />
                   </div>
                 ) : (
@@ -586,6 +637,7 @@ export default function TasksPage() {
                         onTaskUpdate={handleTaskUpdate}
                         departments={departments}
                         tags={tags}
+                        users={users}
                       />
                     </CardContent>
                   </Card>
@@ -602,6 +654,7 @@ export default function TasksPage() {
           onSave={handleTaskCreate}
           departments={departments}
           tags={tags}
+          users={users}
         />
       </div>
     </ProtectedRoute>
