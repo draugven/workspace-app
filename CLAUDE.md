@@ -114,7 +114,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
    - ✅ Assignee display in Kanban task cards
    - ✅ Assignee column in table view (sortable, last position)
    - ✅ Assignee filter dropdown with "Unassigned" option
-4. **Add text search** - Tasks: implement text search filter similar to notes
+4. ✅ **Add text search** - COMPLETED: Tasks now have comprehensive text search functionality that searches titles, descriptions, and tags with real-time filtering
 
 ### Database & Scripts Maintenance
 5. **Validate database setup scripts** - Check if scripts/database-setup/* are current with notes/tasks structure changes
@@ -124,9 +124,27 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ### Code Cleanup
 7. **Remove import UI** - Clean up all todos import related UI code and components
+8. **Remove test page** - Delete `src/app/test/page.tsx` and any related test logic not used elsewhere
 
 ### UI/UX Optimization
-8. **Optimize page layouts** - Improve counter/filter/overview sections on Props & Costumes, Tasks, Notes pages (taking too much vertical space)
+9. **Optimize page layouts** - Improve counter/filter/overview sections on Props & Costumes, Tasks, Notes pages (taking too much vertical space)
+10. **Convert dropdowns to comboboxes** - Make "department" and "assignee" dropdowns searchable comboboxes for better UX
 
 ### Strategic Features
-9. **Offline capabilities strategy** - Research and plan options for offline data access
+11. **Offline capabilities strategy** - Research and plan options for offline data access
+
+## 18:23 25.09.2025 – Compact Session
+
+### CurrentFocus
+Implemented comprehensive assignee functionality for task management with secure auth.users integration.
+
+### SessionChanges
+- Sorted tags alphabetically in both Kanban and table task views
+- Added sortable "Abteilung" and "Tags" columns to tasks table
+- Created secure server-side API route `/api/users` for fetching auth.users data
+- Added assignee dropdown to add/edit task dialogs with current user preselection
+- Displayed assignee information in Kanban task cards with user lookup
+- Added sortable assignee column to tasks table view (last position)
+- Implemented assignee filter dropdown with "Unassigned" option
+- Updated task creation/editing to handle assignee assignments properly
+- Committed comprehensive assignee functionality (feat: 7 files, +225/-39 lines)

@@ -8,17 +8,19 @@ import { TasksTable } from '@/components/tasks/tasks-table'
 import { TaskAddDialog } from '@/components/tasks/task-add-dialog'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { supabase } from '@/lib/supabase'
-import { RefreshCw, Plus, Users, Filter, X } from 'lucide-react'
+import { RefreshCw, Plus, Users, Filter, X, Search } from 'lucide-react'
 import type { Task, Department, TaskTag, User } from '@/types'
 
 // All data is now loaded from Supabase - no mock data needed
 
 export default function TasksPage() {
   const [viewMode, setViewMode] = useState<'board' | 'table'>('board')
+  const [searchTerm, setSearchTerm] = useState('')
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
@@ -207,8 +209,12 @@ export default function TasksPage() {
     }
   }
 
-  // Filter tasks based on department, tags, status, priority, and assignee
+  // Filter tasks based on search term, department, tags, status, priority, and assignee
   const filteredTasks = tasks.filter(task => {
+    const matchesSearch = searchTerm === '' ||
+      task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (task.description && task.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (task.tags && task.tags.some(tag => tag.name.toLowerCase().includes(searchTerm.toLowerCase())))
     const matchesDepartment = !selectedDepartment || task.department_id === selectedDepartment
     const matchesTags = selectedTags.length === 0 ||
       (task.tags && task.tags.some(tag => selectedTags.includes(tag.id)))
@@ -216,7 +222,7 @@ export default function TasksPage() {
     const matchesPriority = !selectedPriority || task.priority === selectedPriority
     const matchesAssignee = !selectedAssignee ||
       (selectedAssignee === 'unassigned' ? !task.assigned_to : task.assigned_to === selectedAssignee)
-    return matchesDepartment && matchesTags && matchesStatus && matchesPriority && matchesAssignee
+    return matchesSearch && matchesDepartment && matchesTags && matchesStatus && matchesPriority && matchesAssignee
   })
 
   const totalTasks = tasks.length
@@ -273,6 +279,17 @@ export default function TasksPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Suche in Titel, Beschreibung oder Tags..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               {/* Department Filter */}
               <div className="space-y-2">
@@ -410,9 +427,19 @@ export default function TasksPage() {
             </div>
 
             {/* Active Filters and Clear Button */}
-            {(selectedDepartment || selectedStatus || selectedPriority || selectedTags.length > 0 || selectedAssignee) && (
+            {(searchTerm || selectedDepartment || selectedStatus || selectedPriority || selectedTags.length > 0 || selectedAssignee) && (
               <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
                 <span className="text-sm text-muted-foreground">Aktive Filter:</span>
+
+                {searchTerm && (
+                  <Badge variant="secondary" className="gap-1">
+                    Suche: {searchTerm}
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => setSearchTerm('')}
+                    />
+                  </Badge>
+                )}
 
                 {selectedDepartment && (
                   <Badge variant="secondary" className="gap-1">
@@ -479,6 +506,7 @@ export default function TasksPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => {
+                    setSearchTerm('')
                     setSelectedDepartment(null)
                     setSelectedStatus(null)
                     setSelectedPriority(null)
@@ -596,6 +624,17 @@ export default function TasksPage() {
                 <CardContent className="py-8 text-center">
                   <div className="text-muted-foreground">
                     Noch keine Tasks vorhanden. Nutze die Import-Funktion um Tasks zu erstellen!
+                  </div>
+                </CardContent>
+              </Card>
+            ) : filteredTasks.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center">
+                  <div className="text-muted-foreground">
+                    {searchTerm || selectedDepartment || selectedStatus || selectedPriority || selectedTags.length > 0 || selectedAssignee
+                      ? 'Keine Tasks entsprechen den aktuellen Filtern.'
+                      : 'Noch keine Tasks vorhanden. Nutze die Import-Funktion um Tasks zu erstellen!'
+                    }
                   </div>
                 </CardContent>
               </Card>
