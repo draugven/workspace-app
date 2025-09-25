@@ -51,6 +51,18 @@ export function TasksTable({
       bVal = b.due_date ? new Date(b.due_date).getTime() : 0
     }
 
+    // Special handling for department sorting
+    if (sortField === 'department') {
+      aVal = a.department?.name || ''
+      bVal = b.department?.name || ''
+    }
+
+    // Special handling for tags sorting
+    if (sortField === 'tags') {
+      aVal = a.tags?.map(tag => tag.name).sort().join(', ') || ''
+      bVal = b.tags?.map(tag => tag.name).sort().join(', ') || ''
+    }
+
     if (sortDirection === 'asc') {
       return aVal > bVal ? 1 : -1
     } else {
@@ -101,14 +113,24 @@ export function TasksTable({
             >
               Priorität {sortField === 'priority' && (sortDirection === 'asc' ? '↑' : '↓')}
             </TableHead>
-            <TableHead>Abteilung</TableHead>
+            <TableHead
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => handleSort('department')}
+            >
+              Abteilung {sortField === 'department' && (sortDirection === 'asc' ? '↑' : '↓')}
+            </TableHead>
             <TableHead
               className="cursor-pointer hover:bg-muted/50"
               onClick={() => handleSort('due_date')}
             >
               Fälligkeitsdatum {sortField === 'due_date' && (sortDirection === 'asc' ? '↑' : '↓')}
             </TableHead>
-            <TableHead>Tags</TableHead>
+            <TableHead
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => handleSort('tags')}
+            >
+              Tags {sortField === 'tags' && (sortDirection === 'asc' ? '↑' : '↓')}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -152,16 +174,20 @@ export function TasksTable({
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
-                  {task.tags?.slice(0, 3).map((tag) => (
-                    <Badge
-                      key={tag.id}
-                      variant="outline"
-                      className="text-xs"
-                      style={{ backgroundColor: tag.color + '20', borderColor: tag.color }}
-                    >
-                      #{tag.name}
-                    </Badge>
-                  ))}
+                  {task.tags
+                    ?.slice()
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .slice(0, 3)
+                    .map((tag) => (
+                      <Badge
+                        key={tag.id}
+                        variant="outline"
+                        className="text-xs"
+                        style={{ backgroundColor: tag.color + '20', borderColor: tag.color }}
+                      >
+                        #{tag.name}
+                      </Badge>
+                    ))}
                   {task.tags && task.tags.length > 3 && (
                     <Badge variant="outline" className="text-xs">
                       +{task.tags.length - 3}

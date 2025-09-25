@@ -180,16 +180,20 @@ function DraggableTaskCard({ task, onClick }: DraggableTaskCardProps) {
             )}
             {task.tags && task.tags.length > 0 && (
               <div className="flex flex-wrap gap-1">
-                {task.tags.slice(0, 2).map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    variant="outline"
-                    className="text-xs"
-                    style={{ backgroundColor: tag.color + '20', borderColor: tag.color }}
-                  >
-                    #{tag.name}
-                  </Badge>
-                ))}
+                {task.tags
+                  .slice()
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .slice(0, 2)
+                  .map((tag) => (
+                    <Badge
+                      key={tag.id}
+                      variant="outline"
+                      className="text-xs"
+                      style={{ backgroundColor: tag.color + '20', borderColor: tag.color }}
+                    >
+                      #{tag.name}
+                    </Badge>
+                  ))}
                 {task.tags.length > 2 && (
                   <Badge variant="outline" className="text-xs">
                     +{task.tags.length - 2}
