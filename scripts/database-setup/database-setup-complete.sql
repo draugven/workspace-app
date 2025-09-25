@@ -4,15 +4,8 @@
 -- Step 1: Create Extensions and Tables
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Users table (simple authentication)
-CREATE TABLE users (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  email TEXT UNIQUE NOT NULL,
-  password_hash TEXT NOT NULL,
-  full_name TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+-- Note: Using Supabase Auth (auth.users) instead of custom users table
+-- No need to create users table - Supabase handles authentication
 
 -- Departments table
 CREATE TABLE departments (
@@ -21,13 +14,6 @@ CREATE TABLE departments (
   description TEXT,
   color TEXT DEFAULT '#6b7280',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- User-Department relationships
-CREATE TABLE user_departments (
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  department_id UUID REFERENCES departments(id) ON DELETE CASCADE,
-  PRIMARY KEY (user_id, department_id)
 );
 
 -- Characters table
@@ -59,7 +45,7 @@ CREATE TABLE items (
   source TEXT CHECK (source IN ('Staatstheater', 'Gekauft', 'Produziert', 'Darsteller*in')),
   notes TEXT,
   category_id UUID REFERENCES categories(id),
-  created_by UUID REFERENCES users(id),
+  created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -79,7 +65,7 @@ CREATE TABLE item_files (
   file_path TEXT NOT NULL,
   file_type TEXT NOT NULL,
   file_size INTEGER,
-  uploaded_by UUID REFERENCES users(id),
+  uploaded_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -92,8 +78,8 @@ CREATE TABLE tasks (
   priority TEXT CHECK (priority IN ('low', 'medium', 'high', 'urgent')) DEFAULT 'medium',
   due_date DATE,
   department_id UUID REFERENCES departments(id),
-  assigned_to UUID REFERENCES users(id),
-  created_by UUID REFERENCES users(id),
+  assigned_to UUID REFERENCES auth.users(id),
+  created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -103,6 +89,7 @@ CREATE TABLE task_tags (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   name TEXT UNIQUE NOT NULL,
   color TEXT DEFAULT '#6b7280',
+  category TEXT CHECK (category IN ('Bereich', 'Typ')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -120,10 +107,10 @@ CREATE TABLE notes (
   content TEXT,
   content_html TEXT,
   is_locked BOOLEAN DEFAULT FALSE,
-  locked_by UUID REFERENCES users(id),
+  locked_by UUID REFERENCES auth.users(id),
   locked_at TIMESTAMP WITH TIME ZONE,
   department_id UUID REFERENCES departments(id),
-  created_by UUID REFERENCES users(id),
+  created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -135,7 +122,7 @@ CREATE TABLE note_versions (
   content TEXT NOT NULL,
   content_html TEXT,
   version_number INTEGER NOT NULL,
-  created_by UUID REFERENCES users(id),
+  created_by UUID REFERENCES auth.users(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -231,47 +218,9 @@ INSERT INTO task_tags (name, color) VALUES
 ('neu-besetzt', '#f97316'),
 ('dringend', '#ef4444');
 
--- Insert sample users (you'll create real users through the app)
-INSERT INTO users (email, password_hash, full_name) VALUES
-('liza@theater.com', '$2a$10$dummy_hash_for_demo', 'Liza'),
-('tanja@theater.com', '$2a$10$dummy_hash_for_demo', 'Tanja'),
-('werner.d@theater.com', '$2a$10$dummy_hash_for_demo', 'Werner D.'),
-('werner.k@theater.com', '$2a$10$dummy_hash_for_demo', 'Werner K.'),
-('elisa@theater.com', '$2a$10$dummy_hash_for_demo', 'Elisa');
-
--- Assign users to departments
-INSERT INTO user_departments (user_id, department_id)
-SELECT u.id, d.id
-FROM users u, departments d
-WHERE (u.full_name = 'Liza' AND d.name IN ('Props', 'Costumes'))
-   OR (u.full_name = 'Tanja' AND d.name = 'Props')
-   OR (u.full_name = 'Werner D.' AND d.name IN ('Administrative', 'Set Design'))
-   OR (u.full_name = 'Werner K.' AND d.name = 'Tech')
-   OR (u.full_name = 'Elisa' AND d.name IN ('Administrative', 'Costumes'));
-
--- Create a sample note
-INSERT INTO notes (title, content, content_html, department_id, created_by)
-SELECT
-  'Production Notes - Dracula',
-  '# Dracula Musical Production Notes
-
-## Key Dates
-- Performance: January 14-15, 2026
-
-## Important Reminders
-- Focus on mobile-responsive design for venue use
-- Keep track of borrowed items from Staatstheater
-- Maintain version control for all changes
-
-## Next Steps
-- Complete props inventory
-- Schedule final costume fittings
-- Confirm technical requirements',
-  '<h1>Dracula Musical Production Notes</h1><h2>Key Dates</h2><ul><li>Performance: January 14-15, 2026</li></ul><h2>Important Reminders</h2><ul><li>Focus on mobile-responsive design for venue use</li><li>Keep track of borrowed items from Staatstheater</li><li>Maintain version control for all changes</li></ul><h2>Next Steps</h2><ul><li>Complete props inventory</li><li>Schedule final costume fittings</li><li>Confirm technical requirements</li></ul>',
-  d.id,
-  u.id
-FROM departments d, users u
-WHERE d.name = 'Administrative' AND u.full_name = 'Liza';
+-- Note: Users are managed through Supabase Auth
+-- Create users through the application interface or Supabase Dashboard
+-- No need to insert sample users here
 
 -- Success message
 DO $$

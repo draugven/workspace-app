@@ -117,7 +117,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 4. ✅ **Add text search** - COMPLETED: Tasks now have comprehensive text search functionality that searches titles, descriptions, and tags with real-time filtering
 
 ### Database & Scripts Maintenance
-5. **Validate database setup scripts** - Check if scripts/database-setup/* are current with notes/tasks structure changes
+5. ✅ **Validate database setup scripts** - COMPLETED: Updated scripts/database-setup/* to match current schema using auth.users and added missing task_tags.category field
 
 ### Notes Issues
 6. **Fix "Gesperrt" counter** - Shows "1" when only one app instance is open
