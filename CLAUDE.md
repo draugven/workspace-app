@@ -127,7 +127,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 ### UI/UX Optimization
 9. **Optimize page layouts** - Improve counter/filter/overview sections on Props & Costumes, Tasks, Notes pages (taking too much vertical space)
 10. ✅ **Convert dropdowns to comboboxes** - COMPLETED: Made "department" and "assignee" dropdowns searchable comboboxes for better UX
-11. **Color task cards and rows by department** - Color background of task cards (kanban view) and rows (table view) based on assigned department color, leave default if no department assigned
+11. ✅ **Color task cards and rows by department** - COMPLETED: Task cards (Kanban) now show colored left border + light background, table rows show subtle colored background based on department color
 
 ### Strategic Features
 12. **Offline capabilities strategy** - Research and plan options for offline data access
@@ -166,3 +166,19 @@ Fixed database scripts compatibility and resolved notes lock cleanup mechanism p
 - Committed database scripts validation (feat: 4 files, +141/-66 lines)
 - Committed script archiving (refactor: 5 files, +34 lines)
 - Committed notes lock cleanup fix (fix: 2 files, +92/-2 lines)
+
+## 21:01 25.09.2025 – Compact Session
+
+### CurrentFocus
+Implemented searchable comboboxes to replace dropdowns for better UX in task management.
+
+### SessionChanges
+- Completed todo 7: removed all import UI code, components, and navigation links
+- Fixed Next.js build cache corruption by clearing .next directory and restarting dev server
+- Created new Combobox component with search functionality and German localization
+- Replaced department and assignee dropdowns in task add/edit dialogs with searchable comboboxes
+- Replaced department and assignee filter dropdowns on tasks page with searchable comboboxes
+- Updated project structure documentation to include new Combobox component
+- Marked todo 10 as completed and added new todo 11 for department color coding
+- Committed import UI removal (refactor: 6 files, +23/-611 lines)
+- Committed searchable comboboxes implementation (feat: 5 files, +184/-90 lines)

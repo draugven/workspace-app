@@ -34,6 +34,7 @@ import { Badge } from "@/components/ui/badge"
 import { TaskStatusBadge } from './task-status-badge'
 import { PriorityBadge } from './priority-badge'
 import { TaskEditDialog } from './task-edit-dialog'
+import { getDepartmentCardStyle } from "@/lib/utils"
 import type { Task, Department, TaskTag, User } from "@/types"
 
 interface TaskBoardProps {
@@ -135,10 +136,12 @@ function DraggableTaskCard({ task, onClick, users = [] }: DraggableTaskCardProps
     }
   })
 
+  const departmentStyle = getDepartmentCardStyle(task.department)
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1
+    opacity: isDragging ? 0.5 : 1,
+    ...departmentStyle
   }
 
   return (

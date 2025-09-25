@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { TaskStatusBadge } from './task-status-badge'
 import { PriorityBadge } from './priority-badge'
 import { TaskEditDialog } from './task-edit-dialog'
+import { getDepartmentRowStyle } from "@/lib/utils"
 import type { Task, Department, TaskTag, User } from "@/types"
 
 interface TasksTableProps {
@@ -154,6 +155,7 @@ export function TasksTable({
             <TableRow
               key={task.id}
               className="hover:bg-muted/50 cursor-pointer"
+              style={getDepartmentRowStyle(task.department)}
               onClick={() => handleTaskClick(task)}
             >
               <TableCell>
