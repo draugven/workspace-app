@@ -81,7 +81,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `notes/` - Collaborative notes (NoteCard, NoteAddDialog, TiptapEditor + SSR wrapper)
 - `files/` - File handling (FileUpload)
 - `layout/` - Navigation
-- `ui/` - Shadcn/ui components (Button, Dialog, Select, etc.)
+- `ui/` - Shadcn/ui components (Button, Dialog, Select, Combobox, etc.)
 
 ### Core Services (`src/`)
 - `lib/supabase.ts` - Supabase client configuration
@@ -126,10 +126,11 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ### UI/UX Optimization
 9. **Optimize page layouts** - Improve counter/filter/overview sections on Props & Costumes, Tasks, Notes pages (taking too much vertical space)
-10. **Convert dropdowns to comboboxes** - Make "department" and "assignee" dropdowns searchable comboboxes for better UX
+10. ✅ **Convert dropdowns to comboboxes** - COMPLETED: Made "department" and "assignee" dropdowns searchable comboboxes for better UX
+11. **Color task cards and rows by department** - Color background of task cards (kanban view) and rows (table view) based on assigned department color, leave default if no department assigned
 
 ### Strategic Features
-11. **Offline capabilities strategy** - Research and plan options for offline data access
+12. **Offline capabilities strategy** - Research and plan options for offline data access
 
 ## 18:23 25.09.2025 – Compact Session
 

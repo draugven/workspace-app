@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Combobox } from '@/components/ui/combobox'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { supabase } from '@/lib/supabase'
 import { RefreshCw, Plus, Users, Filter, X, Search } from 'lucide-react'
@@ -294,22 +295,17 @@ export default function TasksPage() {
               {/* Department Filter */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Abteilung</label>
-                <Select
-                  value={selectedDepartment || ''}
+                <Combobox
+                  options={[
+                    { value: "all", label: "Alle Abteilungen" },
+                    ...departments.map(dept => ({ value: dept.id, label: dept.name }))
+                  ]}
+                  value={selectedDepartment || 'all'}
                   onValueChange={(value) => setSelectedDepartment(value === 'all' ? null : value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Alle Abteilungen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Alle Abteilungen</SelectItem>
-                    {departments.map((department) => (
-                      <SelectItem key={department.id} value={department.id}>
-                        {department.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Alle Abteilungen"
+                  searchPlaceholder="Abteilung suchen..."
+                  emptyText="Keine Abteilung gefunden."
+                />
               </div>
 
               {/* Status Filter */}
@@ -406,23 +402,18 @@ export default function TasksPage() {
               {/* Assignee Filter */}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Zugewiesen</label>
-                <Select
-                  value={selectedAssignee || ''}
+                <Combobox
+                  options={[
+                    { value: "all", label: "Alle Zuweisungen" },
+                    { value: "unassigned", label: "Nicht zugewiesen" },
+                    ...users.map(user => ({ value: user.id, label: user.full_name }))
+                  ]}
+                  value={selectedAssignee || 'all'}
                   onValueChange={(value) => setSelectedAssignee(value === 'all' ? null : value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Alle Zuweisungen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Alle Zuweisungen</SelectItem>
-                    <SelectItem value="unassigned">Nicht zugewiesen</SelectItem>
-                    {users.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.full_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Alle Zuweisungen"
+                  searchPlaceholder="Person suchen..."
+                  emptyText="Keine Person gefunden."
+                />
               </div>
             </div>
 

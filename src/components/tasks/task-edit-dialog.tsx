@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Combobox } from '@/components/ui/combobox'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -152,7 +153,11 @@ export function TaskEditDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="department">Abteilung</Label>
-              <Select
+              <Combobox
+                options={[
+                  { value: "none", label: "Keine Abteilung" },
+                  ...departments.map(dept => ({ value: dept.id, label: dept.name }))
+                ]}
                 value={editedTask.department_id || 'none'}
                 onValueChange={(value) => {
                   const department = departments.find(d => d.id === value)
@@ -162,19 +167,10 @@ export function TaskEditDialog({
                     department: value === 'none' ? null : department || null
                   })
                 }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Abteilung wählen..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Keine Abteilung</SelectItem>
-                  {departments.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                placeholder="Abteilung wählen..."
+                searchPlaceholder="Abteilung suchen..."
+                emptyText="Keine Abteilung gefunden."
+              />
             </div>
 
             <div className="grid gap-2">
@@ -191,22 +187,17 @@ export function TaskEditDialog({
           {/* Assignee Row */}
           <div className="grid gap-2">
             <Label htmlFor="assigned_to">Zugewiesen an</Label>
-            <Select
+            <Combobox
+              options={[
+                { value: "none", label: "Niemandem zugewiesen" },
+                ...users.map(user => ({ value: user.id, label: `${user.full_name} (${user.email})` }))
+              ]}
               value={editedTask.assigned_to || 'none'}
               onValueChange={(value) => setEditedTask({ ...editedTask, assigned_to: value === 'none' ? null : value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Person zuweisen..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">Niemandem zugewiesen</SelectItem>
-                {users.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.full_name} ({user.email})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="Person zuweisen..."
+              searchPlaceholder="Person suchen..."
+              emptyText="Keine Person gefunden."
+            />
           </div>
 
           {/* Tags Selection */}
