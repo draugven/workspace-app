@@ -37,7 +37,6 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Props & Costumes**: Complete CRUD with file uploads
 - **Task Management**: Interactive Kanban + table with drag-and-drop
 - **Collaborative Notes**: Real-time Tiptap editor with SSR fixes
-- **Data Import**: Dracula production markdown parser (54 tasks imported)
 - **Database**: Clean schema using Supabase Auth users (no custom user tables)
 
 ### 🏗️ Architecture
@@ -73,8 +72,6 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `tasks/page.tsx` - Task management (Kanban + table)
 - `notes/page.tsx` - Collaborative notes
 - `login/page.tsx` - Authentication
-- `import/page.tsx` - Data import interface
-- `api/import/dracula-todos/route.ts` - Import API endpoint
 - `api/users/route.ts` - Users API endpoint (secure auth.users fetching)
 
 ### Components (`src/components/`)
@@ -89,7 +86,6 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 ### Core Services (`src/`)
 - `lib/supabase.ts` - Supabase client configuration
 - `lib/utils.ts` - Utility functions
-- `lib/import-todos.ts` - Data import logic
 - `hooks/use-realtime-notes.tsx` - Real-time notes hook
 - `types/` - TypeScript definitions (database.ts, index.ts)
 
@@ -124,7 +120,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 6. ✅ **Fix "Gesperrt" counter** - COMPLETED: Implemented comprehensive lock cleanup mechanism with time-based cleanup (10min), page unload handlers, and user tracking to prevent orphaned locks
 
 ### Code Cleanup
-7. **Remove import UI** - Clean up all todos import related UI code and components
+7. ✅ **Remove import UI** - COMPLETED: Cleaned up all todos import related UI code and components
 8. **Remove test page** - Delete `src/app/test/page.tsx` and any related test logic not used elsewhere
 9. **Remove or archive legacy scripts** - Analyze legacy scripts related to parcing and import of data and remove/archive any that are no longer needed
 
@@ -150,3 +146,22 @@ Implemented comprehensive assignee functionality for task management with secure
 - Implemented assignee filter dropdown with "Unassigned" option
 - Updated task creation/editing to handle assignee assignments properly
 - Committed comprehensive assignee functionality (feat: 7 files, +225/-39 lines)
+
+## 22:23 25.09.2025 – Compact Session
+
+### CurrentFocus
+Fixed database scripts compatibility and resolved notes lock cleanup mechanism preventing orphaned "Gesperrt" counter.
+
+### SessionChanges
+- Implemented comprehensive text search for tasks (title, description, tags with real-time filtering)
+- Updated database setup scripts to use auth.users instead of custom users table
+- Added missing task_tags.category field with 'Bereich'/'Typ' values to match current schema
+- Archived obsolete database scripts incompatible with Supabase Auth architecture
+- Created scripts/archive/ with cleanup-migration.sql and legacy-seed-data/
+- Updated CLAUDE.md project structure to reflect current database scripts organization
+- Fixed "Gesperrt" counter by implementing multi-layered lock cleanup (time-based, page unload, user tracking)
+- Added orphaned lock prevention with 10-minute auto-cleanup and browser event handlers
+- Committed text search feature (feat: 2 files, +64/-7 lines)
+- Committed database scripts validation (feat: 4 files, +141/-66 lines)
+- Committed script archiving (refactor: 5 files, +34 lines)
+- Committed notes lock cleanup fix (fix: 2 files, +92/-2 lines)

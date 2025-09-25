@@ -10,7 +10,6 @@ const navItems = [
   { name: 'Props & Costumes', href: '/items' },
   { name: 'Tasks', href: '/tasks' },
   { name: 'Notes', href: '/notes' },
-  { name: 'Import', href: '/import' },
 ]
 
 import { useAuth } from '../auth/auth-provider'
