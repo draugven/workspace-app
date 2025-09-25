@@ -30,12 +30,45 @@ export function useRealtimeNotes({
   const [channel, setChannel] = useState<RealtimeChannel | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [currentUserEditingNotes, setCurrentUserEditingNotes] = useState<Set<string>>(new Set())
+
+  // Cleanup orphaned locks for current user
+  const cleanupOrphanedLocks = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      // Auto-unlock notes that have been locked by current user for more than 10 minutes
+      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString()
+
+      const { error } = await supabase
+        .from('notes')
+        .update({
+          is_locked: false,
+          locked_by: null,
+          locked_at: null
+        })
+        .eq('locked_by', user.id)
+        .lt('locked_at', tenMinutesAgo)
+
+      if (error) {
+        console.warn('Failed to cleanup orphaned locks:', error)
+      } else {
+        console.log('Cleaned up orphaned locks for current user')
+      }
+    } catch (error) {
+      console.warn('Error during lock cleanup:', error)
+    }
+  }, [])
 
   // Load notes from database
   const loadNotes = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
+      // Clean up orphaned locks first
+      await cleanupOrphanedLocks()
+
       const { data, error } = await supabase
         .from('notes')
         .select(`
@@ -51,7 +84,7 @@ export function useRealtimeNotes({
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [cleanupOrphanedLocks])
 
   // Subscribe to real-time changes
   useEffect(() => {
@@ -130,6 +163,9 @@ export function useRealtimeNotes({
       return
     }
 
+    // Track which notes current user is editing
+    setCurrentUserEditingNotes(prev => new Set([...prev, noteId]))
+
     // Broadcast presence
     await channel.send({
       type: 'broadcast',
@@ -168,6 +204,13 @@ export function useRealtimeNotes({
       console.error('Failed to unlock note:', error)
       return
     }
+
+    // Remove from tracking
+    setCurrentUserEditingNotes(prev => {
+      const updated = new Set(prev)
+      updated.delete(noteId)
+      return updated
+    })
 
     // Broadcast presence
     await channel.send({
@@ -287,6 +330,52 @@ export function useRealtimeNotes({
 
     return () => clearInterval(cleanup)
   }, [])
+
+  // Cleanup locks on page unload (browser close, refresh, navigate away)
+  useEffect(() => {
+    const cleanupOnUnload = async () => {
+      if (currentUserEditingNotes.size === 0) return
+
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        // Unlock all notes that current user was editing
+        await supabase
+          .from('notes')
+          .update({
+            is_locked: false,
+            locked_by: null,
+            locked_at: null
+          })
+          .eq('locked_by', user.id)
+          .in('id', Array.from(currentUserEditingNotes))
+
+        console.log('Cleaned up locks on page unload')
+      } catch (error) {
+        console.warn('Failed to cleanup locks on unload:', error)
+      }
+    }
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      cleanupOnUnload()
+    }
+
+    const handlePageHide = () => {
+      cleanupOnUnload()
+    }
+
+    // Add event listeners
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    window.addEventListener('pagehide', handlePageHide)
+
+    // Cleanup on unmount
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      window.removeEventListener('pagehide', handlePageHide)
+      cleanupOnUnload()
+    }
+  }, [currentUserEditingNotes])
 
   // Get active editors for a specific note
   const getActiveEditors = useCallback((noteId: string) => {

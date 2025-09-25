@@ -121,11 +121,12 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 5. ✅ **Validate database setup scripts** - COMPLETED: Updated scripts/database-setup/* to match current schema using auth.users and added missing task_tags.category field
 
 ### Notes Issues
-6. **Fix "Gesperrt" counter** - Shows "1" when only one app instance is open
+6. ✅ **Fix "Gesperrt" counter** - COMPLETED: Implemented comprehensive lock cleanup mechanism with time-based cleanup (10min), page unload handlers, and user tracking to prevent orphaned locks
 
 ### Code Cleanup
 7. **Remove import UI** - Clean up all todos import related UI code and components
 8. **Remove test page** - Delete `src/app/test/page.tsx` and any related test logic not used elsewhere
+9. **Remove or archive legacy scripts** - Analyze legacy scripts related to parcing and import of data and remove/archive any that are no longer needed
 
 ### UI/UX Optimization
 9. **Optimize page layouts** - Improve counter/filter/overview sections on Props & Costumes, Tasks, Notes pages (taking too much vertical space)
