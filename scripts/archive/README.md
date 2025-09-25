@@ -9,6 +9,11 @@ This directory contains database scripts that are no longer actively used but pr
 **Reason:** One-time migration from custom `users` table to Supabase `auth.users` - already completed
 **Risk:** Could cause data loss if run accidentally
 
+### `update-departments.sql`
+**Archived:** 2025-09-25
+**Reason:** One-time department consolidation script - no longer needed
+**Purpose:** Complex script to standardize and merge department data
+
 ### `legacy-seed-data/`
 **Archived:** 2025-09-25
 **Reason:** Incompatible with current schema (references custom `users` table instead of `auth.users`)
@@ -23,7 +28,6 @@ The following data-import scripts remain active and compatible:
 
 - `scripts/data-import/populate-task-tags.sql` - ✅ Adds categorized task tags
 - `scripts/data-import/cleanup-tasks.sql` - ✅ Utility to clear task data
-- `scripts/data-import/update-departments.sql` - ⚠️ Department consolidation (may be one-time use)
 
 ## Migration Notes
 

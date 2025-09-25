@@ -94,8 +94,9 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `types/` - TypeScript definitions (database.ts, index.ts)
 
 ### Database & Scripts
-- `scripts/database-setup/` - Schema and setup (database-schema.sql, supabase-storage-setup.sql, cleanup-migration.sql)
-- `scripts/data-import/` - Seed data (seed-data.sql, items-seed-data.sql, tasks-seed-data.sql, update-departments.sql)
+- `scripts/database-setup/` - Schema and setup (database-schema.sql, database-setup-complete.sql, supabase-storage-setup.sql, current-database-schema.sql)
+- `scripts/data-import/` - Active data utilities (populate-task-tags.sql, cleanup-tasks.sql)
+- `scripts/archive/` - Archived/obsolete scripts (cleanup-migration.sql, update-departments.sql, legacy-seed-data/)
 - `scripts/` - Processing utilities (parse-todos.js, parse-csv-data.js, run-import.mjs)
 
 ## Known Technical Solutions
