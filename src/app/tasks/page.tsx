@@ -10,11 +10,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/ui/page-header'
+import { StatsBar } from '@/components/ui/stats-bar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { supabase } from '@/lib/supabase'
-import { RefreshCw, Plus, Users, Filter, X, Search } from 'lucide-react'
+import { RefreshCw, Plus, Users, Filter, X, Search, ChevronDown, ChevronUp } from 'lucide-react'
 import type { Task, Department, TaskTag, User } from '@/types'
 
 // All data is now loaded from Supabase - no mock data needed
@@ -27,6 +29,7 @@ export default function TasksPage() {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
   const [selectedPriority, setSelectedPriority] = useState<string | null>(null)
   const [selectedAssignee, setSelectedAssignee] = useState<string | null>(null)
+  const [filtersExpanded, setFiltersExpanded] = useState(false)
   const [tasks, setTasks] = useState<Task[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
   const [tags, setTags] = useState<TaskTag[]>([])
@@ -210,6 +213,16 @@ export default function TasksPage() {
     }
   }
 
+  // Check if any filters are active (for smart expand/collapse)
+  const hasActiveFilters = searchTerm || selectedDepartment || selectedStatus || selectedPriority || selectedTags.length > 0 || selectedAssignee
+
+  // Auto-expand filters when filters become active
+  useEffect(() => {
+    if (hasActiveFilters && !filtersExpanded) {
+      setFiltersExpanded(true)
+    }
+  }, [hasActiveFilters, filtersExpanded])
+
   // Filter tasks based on search term, department, tags, status, priority, and assignee
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = searchTerm === '' ||
@@ -240,352 +253,411 @@ export default function TasksPage() {
   return (
     <ProtectedRoute>
       <Navigation />
-      <div className="container mx-auto py-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Aufgaben</h1>
-            <p className="text-muted-foreground">
-              Verwalte Aufgaben nach Abteilungen und Status
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={() => setAddDialogOpen(true)}
-              className="gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Neue Aufgabe
-            </Button>
-            <Button
-              variant={viewMode === 'board' ? 'default' : 'outline'}
-              onClick={() => setViewMode('board')}
-            >
-              Kanban Board
-            </Button>
-            <Button
-              variant={viewMode === 'table' ? 'default' : 'outline'}
-              onClick={() => setViewMode('table')}
-            >
-              Tabelle
-            </Button>
-          </div>
-        </div>
-
-        {/* Filter Controls */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Filter className="h-5 w-5" />
-              Filter
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Suche in Titel, Beschreibung oder Tags..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              {/* Department Filter */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Abteilung</label>
-                <Combobox
-                  options={[
-                    { value: "all", label: "Alle Abteilungen" },
-                    ...departments.map(dept => ({ value: dept.id, label: dept.name }))
-                  ]}
-                  value={selectedDepartment || 'all'}
-                  onValueChange={(value) => setSelectedDepartment(value === 'all' ? null : value)}
-                  placeholder="Alle Abteilungen"
-                  searchPlaceholder="Abteilung suchen..."
-                  emptyText="Keine Abteilung gefunden."
-                />
-              </div>
-
-              {/* Status Filter */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Status</label>
-                <Select
-                  value={selectedStatus || ''}
-                  onValueChange={(value) => setSelectedStatus(value === 'all' ? null : value)}
+      <div className="container mx-auto py-4 space-y-4">
+        <PageHeader
+          title="Aufgaben"
+          description="Verwalte Aufgaben nach Abteilungen und Status"
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Suche in Titel, Beschreibung oder Tags..."
+          actions={
+            <>
+              {!filtersExpanded && (
+                <Button
+                  variant="outline"
+                  onClick={() => setFiltersExpanded(true)}
+                  className="gap-2"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Alle Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Alle Status</SelectItem>
-                    <SelectItem value="not_started">Zu erledigen</SelectItem>
-                    <SelectItem value="in_progress">In Bearbeitung</SelectItem>
-                    <SelectItem value="done">Erledigt</SelectItem>
-                    <SelectItem value="blocked">Blockiert</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  <Filter className="h-4 w-4" />
+                  Filter
+                  {hasActiveFilters && (
+                    <Badge variant="secondary" className="ml-1">
+                      {[selectedDepartment && 'Abteilung', selectedStatus && 'Status',
+                        selectedPriority && 'Priorität', selectedTags.length && 'Tags', selectedAssignee && 'Zugewiesen']
+                        .filter(Boolean).length}
+                    </Badge>
+                  )}
+                </Button>
+              )}
+              <Button
+                onClick={() => setAddDialogOpen(true)}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Neue Aufgabe
+              </Button>
+              <Button
+                variant={viewMode === 'board' ? 'default' : 'outline'}
+                onClick={() => setViewMode('board')}
+              >
+                Kanban Board
+              </Button>
+              <Button
+                variant={viewMode === 'table' ? 'default' : 'outline'}
+                onClick={() => setViewMode('table')}
+              >
+                Tabelle
+              </Button>
+            </>
+          }
+        />
 
-              {/* Priority Filter */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Priorität</label>
-                <Select
-                  value={selectedPriority || ''}
-                  onValueChange={(value) => setSelectedPriority(value === 'all' ? null : value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Alle Prioritäten" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Alle Prioritäten</SelectItem>
-                    <SelectItem value="urgent">Dringend</SelectItem>
-                    <SelectItem value="high">Hoch</SelectItem>
-                    <SelectItem value="medium">Mittel</SelectItem>
-                    <SelectItem value="low">Niedrig</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+        <StatsBar
+          stats={[
+            { label: 'Gesamt:', value: totalTasks },
+            { label: 'Zu erledigen:', value: statusCounts['not_started'] || 0, className: 'text-gray-600' },
+            { label: 'In Bearbeitung:', value: statusCounts['in_progress'] || 0, className: 'text-blue-600' },
+            { label: 'Erledigt:', value: statusCounts['done'] || 0, className: 'text-green-600' },
+            { label: 'Blockiert:', value: statusCounts['blocked'] || 0, className: 'text-red-600' }
+          ]}
+          badges={Object.entries(priorityCounts).map(([priority, count]) => ({
+            text: `${priority === 'urgent' ? 'Dringend' :
+                   priority === 'high' ? 'Hoch' :
+                   priority === 'medium' ? 'Mittel' : 'Niedrig'}: ${count}`,
+            className: priority === 'urgent' ? 'border-red-200 text-red-700' :
+                      priority === 'high' ? 'border-orange-200 text-orange-700' :
+                      priority === 'medium' ? 'border-yellow-200 text-yellow-700' :
+                      'border-gray-200 text-gray-700'
+          }))}
+        />
 
-              {/* Tags Filter */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Tags</label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="justify-between w-full"
-                    >
-                      {selectedTags.length > 0
-                        ? `${selectedTags.length} Tags ausgewählt`
-                        : 'Tags auswählen'
-                      }
-                      <Filter className="ml-2 h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-3">
-                    <div className="space-y-2">
-                      {tags.map((tag) => (
-                        <div key={tag.id} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            id={`tag-${tag.id}`}
-                            checked={selectedTags.includes(tag.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedTags([...selectedTags, tag.id])
-                              } else {
-                                setSelectedTags(selectedTags.filter(id => id !== tag.id))
-                              }
-                            }}
-                            className="rounded border-gray-300"
-                          />
-                          <label
-                            htmlFor={`tag-${tag.id}`}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            <Badge
-                              variant="outline"
-                              style={{ borderColor: tag.color, color: tag.color }}
+        {/* Filter Controls - only show when expanded */}
+        {filtersExpanded && (
+          <Card>
+            <CardHeader>
+              <CardTitle
+                className="flex items-center justify-between cursor-pointer"
+                onClick={() => setFiltersExpanded(!filtersExpanded)}
+              >
+                <div className="flex items-center gap-2 text-lg">
+                  <Filter className="h-5 w-5" />
+                  Filter
+                  {hasActiveFilters && (
+                    <Badge variant="secondary" className="ml-2">
+                      {[selectedDepartment && 'Abteilung', selectedStatus && 'Status',
+                        selectedPriority && 'Priorität', selectedTags.length && 'Tags', selectedAssignee && 'Zugewiesen']
+                        .filter(Boolean).length} aktiv
+                    </Badge>
+                  )}
+                </div>
+                <ChevronUp className="h-5 w-5" />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                {/* Department Filter */}
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Abteilung</label>
+                  <Combobox
+                    options={[
+                      { value: "all", label: "Alle Abteilungen" },
+                      ...departments.map(dept => ({ value: dept.id, label: dept.name }))
+                    ]}
+                    value={selectedDepartment || 'all'}
+                    onValueChange={(value) => setSelectedDepartment(value === 'all' ? null : value)}
+                    placeholder="Alle Abteilungen"
+                    searchPlaceholder="Abteilung suchen..."
+                    emptyText="Keine Abteilung gefunden."
+                  />
+                </div>
+
+                {/* Status Filter */}
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Status</label>
+                  <Select
+                    value={selectedStatus || ''}
+                    onValueChange={(value) => setSelectedStatus(value === 'all' ? null : value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Alle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Alle Status</SelectItem>
+                      <SelectItem value="not_started">Zu erledigen</SelectItem>
+                      <SelectItem value="in_progress">In Bearbeitung</SelectItem>
+                      <SelectItem value="done">Erledigt</SelectItem>
+                      <SelectItem value="blocked">Blockiert</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Priority Filter */}
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Priorität</label>
+                  <Select
+                    value={selectedPriority || ''}
+                    onValueChange={(value) => setSelectedPriority(value === 'all' ? null : value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Alle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Alle</SelectItem>
+                      <SelectItem value="urgent">Dringend</SelectItem>
+                      <SelectItem value="high">Hoch</SelectItem>
+                      <SelectItem value="medium">Mittel</SelectItem>
+                      <SelectItem value="low">Niedrig</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Tags Filter */}
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Tags</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="justify-between w-full"
+                      >
+                        {selectedTags.length > 0
+                          ? `${selectedTags.length} Tags`
+                          : 'Tags'
+                        }
+                        <Filter className="ml-2 h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-3">
+                      <div className="space-y-2">
+                        {tags.map((tag) => (
+                          <div key={tag.id} className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              id={`tag-${tag.id}`}
+                              checked={selectedTags.includes(tag.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedTags([...selectedTags, tag.id])
+                                } else {
+                                  setSelectedTags(selectedTags.filter(id => id !== tag.id))
+                                }
+                              }}
+                              className="rounded border-gray-300"
+                            />
+                            <label
+                              htmlFor={`tag-${tag.id}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                             >
-                              {tag.name}
-                            </Badge>
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                              <Badge
+                                variant="outline"
+                                style={{ borderColor: tag.color, color: tag.color }}
+                              >
+                                {tag.name}
+                              </Badge>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Assignee Filter */}
+                <div className="space-y-1">
+                  <label className="text-sm font-medium">Zugewiesen</label>
+                  <Combobox
+                    options={[
+                      { value: "all", label: "Alle" },
+                      { value: "unassigned", label: "Unassigned" },
+                      ...users.map(user => ({ value: user.id, label: user.full_name }))
+                    ]}
+                    value={selectedAssignee || 'all'}
+                    onValueChange={(value) => setSelectedAssignee(value === 'all' ? null : value)}
+                    placeholder="Alle"
+                    searchPlaceholder="Person suchen..."
+                    emptyText="Keine Person gefunden."
+                  />
+                </div>
               </div>
 
-              {/* Assignee Filter */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Zugewiesen</label>
-                <Combobox
-                  options={[
-                    { value: "all", label: "Alle Zuweisungen" },
-                    { value: "unassigned", label: "Nicht zugewiesen" },
-                    ...users.map(user => ({ value: user.id, label: user.full_name }))
-                  ]}
-                  value={selectedAssignee || 'all'}
-                  onValueChange={(value) => setSelectedAssignee(value === 'all' ? null : value)}
-                  placeholder="Alle Zuweisungen"
-                  searchPlaceholder="Person suchen..."
-                  emptyText="Keine Person gefunden."
-                />
-              </div>
-            </div>
+              {/* Active Filters and Clear Button */}
+              {hasActiveFilters && (
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
+                  <span className="text-sm text-muted-foreground">Aktive Filter:</span>
 
-            {/* Active Filters and Clear Button */}
-            {(searchTerm || selectedDepartment || selectedStatus || selectedPriority || selectedTags.length > 0 || selectedAssignee) && (
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
-                <span className="text-sm text-muted-foreground">Aktive Filter:</span>
-
-                {searchTerm && (
-                  <Badge variant="secondary" className="gap-1">
-                    Suche: {searchTerm}
-                    <X
-                      className="h-3 w-3 cursor-pointer"
-                      onClick={() => setSearchTerm('')}
-                    />
-                  </Badge>
-                )}
-
-                {selectedDepartment && (
-                  <Badge variant="secondary" className="gap-1">
-                    {departments.find(d => d.id === selectedDepartment)?.name}
-                    <X
-                      className="h-3 w-3 cursor-pointer"
-                      onClick={() => setSelectedDepartment(null)}
-                    />
-                  </Badge>
-                )}
-
-                {selectedStatus && (
-                  <Badge variant="secondary" className="gap-1">
-                    {selectedStatus === 'not_started' ? 'Zu erledigen' :
-                     selectedStatus === 'in_progress' ? 'In Bearbeitung' :
-                     selectedStatus === 'done' ? 'Erledigt' :
-                     selectedStatus === 'blocked' ? 'Blockiert' : selectedStatus}
-                    <X
-                      className="h-3 w-3 cursor-pointer"
-                      onClick={() => setSelectedStatus(null)}
-                    />
-                  </Badge>
-                )}
-
-                {selectedPriority && (
-                  <Badge variant="secondary" className="gap-1">
-                    {selectedPriority === 'urgent' ? 'Dringend' :
-                     selectedPriority === 'high' ? 'Hoch' :
-                     selectedPriority === 'medium' ? 'Mittel' :
-                     selectedPriority === 'low' ? 'Niedrig' : selectedPriority}
-                    <X
-                      className="h-3 w-3 cursor-pointer"
-                      onClick={() => setSelectedPriority(null)}
-                    />
-                  </Badge>
-                )}
-
-                {selectedTags.map(tagId => {
-                  const tag = tags.find(t => t.id === tagId)
-                  return tag ? (
-                    <Badge key={tagId} variant="secondary" className="gap-1">
-                      {tag.name}
+                  {searchTerm && (
+                    <Badge variant="secondary" className="gap-1">
+                      Suche: {searchTerm}
                       <X
                         className="h-3 w-3 cursor-pointer"
-                        onClick={() => setSelectedTags(selectedTags.filter(id => id !== tagId))}
+                        onClick={() => setSearchTerm('')}
                       />
                     </Badge>
-                  ) : null
-                })}
+                  )}
 
-                {selectedAssignee && (
-                  <Badge variant="secondary" className="gap-1">
-                    {selectedAssignee === 'unassigned'
-                      ? 'Nicht zugewiesen'
-                      : users.find(u => u.id === selectedAssignee)?.full_name || 'Unbekannt'}
-                    <X
-                      className="h-3 w-3 cursor-pointer"
-                      onClick={() => setSelectedAssignee(null)}
-                    />
-                  </Badge>
-                )}
+                  {selectedDepartment && (
+                    <Badge variant="secondary" className="gap-1">
+                      {departments.find(d => d.id === selectedDepartment)?.name}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => setSelectedDepartment(null)}
+                      />
+                    </Badge>
+                  )}
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm('')
-                    setSelectedDepartment(null)
-                    setSelectedStatus(null)
-                    setSelectedPriority(null)
-                    setSelectedTags([])
-                    setSelectedAssignee(null)
-                  }}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  Alle Filter löschen
-                </Button>
-              </div>
+                  {selectedStatus && (
+                    <Badge variant="secondary" className="gap-1">
+                      {selectedStatus === 'not_started' ? 'Zu erledigen' :
+                       selectedStatus === 'in_progress' ? 'In Bearbeitung' :
+                       selectedStatus === 'done' ? 'Erledigt' :
+                       selectedStatus === 'blocked' ? 'Blockiert' : selectedStatus}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => setSelectedStatus(null)}
+                      />
+                    </Badge>
+                  )}
+
+                  {selectedPriority && (
+                    <Badge variant="secondary" className="gap-1">
+                      {selectedPriority === 'urgent' ? 'Dringend' :
+                       selectedPriority === 'high' ? 'Hoch' :
+                       selectedPriority === 'medium' ? 'Mittel' :
+                       selectedPriority === 'low' ? 'Niedrig' : selectedPriority}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => setSelectedPriority(null)}
+                      />
+                    </Badge>
+                  )}
+
+                  {selectedTags.map(tagId => {
+                    const tag = tags.find(t => t.id === tagId)
+                    return tag ? (
+                      <Badge key={tagId} variant="secondary" className="gap-1">
+                        {tag.name}
+                        <X
+                          className="h-3 w-3 cursor-pointer"
+                          onClick={() => setSelectedTags(selectedTags.filter(id => id !== tagId))}
+                        />
+                      </Badge>
+                    ) : null
+                  })}
+
+                  {selectedAssignee && (
+                    <Badge variant="secondary" className="gap-1">
+                      {selectedAssignee === 'unassigned'
+                        ? 'Nicht zugewiesen'
+                        : users.find(u => u.id === selectedAssignee)?.full_name || 'Unbekannt'}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => setSelectedAssignee(null)}
+                      />
+                    </Badge>
+                  )}
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSearchTerm('')
+                      setSelectedDepartment(null)
+                      setSelectedStatus(null)
+                      setSelectedPriority(null)
+                      setSelectedTags([])
+                      setSelectedAssignee(null)
+                    }}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Alle Filter löschen
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Active Filters Summary (shown when collapsed) */}
+        {!filtersExpanded && hasActiveFilters && (
+          <div className="flex flex-wrap items-center gap-2 py-1">
+            <span className="text-sm text-muted-foreground">Aktive Filter:</span>
+            {searchTerm && (
+              <Badge variant="secondary" className="gap-1">
+                Suche: {searchTerm}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setSearchTerm('')}
+                />
+              </Badge>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Gesamt</CardDescription>
-              <CardTitle className="text-2xl">{totalTasks}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Zu erledigen</CardDescription>
-              <CardTitle className="text-2xl text-gray-600">
-                {statusCounts['not_started'] || 0}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>In Bearbeitung</CardDescription>
-              <CardTitle className="text-2xl text-blue-600">
-                {statusCounts['in_progress'] || 0}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Erledigt</CardDescription>
-              <CardTitle className="text-2xl text-green-600">
-                {statusCounts['done'] || 0}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Blockiert</CardDescription>
-              <CardTitle className="text-2xl text-red-600">
-                {statusCounts['blocked'] || 0}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-        </div>
-
-        {/* Priority Overview */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Prioritäten Übersicht</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(priorityCounts).map(([priority, count]) => (
-                <Badge
-                  key={priority}
-                  variant="outline"
-                  className={
-                    priority === 'urgent' ? 'border-red-200 text-red-700' :
-                    priority === 'high' ? 'border-orange-200 text-orange-700' :
-                    priority === 'medium' ? 'border-yellow-200 text-yellow-700' :
-                    'border-gray-200 text-gray-700'
-                  }
-                >
-                  {priority === 'urgent' ? 'Dringend' :
-                   priority === 'high' ? 'Hoch' :
-                   priority === 'medium' ? 'Mittel' : 'Niedrig'}: {count}
+            {selectedDepartment && (
+              <Badge variant="secondary" className="gap-1">
+                {departments.find(d => d.id === selectedDepartment)?.name}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setSelectedDepartment(null)}
+                />
+              </Badge>
+            )}
+            {selectedStatus && (
+              <Badge variant="secondary" className="gap-1">
+                {selectedStatus === 'not_started' ? 'Zu erledigen' :
+                 selectedStatus === 'in_progress' ? 'In Bearbeitung' :
+                 selectedStatus === 'done' ? 'Erledigt' :
+                 selectedStatus === 'blocked' ? 'Blockiert' : selectedStatus}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setSelectedStatus(null)}
+                />
+              </Badge>
+            )}
+            {selectedPriority && (
+              <Badge variant="secondary" className="gap-1">
+                {selectedPriority === 'urgent' ? 'Dringend' :
+                 selectedPriority === 'high' ? 'Hoch' :
+                 selectedPriority === 'medium' ? 'Mittel' :
+                 selectedPriority === 'low' ? 'Niedrig' : selectedPriority}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setSelectedPriority(null)}
+                />
+              </Badge>
+            )}
+            {selectedTags.map(tagId => {
+              const tag = tags.find(t => t.id === tagId)
+              return tag ? (
+                <Badge key={tagId} variant="secondary" className="gap-1">
+                  {tag.name}
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={() => setSelectedTags(selectedTags.filter(id => id !== tagId))}
+                  />
                 </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              ) : null
+            })}
+            {selectedAssignee && (
+              <Badge variant="secondary" className="gap-1">
+                {selectedAssignee === 'unassigned'
+                  ? 'Nicht zugewiesen'
+                  : users.find(u => u.id === selectedAssignee)?.full_name || 'Unbekannt'}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setSelectedAssignee(null)}
+                />
+              </Badge>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSearchTerm('')
+                setSelectedDepartment(null)
+                setSelectedStatus(null)
+                setSelectedPriority(null)
+                setSelectedTags([])
+                setSelectedAssignee(null)
+              }}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Alle löschen
+            </Button>
+          </div>
+        )}
 
         {/* Loading and Error States */}
         {loading && (
           <Card>
-            <CardContent className="py-8 text-center">
+            <CardContent className="py-6 text-center">
               <div className="text-muted-foreground">Tasks werden geladen...</div>
             </CardContent>
           </Card>
@@ -612,7 +684,7 @@ export default function TasksPage() {
           <>
             {tasks.length === 0 ? (
               <Card>
-                <CardContent className="py-8 text-center">
+                <CardContent className="py-6 text-center">
                   <div className="text-muted-foreground">
                     Noch keine Tasks vorhanden. Nutze die Import-Funktion um Tasks zu erstellen!
                   </div>
@@ -620,7 +692,7 @@ export default function TasksPage() {
               </Card>
             ) : filteredTasks.length === 0 ? (
               <Card>
-                <CardContent className="py-8 text-center">
+                <CardContent className="py-6 text-center">
                   <div className="text-muted-foreground">
                     {searchTerm || selectedDepartment || selectedStatus || selectedPriority || selectedTags.length > 0 || selectedAssignee
                       ? 'Keine Tasks entsprechen den aktuellen Filtern.'
@@ -632,7 +704,7 @@ export default function TasksPage() {
             ) : (
               <>
                 {viewMode === 'board' ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <h2 className="text-xl font-semibold">Kanban Board</h2>
                       <span className="text-sm text-muted-foreground">
@@ -649,28 +721,21 @@ export default function TasksPage() {
                     />
                   </div>
                 ) : (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        <span>Alle Aufgaben</span>
-                        <span className="text-sm font-normal text-muted-foreground">
-                          {filteredTasks.length} Tasks
-                        </span>
-                      </CardTitle>
-                      <CardDescription>
-                        Klicke auf die Spaltenüberschriften zum Sortieren
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <TasksTable
-                        tasks={filteredTasks}
-                        onTaskUpdate={handleTaskUpdate}
-                        departments={departments}
-                        tags={tags}
-                        users={users}
-                      />
-                    </CardContent>
-                  </Card>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-semibold">Alle Aufgaben</h2>
+                      <span className="text-sm text-muted-foreground">
+                        {filteredTasks.length} Tasks
+                      </span>
+                    </div>
+                    <TasksTable
+                      tasks={filteredTasks}
+                      onTaskUpdate={handleTaskUpdate}
+                      departments={departments}
+                      tags={tags}
+                      users={users}
+                    />
+                  </div>
                 )}
               </>
             )}

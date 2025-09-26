@@ -9,9 +9,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { PageHeader } from '@/components/ui/page-header'
+import { StatsBar } from '@/components/ui/stats-bar'
 import { useRealtimeNotes } from '@/hooks/use-realtime-notes'
 import { supabase } from '@/lib/supabase'
-import { Plus, Search, Users } from 'lucide-react'
+import { Plus, Search, Users, ChevronDown, ChevronUp, X, Filter } from 'lucide-react'
 import type { Note, Department, User } from '@/types'
 
 // Mock data for now
@@ -138,6 +140,7 @@ Anstatt double bei "Zu Ende":
 export default function NotesPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterDepartment, setFilterDepartment] = useState<string | null>(null)
+  const [filtersExpanded, setFiltersExpanded] = useState(false)
   const [departments, setDepartments] = useState<Department[]>(mockDepartments)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [showAddDialog, setShowAddDialog] = useState(false)
@@ -180,6 +183,16 @@ export default function NotesPage() {
 
     loadUserData()
   }, [])
+
+  // Check if any filters are active (search is now separate)
+  const hasActiveFilters = filterDepartment
+
+  // Auto-expand filters when filters become active
+  useEffect(() => {
+    if (hasActiveFilters && !filtersExpanded) {
+      setFiltersExpanded(true)
+    }
+  }, [hasActiveFilters, filtersExpanded])
 
   const filteredNotes = notes.filter(note => {
     const matchesSearch = note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -234,107 +247,138 @@ export default function NotesPage() {
   return (
     <ProtectedRoute>
       <Navigation />
-      <div className="container mx-auto py-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Notizen</h1>
-            <p className="text-muted-foreground">
-              Kollaborative Notizen für die Produktion
-            </p>
-          </div>
-          <Button className="gap-2" onClick={handleOpenAddDialog} disabled={loading}>
-            <Plus className="h-4 w-4" />
-            Neue Notiz
-          </Button>
-        </div>
-
-        {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Gesamt Notizen</CardDescription>
-              <CardTitle className="text-2xl">{statsData.total}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Gesperrt</CardDescription>
-              <CardTitle className="text-2xl text-yellow-600">
-                {statsData.locked}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Bearbeitbar</CardDescription>
-              <CardTitle className="text-2xl text-green-600">
-                {statsData.total - statsData.locked}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
-                Aktive Bearbeiter
-              </CardDescription>
-              <CardTitle className="text-2xl text-blue-600">
-                {statsData.activeEditors}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-        </div>
-
-        {/* Filters */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Filter & Suche</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Notizen durchsuchen..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant={filterDepartment === null ? "default" : "outline"}
-                size="sm"
-                onClick={() => setFilterDepartment(null)}
-              >
-                Alle ({statsData.total})
-              </Button>
-              {statsData.byDepartment.map((dept) => (
+      <div className="container mx-auto py-4 space-y-4">
+        <PageHeader
+          title="Notizen"
+          description="Kollaborative Notizen für die Produktion"
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Notizen durchsuchen..."
+          actions={
+            <>
+              {!filtersExpanded && (
                 <Button
-                  key={dept.id}
-                  variant={filterDepartment === dept.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilterDepartment(dept.id)}
-                  style={{
-                    backgroundColor: filterDepartment === dept.id ? dept.color : undefined,
-                    borderColor: dept.color
-                  }}
+                  variant="outline"
+                  onClick={() => setFiltersExpanded(true)}
+                  className="gap-2"
                 >
-                  {dept.name} ({dept.count})
+                  <Filter className="h-4 w-4" />
+                  Filter
+                  {hasActiveFilters && (
+                    <Badge variant="secondary" className="ml-1">
+                      {[filterDepartment && 'Abteilung'].filter(Boolean).length}
+                    </Badge>
+                  )}
                 </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              )}
+              <Button className="gap-2" onClick={handleOpenAddDialog} disabled={loading}>
+                <Plus className="h-4 w-4" />
+                Neue Notiz
+              </Button>
+            </>
+          }
+        />
+
+        <StatsBar
+          stats={[
+            { label: 'Gesamt Notizen:', value: statsData.total },
+            { label: 'Gesperrt:', value: statsData.locked, className: 'text-yellow-600' },
+            { label: 'Bearbeitbar:', value: statsData.total - statsData.locked, className: 'text-green-600' },
+            {
+              label: (
+                <div className="flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  Aktive Bearbeiter:
+                </div>
+              ),
+              value: statsData.activeEditors,
+              className: 'text-blue-600'
+            }
+          ]}
+        />
+
+        {/* Filters - only show when expanded */}
+        {filtersExpanded && (
+          <Card>
+            <CardHeader>
+              <CardTitle
+                className="flex items-center justify-between cursor-pointer"
+                onClick={() => setFiltersExpanded(!filtersExpanded)}
+              >
+                <div className="flex items-center gap-2 text-lg">
+                  <Filter className="h-5 w-5" />
+                  Filter
+                  {hasActiveFilters && (
+                    <Badge variant="secondary" className="ml-2">
+                      {[filterDepartment && 'Abteilung'].filter(Boolean).length} aktiv
+                    </Badge>
+                  )}
+                  <div className="flex flex-wrap gap-2 ml-4">
+                    <Button
+                      variant={filterDepartment === null ? "default" : "outline"}
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setFilterDepartment(null)
+                      }}
+                    >
+                      Alle ({statsData.total})
+                    </Button>
+                    {statsData.byDepartment.map((dept) => (
+                      <Button
+                        key={dept.id}
+                        variant={filterDepartment === dept.id ? "default" : "outline"}
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setFilterDepartment(dept.id)
+                        }}
+                        style={{
+                          backgroundColor: filterDepartment === dept.id ? dept.color : undefined,
+                          borderColor: dept.color
+                        }}
+                      >
+                        {dept.name} ({dept.count})
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <ChevronUp className="h-5 w-5" />
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        )}
+
+        {/* Active Filters Summary (shown when collapsed) */}
+        {!filtersExpanded && hasActiveFilters && (
+          <div className="flex flex-wrap items-center gap-2 py-1">
+            <span className="text-sm text-muted-foreground">Aktive Filter:</span>
+            {filterDepartment && (
+              <Badge variant="secondary" className="gap-1">
+                {departments.find(d => d.id === filterDepartment)?.name}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setFilterDepartment(null)}
+                />
+              </Badge>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setFilterDepartment(null)
+              }}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Alle löschen
+            </Button>
+          </div>
+        )}
 
         {/* Loading and Error States */}
         {loading && (
           <Card>
-            <CardContent className="py-8 text-center">
+            <CardContent className="py-6 text-center">
               <div className="text-muted-foreground">Notizen werden geladen...</div>
             </CardContent>
           </Card>
@@ -357,7 +401,7 @@ export default function NotesPage() {
 
         {/* Notes Grid */}
         {!loading && !error && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {filteredNotes.map((note) => {
               const editors = getActiveEditors(note.id)
               const isBeingEdited = editors.length > 0 &&
@@ -384,7 +428,7 @@ export default function NotesPage() {
 
         {!loading && !error && filteredNotes.length === 0 && (
           <Card>
-            <CardContent className="py-8 text-center">
+            <CardContent className="py-6 text-center">
               <div className="text-muted-foreground">
                 {searchTerm || filterDepartment
                   ? 'Keine Notizen gefunden, die den Filterkriterien entsprechen.'

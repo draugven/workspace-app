@@ -104,7 +104,7 @@ function DroppableColumn({ status, title, color, tasks, activeTask, onTaskClick,
         ))}
 
         {tasks.length === 0 && (
-          <div className="text-center text-sm text-gray-400 py-8">
+          <div className="text-center text-sm text-gray-400 py-6">
             {activeTask && isOver ? 'Hier ablegen' : 'Keine Aufgaben'}
           </div>
         )}

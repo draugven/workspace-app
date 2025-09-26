@@ -81,7 +81,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `notes/` - Collaborative notes (NoteCard, NoteAddDialog, TiptapEditor + SSR wrapper)
 - `files/` - File handling (FileUpload)
 - `layout/` - Navigation
-- `ui/` - Shadcn/ui components (Button, Dialog, Select, Combobox, etc.)
+- `ui/` - Shadcn/ui components (Button, Dialog, Select, Combobox, PageHeader, StatsBar, etc.)
 
 ### Core Services (`src/`)
 - `lib/supabase.ts` - Supabase client configuration

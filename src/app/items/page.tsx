@@ -8,6 +8,8 @@ import { ItemForm } from '@/components/items/item-form'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/ui/page-header'
+import { StatsBar } from '@/components/ui/stats-bar'
 import { supabase } from '@/lib/supabase'
 import { Plus, RefreshCw } from 'lucide-react'
 import type { Item } from '@/types'
@@ -94,6 +96,7 @@ export default function ItemsPage() {
   const [error, setError] = useState<string | null>(null)
   const [formOpen, setFormOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
     loadItems()
@@ -217,6 +220,16 @@ export default function ItemsPage() {
     setFormOpen(true)
   }
 
+  // Filter items based on search term
+  const filteredItems = items.filter(item =>
+    searchTerm === '' ||
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.notes && item.notes.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    item.source?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.category?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.characters?.some(char => char.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  )
+
   const totalItems = items.length
   const propCount = items.filter(item => item.type === 'prop').length
   const costumeCount = items.filter(item => item.type === 'costume').length
@@ -228,90 +241,55 @@ export default function ItemsPage() {
   return (
     <ProtectedRoute>
       <Navigation />
-      <div className="container mx-auto py-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Props & Kostüme</h1>
-            <p className="text-muted-foreground">
-              Verwalte Requisiten und Kostüme für die Produktion
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={loadItems}
-              disabled={loading}
-              className="gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              Aktualisieren
-            </Button>
-            <Button
-              onClick={() => {
-                setEditingItem(null)
-                setFormOpen(true)
-              }}
-              className="gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Neues Item
-            </Button>
-          </div>
-        </div>
+      <div className="container mx-auto py-4 space-y-4">
+        <PageHeader
+          title="Props & Kostüme"
+          description="Verwalte Requisiten und Kostüme für die Produktion"
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          searchPlaceholder="Items durchsuchen..."
+          actions={
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadItems}
+                disabled={loading}
+                className="gap-2"
+              >
+                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                Aktualisieren
+              </Button>
+              <Button
+                onClick={() => {
+                  setEditingItem(null)
+                  setFormOpen(true)
+                }}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Neues Item
+              </Button>
+            </>
+          }
+        />
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Gesamt</CardDescription>
-              <CardTitle className="text-2xl">{totalItems}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Requisiten</CardDescription>
-              <CardTitle className="text-2xl">{propCount}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Kostüme</CardDescription>
-              <CardTitle className="text-2xl">{costumeCount}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Erhalten</CardDescription>
-              <CardTitle className="text-2xl text-green-600">
-                {statusCounts['erhalten'] || 0}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-        </div>
-
-        {/* Status Overview */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Status Übersicht</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(statusCounts).map(([status, count]) => (
-                <div key={status} className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-sm">
-                    {status}: {count}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <StatsBar
+          stats={[
+            { label: 'Gesamt:', value: totalItems },
+            { label: 'Requisiten:', value: propCount },
+            { label: 'Kostüme:', value: costumeCount },
+            { label: 'Erhalten:', value: statusCounts['erhalten'] || 0, className: 'text-green-600' }
+          ]}
+          badges={Object.entries(statusCounts).map(([status, count]) => ({
+            text: `${status}: ${count}`
+          }))}
+        />
 
         {/* Loading and Error States */}
         {loading && (
           <Card>
-            <CardContent className="py-8 text-center">
+            <CardContent className="py-6 text-center">
               <div className="text-muted-foreground">Items werden geladen...</div>
             </CardContent>
           </Card>
@@ -340,7 +318,7 @@ export default function ItemsPage() {
               <CardTitle className="flex items-center justify-between">
                 <span>Alle Items</span>
                 <span className="text-sm font-normal text-muted-foreground">
-                  {totalItems} Items
+                  {searchTerm ? `${filteredItems.length} von ${totalItems}` : totalItems} Items
                 </span>
               </CardTitle>
               <CardDescription>
@@ -348,10 +326,10 @@ export default function ItemsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {items.length > 0 ? (
-                <ItemsTable items={items} onEditItem={openEditForm} />
-              ) : (
-                <div className="text-center py-8">
+              {filteredItems.length > 0 ? (
+                <ItemsTable items={filteredItems} onEditItem={openEditForm} />
+              ) : items.length === 0 ? (
+                <div className="text-center py-6">
                   <div className="text-muted-foreground mb-4">
                     Noch keine Items vorhanden. Erstelle dein erstes Item!
                   </div>
@@ -365,6 +343,12 @@ export default function ItemsPage() {
                     <Plus className="h-4 w-4" />
                     Erstes Item erstellen
                   </Button>
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <div className="text-muted-foreground">
+                    Keine Items entsprechen der aktuellen Suche.
+                  </div>
                 </div>
               )}
             </CardContent>

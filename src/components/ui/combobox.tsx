@@ -88,7 +88,7 @@ export function Combobox({
         </div>
         <div className="max-h-64 overflow-auto">
           {filteredOptions.length === 0 ? (
-            <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+            <div className="px-4 py-4 text-center text-sm text-muted-foreground">
               {emptyText}
             </div>
           ) : (

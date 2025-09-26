@@ -139,7 +139,7 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit }: ItemDetailDraw
           </div>
         </SheetHeader>
 
-        <div className="mt-6 space-y-6">
+        <div className="mt-4 space-y-4">
           {/* Status and Basic Info */}
           <Card>
             <CardHeader className="pb-3">

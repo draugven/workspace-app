@@ -176,7 +176,7 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
         {loading ? (
           <div className="p-4 text-center">Lade Formulardaten...</div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Basic Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
