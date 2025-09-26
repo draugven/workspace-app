@@ -154,7 +154,7 @@ CREATE TRIGGER update_notes_updated_at BEFORE UPDATE ON notes FOR EACH ROW EXECU
 
 -- Insert departments
 INSERT INTO departments (name, description, color) VALUES
-('Props', 'Props and set pieces management', '#8b5cf6'),
+('Requisiten', 'Requisiten and set pieces management', '#8b5cf6'),
 ('Costumes', 'Costume design and wardrobe', '#ec4899'),
 ('Set Design', 'Set design and construction', '#f59e0b'),
 ('Administrative', 'Production administration and planning', '#6b7280'),

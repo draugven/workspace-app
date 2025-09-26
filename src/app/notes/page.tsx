@@ -19,7 +19,7 @@ import type { Note, Department, User } from '@/types'
 // Mock data for now
 const mockDepartments: Department[] = [
   { id: '1', name: 'Kostüme', description: 'Costume design and wardrobe', color: '#ec4899', created_at: '2024-01-01' },
-  { id: '2', name: 'Requisiten', description: 'Props management', color: '#8b5cf6', created_at: '2024-01-01' },
+  { id: '2', name: 'Requisiten', description: 'Requisiten management', color: '#8b5cf6', created_at: '2024-01-01' },
   { id: '3', name: 'Technik', description: 'Technical production', color: '#10b981', created_at: '2024-01-01' },
   { id: '4', name: 'Administrative', description: 'Production admin', color: '#6b7280', created_at: '2024-01-01' }
 ]

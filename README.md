@@ -4,7 +4,7 @@ A Next.js web application for small theater production teams to manage props, co
 
 ## Features
 
-- **Props & Costumes Management**: Track items with customizable properties, status tracking, and character assignments
+- **Requisiten & Costumes Management**: Track items with customizable properties, status tracking, and character assignments
 - **Task Management**: Multi-status workflow (Not Started → In Progress → Done/Blocked) with department grouping and assignments
 - **Collaborative Notes**: Rich text editing with conflict warnings and version history
 - **Real-time Collaboration**: Live updates for concurrent editing
@@ -85,7 +85,7 @@ The app uses a PostgreSQL database with the following main tables:
 - `departments` - Theater production departments
 - `characters` - Characters in the production
 - `categories` - Item categories (props/costumes)
-- `items` - Props and costumes with status tracking
+- `items` - Requisiten and costumes with status tracking
 - `tasks` - Task management with workflow states
 - `notes` - Collaborative notes with version history
 
@@ -110,7 +110,7 @@ The project includes organized scripts for database management and data import:
 
 **Data Import:**
 - `scripts/data-import/seed-data.sql` - Basic departments and categories
-- `scripts/data-import/items-seed-data.sql` - Props and costumes data
+- `scripts/data-import/items-seed-data.sql` - Requisiten and costumes data
 - `scripts/data-import/tasks-seed-data.sql` - Production tasks data
 
 **Processing Utilities:**

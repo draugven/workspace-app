@@ -10,7 +10,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 ## Core Features
 
 ### Database & Tables
-- Props/costume tables with cross-references and customizable views
+- Requisiten/costume tables with cross-references and customizable views
 - Property types: text, date, dropdown, file links, status
 - Filter by department, priority, status
 
@@ -34,7 +34,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ### ✅ Completed Features
 - **Authentication**: Supabase Auth with protected routes
-- **Props & Costumes**: Complete CRUD with file uploads
+- **Requisiten & Costumes**: Complete CRUD with file uploads
 - **Task Management**: Interactive Kanban + table with drag-and-drop, assignees, search, department colors
 - **Collaborative Notes**: Real-time Tiptap editor with SSR fixes and lock cleanup
 - **Database**: Clean schema using Supabase Auth users
@@ -69,7 +69,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ### Core App Routes (`src/app/`)
 - `page.tsx` - Dashboard/home page
-- `items/page.tsx` - Props & costumes management
+- `items/page.tsx` - Requisiten & costumes management
 - `tasks/page.tsx` - Task management (Kanban + table)
 - `notes/page.tsx` - Collaborative notes
 - `login/page.tsx` - Authentication
@@ -77,7 +77,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ### Components (`src/components/`)
 - `auth/` - Authentication (AuthProvider, LoginForm, ProtectedRoute)
-- `items/` - Props/costumes (ItemsTable, ItemForm, ItemDetailDrawer, StatusBadge)
+- `items/` - Requisiten/costumes (ItemsTable, ItemForm, ItemDetailDrawer, StatusBadge)
 - `tasks/` - Task management (TaskBoard, TasksTable, TaskAddDialog, TaskEditDialog, PriorityBadge)
 - `notes/` - Collaborative notes (NoteCard, NoteAddDialog, TiptapEditor + SSR wrapper)
 - `files/` - File handling (FileUpload)
@@ -111,7 +111,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 ### New Feature Requests
 3. **Private content functionality** - Add privacy toggle for notes and tasks (creator-only visibility) in add/edit dialogs
 4. ~~**Department assignment for notes** - Add department selection to note edit dialog~~ ✅ **COMPLETED**
-5. **Rename Items to Requisiten** - Change "Props" terminology to "Requisiten" throughout (Kostüme will be separate later)
+5. ~~**Rename Items to Requisiten** - Change "Props" terminology to "Requisiten" throughout (Kostüme will be separate later)~~ ✅ **COMPLETED**
 6. ~~**Remove Dashboard nav item** - Remove redundant navigation since logo already links to dashboard~~ ✅ **COMPLETED**
 7. **Typography and styling updates** - General design improvements (requires input on preferences)
 8. **Dark theme implementation** - Add dark mode support (requires input on design approach)
@@ -123,6 +123,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 14. **Task description rich text** - Replace plain text task descriptions with rich text editor
 15. **Branding updates** - Replace logo and add custom favicon
 16. **Deployment setup** - Prepare and deploy application
+17. **German localization** - Translate navigation bar items and dashboard text to German
 
 ## Recent Development History
 
@@ -133,3 +134,4 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Database Cleanup**: Archived obsolete scripts, fixed lock mechanisms
 - **Navigation Cleanup**: Removed redundant Dashboard navigation item (logo already navigates home)
 - **Note Department Assignment**: Added department selection to note editing with real-time updates
+- **Terminology Update**: Changed "Props" to "Requisiten" throughout application for German terminology consistency

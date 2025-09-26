@@ -19,7 +19,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 w-full max-w-4xl">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Props & Costumes</CardTitle>
+                <CardTitle className="text-lg">Requisiten & Kostüme</CardTitle>
                 <CardDescription>
                   Track items with customizable properties, status, and character assignments.
                 </CardDescription>
