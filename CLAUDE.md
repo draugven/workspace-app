@@ -16,9 +16,9 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ### Task Management
 - Multi-status todos: Not Started → In Progress → Done/Blocked
-- Department grouping (Bereich/Typ categorization), due dates
-- Drag-and-drop Kanban board + table views
-- NO user assignments (uses Supabase Auth for creators only)
+- Department grouping (Bereich/Typ categorization), due dates, assignees
+- Drag-and-drop Kanban board + table views with searchable filters
+- Text search across titles, descriptions, and tags
 
 ### Collaborative Notes
 - Real-time rich text editor with conflict detection
@@ -35,9 +35,10 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 ### ✅ Completed Features
 - **Authentication**: Supabase Auth with protected routes
 - **Props & Costumes**: Complete CRUD with file uploads
-- **Task Management**: Interactive Kanban + table with drag-and-drop
-- **Collaborative Notes**: Real-time Tiptap editor with SSR fixes
-- **Database**: Clean schema using Supabase Auth users (no custom user tables)
+- **Task Management**: Interactive Kanban + table with drag-and-drop, assignees, search, department colors
+- **Collaborative Notes**: Real-time Tiptap editor with SSR fixes and lock cleanup
+- **Database**: Clean schema using Supabase Auth users
+- **UI/UX**: Compact design, searchable comboboxes, collapsible filters
 
 ### 🏗️ Architecture
 - German localization throughout
@@ -103,95 +104,32 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ## TODO Backlog
 
-### Task Management Improvements
-1. ✅ **Sort tags alphabetically** - COMPLETED: Tasks Kanban + table views now sort tags in ascending order within each task
-2. ✅ **Table column sorting** - COMPLETED: Tasks table now has sortable "Abteilung" and "Tags" columns
-3. ✅ **Restore assignee functionality** - COMPLETED: Full assignee system implemented:
-   - ✅ Assignee dropdown in add/edit task dialogs (populated from auth.users via secure API, preselects current user)
-   - ✅ Assignee display in Kanban task cards
-   - ✅ Assignee column in table view (sortable, last position)
-   - ✅ Assignee filter dropdown with "Unassigned" option
-4. ✅ **Add text search** - COMPLETED: Tasks now have comprehensive text search functionality that searches titles, descriptions, and tags with real-time filtering
+### Active Tasks
+1. **Archive legacy scripts** - Review and archive remaining obsolete data import/processing scripts
+2. **Offline capabilities strategy** - Research and plan options for offline data access
 
-### Database & Scripts Maintenance
-5. ✅ **Validate database setup scripts** - COMPLETED: Updated scripts/database-setup/* to match current schema using auth.users and added missing task_tags.category field
+### New Feature Requests
+3. **Private content functionality** - Add privacy toggle for notes and tasks (creator-only visibility) in add/edit dialogs
+4. ~~**Department assignment for notes** - Add department selection to note edit dialog~~ ✅ **COMPLETED**
+5. **Rename Items to Requisiten** - Change "Props" terminology to "Requisiten" throughout (Kostüme will be separate later)
+6. ~~**Remove Dashboard nav item** - Remove redundant navigation since logo already links to dashboard~~ ✅ **COMPLETED**
+7. **Typography and styling updates** - General design improvements (requires input on preferences)
+8. **Dark theme implementation** - Add dark mode support (requires input on design approach)
+9. **Admin role and deletion** - Implement admin role with delete permissions for notes, tasks, and items
+10. **Done task management** - Strategy for completed tasks (hide after X days, archive, etc.)
+11. **Mobile UI optimization** - Improve mobile responsiveness across all views
+12. **Note versioning review** - Investigate current note version saving and potential usage
+13. **Rich text link support** - Add hyperlink functionality to note editor
+14. **Task description rich text** - Replace plain text task descriptions with rich text editor
+15. **Branding updates** - Replace logo and add custom favicon
+16. **Deployment setup** - Prepare and deploy application
 
-### Notes Issues
-6. ✅ **Fix "Gesperrt" counter** - COMPLETED: Implemented comprehensive lock cleanup mechanism with time-based cleanup (10min), page unload handlers, and user tracking to prevent orphaned locks
+## Recent Development History
 
-### Code Cleanup
-7. ✅ **Remove import UI** - COMPLETED: Cleaned up all todos import related UI code and components
-8. ✅ **Remove test page** - COMPLETED: Deleted `src/app/test/page.tsx` and test directory
-9. **Remove or archive legacy scripts** - Analyze legacy scripts related to parcing and import of data and remove/archive any that are no longer needed
-
-### UI/UX Optimization
-9. **Optimize page layouts** - Improve counter/filter/overview sections on Props & Costumes, Tasks, Notes pages (taking too much vertical space)
-10. ✅ **Convert dropdowns to comboboxes** - COMPLETED: Made "department" and "assignee" dropdowns searchable comboboxes for better UX
-11. ✅ **Color task cards and rows by department** - COMPLETED: Task cards (Kanban) now show colored left border + light background, table rows show subtle colored background based on department color
-
-### Strategic Features
-12. **Offline capabilities strategy** - Research and plan options for offline data access
-
-## 18:23 25.09.2025 – Compact Session
-
-### CurrentFocus
-Implemented comprehensive assignee functionality for task management with secure auth.users integration.
-
-### SessionChanges
-- Sorted tags alphabetically in both Kanban and table task views
-- Added sortable "Abteilung" and "Tags" columns to tasks table
-- Created secure server-side API route `/api/users` for fetching auth.users data
-- Added assignee dropdown to add/edit task dialogs with current user preselection
-- Displayed assignee information in Kanban task cards with user lookup
-- Added sortable assignee column to tasks table view (last position)
-- Implemented assignee filter dropdown with "Unassigned" option
-- Updated task creation/editing to handle assignee assignments properly
-- Committed comprehensive assignee functionality (feat: 7 files, +225/-39 lines)
-
-## 22:23 25.09.2025 – Compact Session
-
-### CurrentFocus
-Fixed database scripts compatibility and resolved notes lock cleanup mechanism preventing orphaned "Gesperrt" counter.
-
-### SessionChanges
-- Implemented comprehensive text search for tasks (title, description, tags with real-time filtering)
-- Updated database setup scripts to use auth.users instead of custom users table
-- Added missing task_tags.category field with 'Bereich'/'Typ' values to match current schema
-- Archived obsolete database scripts incompatible with Supabase Auth architecture
-- Created scripts/archive/ with cleanup-migration.sql and legacy-seed-data/
-- Updated CLAUDE.md project structure to reflect current database scripts organization
-- Fixed "Gesperrt" counter by implementing multi-layered lock cleanup (time-based, page unload, user tracking)
-- Added orphaned lock prevention with 10-minute auto-cleanup and browser event handlers
-- Committed text search feature (feat: 2 files, +64/-7 lines)
-- Committed database scripts validation (feat: 4 files, +141/-66 lines)
-- Committed script archiving (refactor: 5 files, +34 lines)
-- Committed notes lock cleanup fix (fix: 2 files, +92/-2 lines)
-
-## 21:01 25.09.2025 – Compact Session
-
-### CurrentFocus
-Implemented searchable comboboxes to replace dropdowns for better UX in task management.
-
-### SessionChanges
-- Completed todo 7: removed all import UI code, components, and navigation links
-- Fixed Next.js build cache corruption by clearing .next directory and restarting dev server
-- Created new Combobox component with search functionality and German localization
-- Replaced department and assignee dropdowns in task add/edit dialogs with searchable comboboxes
-- Replaced department and assignee filter dropdowns on tasks page with searchable comboboxes
-- Updated project structure documentation to include new Combobox component
-- Marked todo 10 as completed and added new todo 11 for department color coding
-- Committed import UI removal (refactor: 6 files, +23/-611 lines)
-- Committed searchable comboboxes implementation (feat: 5 files, +184/-90 lines)
-
-## 22:35 25.09.2025 – Compact Session
-
-### CurrentFocus
-Implemented department-based color coding for task cards and table rows to improve visual organization.
-
-### SessionChanges
-- Added utility functions getDepartmentCardStyle() and getDepartmentRowStyle() in src/lib/utils.ts
-- Applied colored left border (4px) and light background to Kanban task cards based on department color
-- Added subtle rgba background coloring to table rows using department colors with 0.063 alpha
-- Iteratively refined color opacity based on user feedback for better visual distinction
-- Marked todo 11 as completed in CLAUDE.md
-- Committed department color coding feature (feat: 4 files, +48/-2 lines)
+### Major Features Completed
+- **Assignee System**: Full user assignment functionality with auth.users integration
+- **Search & Filters**: Comprehensive text search and searchable comboboxes
+- **UI Optimization**: Compact design with collapsible filters and department color coding
+- **Database Cleanup**: Archived obsolete scripts, fixed lock mechanisms
+- **Navigation Cleanup**: Removed redundant Dashboard navigation item (logo already navigates home)
+- **Note Department Assignment**: Added department selection to note editing with real-time updates

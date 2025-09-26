@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 
 const navItems = [
-  { name: 'Dashboard', href: '/' },
   { name: 'Props & Costumes', href: '/items' },
   { name: 'Tasks', href: '/tasks' },
   { name: 'Notes', href: '/notes' },

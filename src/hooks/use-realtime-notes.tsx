@@ -99,7 +99,7 @@ export function useRealtimeNotes({
           schema: 'public',
           table: 'notes'
         },
-        (payload) => {
+        async (payload) => {
           console.log('Real-time note change:', payload)
 
           switch (payload.eventType) {
@@ -114,13 +114,42 @@ export function useRealtimeNotes({
               break
 
             case 'UPDATE':
-              setNotes(prev =>
-                prev.map(note =>
-                  note.id === payload.new.id ? { ...note, ...payload.new } : note
+              // Fetch complete note data with department relationship
+              try {
+                const { data: updatedNote } = await supabase
+                  .from('notes')
+                  .select(`
+                    *,
+                    department:departments(*)
+                  `)
+                  .eq('id', payload.new.id)
+                  .single()
+
+                if (updatedNote) {
+                  setNotes(prev =>
+                    prev.map(note =>
+                      note.id === payload.new.id ? updatedNote : note
+                    )
+                  )
+                  if (onNoteUpdated) {
+                    onNoteUpdated(updatedNote as Note)
+                  }
+                } else {
+                  // Fallback to payload data if fetch fails
+                  setNotes(prev =>
+                    prev.map(note =>
+                      note.id === payload.new.id ? { ...note, ...payload.new } : note
+                    )
+                  )
+                }
+              } catch (error) {
+                console.error('Failed to fetch updated note with department:', error)
+                // Fallback to payload data
+                setNotes(prev =>
+                  prev.map(note =>
+                    note.id === payload.new.id ? { ...note, ...payload.new } : note
+                  )
                 )
-              )
-              if (onNoteUpdated) {
-                onNoteUpdated(payload.new as Note)
               }
               break
 
@@ -229,24 +258,41 @@ export function useRealtimeNotes({
   }, [channel, onNoteUnlocked])
 
   // Save note with real-time update
-  const saveNote = useCallback(async (noteId: string, content: string, title?: string) => {
+  const saveNote = useCallback(async (noteId: string, content: string, title?: string, departmentId?: string | null) => {
     try {
+      const updateData: any = {
+        content,
+        title: title,
+        updated_at: new Date().toISOString(),
+        // Convert content to HTML (in a real app you'd use a markdown parser)
+        content_html: content.replace(/\n/g, '<br>')
+      }
+
+      // Only add department_id if it's provided
+      if (departmentId !== undefined) {
+        updateData.department_id = departmentId
+      }
+
       const { data, error } = await supabase
         .from('notes')
-        .update({
-          content,
-          title: title,
-          updated_at: new Date().toISOString(),
-          // Convert content to HTML (in a real app you'd use a markdown parser)
-          content_html: content.replace(/\n/g, '<br>')
-        })
+        .update(updateData)
         .eq('id', noteId)
-        .select()
+        .select(`
+          *,
+          department:departments(*)
+        `)
         .single()
 
       if (error) throw error
 
-      // The real-time subscription will handle updating the local state
+      // Update local state immediately to provide instant feedback
+      setNotes(prev =>
+        prev.map(note =>
+          note.id === noteId ? data : note
+        )
+      )
+
+      // The real-time subscription will handle updating the local state for other users
       return data
     } catch (error) {
       console.error('Failed to save note:', error)

@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Combobox } from "@/components/ui/combobox"
+import { Label } from "@/components/ui/label"
 import { TiptapEditorWrapper } from './tiptap-editor-wrapper'
 import type { Note, Department, User } from "@/types"
 import { Edit, Lock, History, Save, Users, AlertTriangle } from 'lucide-react'
@@ -18,7 +20,7 @@ interface NoteCardProps {
     }>
   }
   currentUser?: User | null
-  onSave: (noteId: string, content: string, title?: string) => void
+  onSave: (noteId: string, content: string, title?: string, departmentId?: string | null) => void
   onLock?: (noteId: string, lock: boolean) => void
   departments?: Department[]
   isBeingEditedByOthers?: boolean
@@ -35,6 +37,7 @@ export function NoteCard({
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(note.content || '')
   const [editTitle, setEditTitle] = useState(note.title)
+  const [editDepartmentId, setEditDepartmentId] = useState<string | null>(note.department_id)
 
   const isLocked = note.is_locked && note.locked_by !== currentUser?.id
   const lockedByCurrentUser = note.is_locked && note.locked_by === currentUser?.id
@@ -51,7 +54,7 @@ export function NoteCard({
   }
 
   const handleSave = async () => {
-    await onSave(note.id, editContent, editTitle)
+    await onSave(note.id, editContent, editTitle, editDepartmentId)
     if (onLock) {
       await onLock(note.id, false) // Unlock after saving
     }
@@ -61,6 +64,7 @@ export function NoteCard({
   const handleCancel = async () => {
     setEditContent(note.content || '')
     setEditTitle(note.title)
+    setEditDepartmentId(note.department_id)
     if (onLock && lockedByCurrentUser) {
       await onLock(note.id, false) // Unlock on cancel
     }
@@ -172,6 +176,21 @@ export function NoteCard({
       <CardContent>
         {isEditing ? (
           <div className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="department">Abteilung</Label>
+              <Combobox
+                options={[
+                  { value: "none", label: "Keine Abteilung" },
+                  ...departments.map(dept => ({ value: dept.id, label: dept.name }))
+                ]}
+                value={editDepartmentId || 'none'}
+                onValueChange={(value) => {
+                  setEditDepartmentId(value === 'none' ? null : value)
+                }}
+                placeholder="Abteilung wählen..."
+                searchPlaceholder="Abteilung suchen..."
+              />
+            </div>
             <TiptapEditorWrapper
               content={editContent}
               onChange={setEditContent}
