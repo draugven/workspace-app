@@ -121,7 +121,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ### Code Cleanup
 7. ✅ **Remove import UI** - COMPLETED: Cleaned up all todos import related UI code and components
-8. **Remove test page** - Delete `src/app/test/page.tsx` and any related test logic not used elsewhere
+8. ✅ **Remove test page** - COMPLETED: Deleted `src/app/test/page.tsx` and test directory
 9. **Remove or archive legacy scripts** - Analyze legacy scripts related to parcing and import of data and remove/archive any that are no longer needed
 
 ### UI/UX Optimization
@@ -182,3 +182,16 @@ Implemented searchable comboboxes to replace dropdowns for better UX in task man
 - Marked todo 10 as completed and added new todo 11 for department color coding
 - Committed import UI removal (refactor: 6 files, +23/-611 lines)
 - Committed searchable comboboxes implementation (feat: 5 files, +184/-90 lines)
+
+## 22:35 25.09.2025 – Compact Session
+
+### CurrentFocus
+Implemented department-based color coding for task cards and table rows to improve visual organization.
+
+### SessionChanges
+- Added utility functions getDepartmentCardStyle() and getDepartmentRowStyle() in src/lib/utils.ts
+- Applied colored left border (4px) and light background to Kanban task cards based on department color
+- Added subtle rgba background coloring to table rows using department colors with 0.063 alpha
+- Iteratively refined color opacity based on user feedback for better visual distinction
+- Marked todo 11 as completed in CLAUDE.md
+- Committed department color coding feature (feat: 4 files, +48/-2 lines)
