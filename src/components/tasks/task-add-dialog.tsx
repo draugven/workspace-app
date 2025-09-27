@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
+import { MultiCombobox } from '@/components/ui/multi-combobox'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -106,14 +107,6 @@ export function TaskAddDialog({
     onOpenChange(false)
   }
 
-  const handleTagToggle = (tagId: string) => {
-    setNewTask(prev => ({
-      ...prev,
-      tags: prev.tags.includes(tagId)
-        ? prev.tags.filter(id => id !== tagId)
-        : [...prev.tags, tagId]
-    }))
-  }
 
   const isFormValid = newTask.title.trim().length > 0
 
@@ -241,52 +234,18 @@ export function TaskAddDialog({
           {/* Tags Selection */}
           <div className="grid gap-2">
             <Label>Tags</Label>
-            <div className="border rounded-md p-3 max-h-40 overflow-y-auto">
-              {tags.length > 0 ? (
-                <div className="space-y-2">
-                  {tags.map((tag) => (
-                    <div key={tag.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`tag-${tag.id}`}
-                        checked={newTask.tags.includes(tag.id)}
-                        onCheckedChange={() => handleTagToggle(tag.id)}
-                      />
-                      <Label
-                        htmlFor={`tag-${tag.id}`}
-                        className="flex items-center gap-2 cursor-pointer text-sm"
-                      >
-                        <Tag className="h-3 w-3" style={{ color: tag.color }} />
-                        <span>#{tag.name}</span>
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Keine Tags verfügbar
-                </p>
-              )}
-            </div>
-
-            {/* Selected Tags Preview */}
-            {newTask.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-2">
-                {newTask.tags.map((tagId) => {
-                  const tag = tags.find(t => t.id === tagId)
-                  if (!tag) return null
-                  return (
-                    <Badge
-                      key={tag.id}
-                      variant="outline"
-                      style={{ borderColor: tag.color, color: tag.color }}
-                      className="text-xs"
-                    >
-                      #{tag.name}
-                    </Badge>
-                  )
-                })}
-              </div>
-            )}
+            <MultiCombobox
+              options={tags.map(tag => ({
+                value: tag.id,
+                label: tag.name,
+                color: tag.color
+              }))}
+              values={newTask.tags}
+              onValuesChange={(values) => setNewTask(prev => ({ ...prev, tags: values }))}
+              placeholder="Tags auswählen..."
+              searchPlaceholder="Tags suchen..."
+              emptyText="Keine Tags gefunden."
+            />
           </div>
 
           {/* Privacy Toggle */}
