@@ -39,7 +39,7 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
     // Use regular supabase client if on client-side, admin client if server-side
     const client = typeof window !== 'undefined' ? supabase : getSupabaseAdmin()
 
-    const { data, error } = await client
+    const { data, error } = await (client as any)
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
@@ -68,7 +68,7 @@ export async function getUserRole(userId: string): Promise<UserRole | null> {
     // Use regular supabase client if on client-side, admin client if server-side
     const client = typeof window !== 'undefined' ? supabase : getSupabaseAdmin()
 
-    const { data, error } = await client
+    const { data, error } = await (client as any)
       .from('user_roles')
       .select('*')
       .eq('user_id', userId)
