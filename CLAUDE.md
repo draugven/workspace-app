@@ -144,7 +144,7 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 18. ~~**Improve sign up functionality** - Add display name to the sign in form and persist it to DB. Currently auth.users populates "Display name" property automatically by taking everything in the email before "@". Would be nice to be able to add a custom display name. Also if user is not logged in, display log in mask by default instead of sign up mask~~ ✅ **COMPLETED**
 19. **Add task ranking within priority** - Add possibility to rank tasks within one priority. Currently they are ordered by created_at DESC by default. Would be cool to be able to drag and drop them within one column in Kanban view to change rank within one status and priority, and in the table within a priority and status
 20. **Real-time data synchronization** - Implement automatic polling/refresh mechanism on Requisiten, Tasks, and Notes pages to display latest updates from other users without requiring manual page refresh. Currently only Notes has real-time updates via Supabase subscriptions
-21. **German localization for authentication** - Translate sign in/sign up forms to German (currently in English). Update field labels, buttons, messages, and placeholder text to match the German localization used throughout the rest of the application
+21. ~~**German localization for authentication** - Translate sign in/sign up forms to German (currently in English). Update field labels, buttons, messages, and placeholder text to match the German localization used throughout the rest of the application~~ ✅ **COMPLETED**
 
 ## Recent Development History
 
