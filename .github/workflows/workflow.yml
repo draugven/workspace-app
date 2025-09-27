@@ -12,6 +12,7 @@ jobs:
   deploy:
     runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@v5
       # https://github.com/docker/setup-qemu-action
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
