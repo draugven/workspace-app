@@ -1,0 +1,71 @@
+name: build-image
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    steps:
+      # https://github.com/docker/setup-qemu-action
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      # https://github.com/docker/setup-buildx-action
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Docker meta
+        id: meta_php8
+        uses: docker/metadata-action@v3
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            dfox288/draug-back2stage-website
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: dfox288/draug-back2stage-website:latest, dfox288/draug-back2stage-website:${{ github.sha }}
+          labels: ${{ github.sha }}
+
+      - name: Trigger k8s deploy
+        run: |
+          eval `ssh-agent -s`
+          ssh-add - <<< '${{ secrets.TUM_DRAUG_K8S_PRIVATE_KEY }}'
+          git clone git@github.com:dfox288/tum-cluster-draug-websites_k8s.git manifests
+          cd manifests
+          files_to_update="back2stage.draug.art/draug-back2stage-website-deployment.yaml"
+          echo $files_to_update
+          for file in $files_to_update; do
+          repo=dfox288/draug-back2stage-website
+          sed -i "s/${repo//\//\\/}:.*/${repo//\//\\/}:${{ github.sha }}/g" $file;
+          done
+          git config --global user.email "info@tastatur-und-maus.net"
+          git config --global user.name "${{ github.repository_owner }}"
+          git add --all
+          git commit -m "deploy ${{ github.repository }}:${{ github.sha }}"
+          git push -u origin main
