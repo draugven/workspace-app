@@ -69,12 +69,16 @@ export function useRealtimeNotes({
       // Clean up orphaned locks first
       await cleanupOrphanedLocks()
 
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
       const { data, error } = await supabase
         .from('notes')
         .select(`
           *,
           department:departments(*)
         `)
+        .or(`is_private.eq.false,and(is_private.eq.true,created_by.eq.${user.id})`)
         .order('updated_at', { ascending: false })
 
       if (error) throw error
@@ -258,7 +262,7 @@ export function useRealtimeNotes({
   }, [channel, onNoteUnlocked])
 
   // Save note with real-time update
-  const saveNote = useCallback(async (noteId: string, content: string, title?: string, departmentId?: string | null) => {
+  const saveNote = useCallback(async (noteId: string, content: string, title?: string, departmentId?: string | null, isPrivate?: boolean) => {
     try {
       const updateData: any = {
         content,
@@ -271,6 +275,11 @@ export function useRealtimeNotes({
       // Only add department_id if it's provided
       if (departmentId !== undefined) {
         updateData.department_id = departmentId
+      }
+
+      // Only add is_private if it's provided
+      if (isPrivate !== undefined) {
+        updateData.is_private = isPrivate
       }
 
       const { data, error } = await supabase
@@ -314,7 +323,8 @@ export function useRealtimeNotes({
           content_html: (noteData.content || '').replace(/\n/g, '<br>'),
           department_id: noteData.department_id,
           created_by: user.id,
-          is_locked: false
+          is_locked: false,
+          is_private: noteData.is_private || false
         })
         .select(`
           *,

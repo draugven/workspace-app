@@ -17,7 +17,7 @@ import {
   Over,
   useDroppable
 } from '@dnd-kit/core'
-import { GripVertical } from 'lucide-react'
+import { GripVertical, EyeOff } from 'lucide-react'
 import {
   arrayMove,
   SortableContext,
@@ -175,6 +175,12 @@ function DraggableTaskCard({ task, onClick, users = [] }: DraggableTaskCardProps
         </CardHeader>
         <CardContent className="pt-0">
           <div className="flex flex-col gap-2">
+            {task.is_private && (
+              <Badge variant="secondary" className="gap-1 text-xs w-fit">
+                <EyeOff className="h-3 w-3" />
+                Privat
+              </Badge>
+            )}
             {task.department && (
               <Badge variant="outline" className="text-xs w-fit">
                 {task.department.name}

@@ -11,6 +11,7 @@ import { Combobox } from '@/components/ui/combobox'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Switch } from '@/components/ui/switch'
 import { Calendar, Save, X, Tag } from 'lucide-react'
 import type { Task, Department, TaskTag, User } from '@/types'
 
@@ -249,6 +250,20 @@ export function TaskEditDialog({
                 })}
               </div>
             )}
+          </div>
+
+          {/* Privacy Toggle */}
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="is_private"
+              checked={editedTask.is_private || false}
+              onCheckedChange={(checked) =>
+                setEditedTask(prev => ({ ...prev!, is_private: checked }))
+              }
+            />
+            <Label htmlFor="is_private" className="text-sm">
+              Privat (nur für mich sichtbar)
+            </Label>
           </div>
         </div>
 

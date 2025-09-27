@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Combobox } from "@/components/ui/combobox"
 import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { TiptapEditorWrapper } from './tiptap-editor-wrapper'
 import type { Note, Department, User } from "@/types"
-import { Edit, Lock, History, Save, Users, AlertTriangle } from 'lucide-react'
+import { Edit, Lock, History, Save, Users, AlertTriangle, Eye, EyeOff } from 'lucide-react'
 
 interface NoteCardProps {
   note: Note & {
@@ -20,7 +21,7 @@ interface NoteCardProps {
     }>
   }
   currentUser?: User | null
-  onSave: (noteId: string, content: string, title?: string, departmentId?: string | null) => void
+  onSave: (noteId: string, content: string, title?: string, departmentId?: string | null, isPrivate?: boolean) => void
   onLock?: (noteId: string, lock: boolean) => void
   departments?: Department[]
   isBeingEditedByOthers?: boolean
@@ -38,6 +39,7 @@ export function NoteCard({
   const [editContent, setEditContent] = useState(note.content || '')
   const [editTitle, setEditTitle] = useState(note.title)
   const [editDepartmentId, setEditDepartmentId] = useState<string | null>(note.department_id)
+  const [editIsPrivate, setEditIsPrivate] = useState(note.is_private || false)
 
   const isLocked = note.is_locked && note.locked_by !== currentUser?.id
   const lockedByCurrentUser = note.is_locked && note.locked_by === currentUser?.id
@@ -54,7 +56,7 @@ export function NoteCard({
   }
 
   const handleSave = async () => {
-    await onSave(note.id, editContent, editTitle, editDepartmentId)
+    await onSave(note.id, editContent, editTitle, editDepartmentId, editIsPrivate)
     if (onLock) {
       await onLock(note.id, false) // Unlock after saving
     }
@@ -65,6 +67,7 @@ export function NoteCard({
     setEditContent(note.content || '')
     setEditTitle(note.title)
     setEditDepartmentId(note.department_id)
+    setEditIsPrivate(note.is_private || false)
     if (onLock && lockedByCurrentUser) {
       await onLock(note.id, false) // Unlock on cancel
     }
@@ -101,6 +104,13 @@ export function NoteCard({
           </div>
 
           <div className="flex items-center gap-2">
+            {note.is_private && (
+              <Badge variant="secondary" className="gap-1">
+                <EyeOff className="h-3 w-3" />
+                Privat
+              </Badge>
+            )}
+
             {department && (
               <Badge
                 variant="outline"
@@ -191,6 +201,19 @@ export function NoteCard({
                 searchPlaceholder="Abteilung suchen..."
               />
             </div>
+
+            {/* Privacy Toggle */}
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="is_private"
+                checked={editIsPrivate}
+                onCheckedChange={setEditIsPrivate}
+              />
+              <Label htmlFor="is_private" className="text-sm">
+                Privat (nur für mich sichtbar)
+              </Label>
+            </div>
+
             <TiptapEditorWrapper
               content={editContent}
               onChange={setEditContent}

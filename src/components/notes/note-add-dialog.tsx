@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { Plus, X } from 'lucide-react'
 import type { Note, Department } from '@/types'
 
@@ -22,6 +23,7 @@ interface NewNoteData {
   title: string
   content: string
   department_id: string | 'none'
+  is_private: boolean
 }
 
 export function NoteAddDialog({
@@ -34,7 +36,8 @@ export function NoteAddDialog({
   const [newNote, setNewNote] = useState<NewNoteData>({
     title: '',
     content: '',
-    department_id: defaultDepartmentId || 'none'
+    department_id: defaultDepartmentId || 'none',
+    is_private: false
   })
 
   // Reset form when dialog opens/closes
@@ -43,7 +46,8 @@ export function NoteAddDialog({
       setNewNote({
         title: '',
         content: '',
-        department_id: defaultDepartmentId || 'none'
+        department_id: defaultDepartmentId || 'none',
+        is_private: false
       })
     }
   }, [open, defaultDepartmentId])
@@ -57,7 +61,8 @@ export function NoteAddDialog({
     const noteToSave: Partial<Note> = {
       title: newNote.title.trim(),
       content: newNote.content.trim(),
-      department_id: newNote.department_id === 'none' ? undefined : newNote.department_id
+      department_id: newNote.department_id === 'none' ? undefined : newNote.department_id,
+      is_private: newNote.is_private
     }
 
     onSave(noteToSave)
@@ -130,6 +135,20 @@ export function NoteAddDialog({
             <p className="text-xs text-muted-foreground">
               Du kannst die Notiz nach dem Erstellen mit dem Rich-Text-Editor weiter bearbeiten
             </p>
+          </div>
+
+          {/* Privacy Toggle */}
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="is_private"
+              checked={newNote.is_private}
+              onCheckedChange={(checked) =>
+                setNewNote(prev => ({ ...prev, is_private: checked }))
+              }
+            />
+            <Label htmlFor="is_private" className="text-sm">
+              Privat (nur für mich sichtbar)
+            </Label>
           </div>
         </div>
 

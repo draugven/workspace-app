@@ -46,6 +46,10 @@ export default function TasksPage() {
     setLoading(true)
     setError(null)
     try {
+      // Get current user for privacy filtering
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
       // Load all data in parallel
       const [tasksResponse, departmentsResponse, tagsResponse, usersResponse] = await Promise.all([
         supabase
@@ -55,6 +59,7 @@ export default function TasksPage() {
             department:departments(*),
             tags:task_tag_assignments(tag:task_tags(*))
           `)
+          .or(`is_private.eq.false,and(is_private.eq.true,created_by.eq.${user.id})`)
           .order('updated_at', { ascending: false }),
 
         supabase

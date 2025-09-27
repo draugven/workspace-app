@@ -80,6 +80,7 @@ CREATE TABLE tasks (
   department_id UUID REFERENCES departments(id),
   assigned_to UUID REFERENCES auth.users(id),
   created_by UUID REFERENCES auth.users(id),
+  is_private BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -111,6 +112,7 @@ CREATE TABLE notes (
   locked_at TIMESTAMP WITH TIME ZONE,
   department_id UUID REFERENCES departments(id),
   created_by UUID REFERENCES auth.users(id),
+  is_private BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

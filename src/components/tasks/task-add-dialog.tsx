@@ -11,6 +11,7 @@ import { Combobox } from '@/components/ui/combobox'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Switch } from '@/components/ui/switch'
 import { Plus, X, Tag } from 'lucide-react'
 import type { Task, Department, TaskTag, User } from '@/types'
 
@@ -32,6 +33,7 @@ interface NewTaskData {
   assigned_to: string | 'none'
   due_date: string | null
   tags: string[]
+  is_private: boolean
 }
 
 export function TaskAddDialog({
@@ -50,7 +52,8 @@ export function TaskAddDialog({
     department_id: 'none',
     assigned_to: 'none',
     due_date: null,
-    tags: []
+    tags: [],
+    is_private: false
   })
   const [currentUser, setCurrentUser] = useState<User | null>(null)
 
@@ -70,7 +73,8 @@ export function TaskAddDialog({
           department_id: 'none',
           assigned_to: currentUserData?.id || 'none',
           due_date: null,
-          tags: []
+          tags: [],
+          is_private: false
         })
       })
     }
@@ -90,6 +94,7 @@ export function TaskAddDialog({
       department_id: newTask.department_id === 'none' ? null : newTask.department_id,
       assigned_to: newTask.assigned_to === 'none' ? null : newTask.assigned_to,
       due_date: newTask.due_date,
+      is_private: newTask.is_private,
       tags: newTask.tags.map(tagId => tags.find(t => t.id === tagId)).filter(Boolean) as TaskTag[]
     }
 
@@ -282,6 +287,20 @@ export function TaskAddDialog({
                 })}
               </div>
             )}
+          </div>
+
+          {/* Privacy Toggle */}
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="is_private"
+              checked={newTask.is_private}
+              onCheckedChange={(checked) =>
+                setNewTask(prev => ({ ...prev, is_private: checked }))
+              }
+            />
+            <Label htmlFor="is_private" className="text-sm">
+              Privat (nur für mich sichtbar)
+            </Label>
           </div>
         </div>
 

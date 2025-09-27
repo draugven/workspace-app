@@ -71,6 +71,7 @@ export interface Task {
   department_id?: string
   assigned_to?: string
   created_by?: string
+  is_private?: boolean
   created_at: string
   updated_at: string
   // Relations
@@ -95,6 +96,7 @@ export interface Note {
   locked_at?: string
   department_id?: string
   created_by?: string
+  is_private?: boolean
   created_at: string
   updated_at: string
   // Relations

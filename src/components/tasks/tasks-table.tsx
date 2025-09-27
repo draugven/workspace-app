@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { EyeOff } from 'lucide-react'
 import { TaskStatusBadge } from './task-status-badge'
 import { PriorityBadge } from './priority-badge'
 import { TaskEditDialog } from './task-edit-dialog'
@@ -160,7 +161,15 @@ export function TasksTable({
             >
               <TableCell>
                 <div className="space-y-1">
-                  <div className="font-medium">{task.title}</div>
+                  <div className="font-medium flex items-center gap-2">
+                    {task.title}
+                    {task.is_private && (
+                      <Badge variant="secondary" className="gap-1 text-xs">
+                        <EyeOff className="h-3 w-3" />
+                        Privat
+                      </Badge>
+                    )}
+                  </div>
                   {task.description && (
                     <div className="text-sm text-muted-foreground line-clamp-2">
                       {task.description}
