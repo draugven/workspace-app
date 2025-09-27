@@ -53,6 +53,21 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - Always add loading/error states
 - Semantic HTML elements
 
+## Version Management
+**Current Version**: `0.2.0`
+
+Follow semantic versioning (SemVer) when creating commits and updating package.json version:
+
+**MAJOR.MINOR.PATCH** - Increment the:
+- **MAJOR** version when you make incompatible API changes
+- **MINOR** version when you add functionality in a backward compatible manner
+- **PATCH** version when you make backward compatible bug fixes
+
+**Version Update Guidelines**:
+- Always update `package.json` version number when committing significant changes
+- Update the "Current Version" in this CLAUDE.md file to match
+- Use conventional commit messages with version context (feat:, fix:, BREAKING CHANGE:)
+
 ## General Preferences
 - Follow requirements to the letter
 - Bug-free, fully functional code
