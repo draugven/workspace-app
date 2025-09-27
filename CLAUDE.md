@@ -96,7 +96,7 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - `tasks/` - Task management (TaskBoard, TasksTable, TaskAddDialog, TaskEditDialog, PriorityBadge, TaskDescriptionEditor)
 - `notes/` - Collaborative notes (NoteCard, NoteAddDialog, TiptapEditor + SSR wrapper)
 - `files/` - File handling (FileUpload)
-- `layout/` - Navigation
+- `layout/` - Navigation, Footer (version display)
 - `ui/` - Shadcn/ui components (Button, Dialog, Select, Combobox, PageHeader, StatsBar, etc.)
 
 ### Core Services (`src/`)
