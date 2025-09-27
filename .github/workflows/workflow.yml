@@ -52,7 +52,10 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: dfox288/draug-back2stage-website:latest, dfox288/draug-back2stage-website:${{ github.sha }}
           labels: ${{ github.sha }}
-
+          build-args: |
+            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+            SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       - name: Trigger k8s deploy
         run: |
           eval `ssh-agent -s`
