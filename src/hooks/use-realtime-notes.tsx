@@ -41,7 +41,7 @@ export function useRealtimeNotes({
       // Auto-unlock notes that have been locked by current user for more than 10 minutes
       const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString()
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('notes')
         .update({
           is_locked: false,
@@ -182,7 +182,7 @@ export function useRealtimeNotes({
     if (!user) return
 
     // Lock the note in the database
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('notes')
       .update({
         is_locked: true,
@@ -197,7 +197,7 @@ export function useRealtimeNotes({
     }
 
     // Track which notes current user is editing
-    setCurrentUserEditingNotes(prev => new Set([...prev, noteId]))
+    setCurrentUserEditingNotes(prev => new Set(Array.from(prev).concat(noteId)))
 
     // Broadcast presence
     await channel.send({
@@ -224,7 +224,7 @@ export function useRealtimeNotes({
     if (!user) return
 
     // Unlock the note in the database
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('notes')
       .update({
         is_locked: false,
@@ -282,7 +282,7 @@ export function useRealtimeNotes({
         updateData.is_private = isPrivate
       }
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('notes')
         .update(updateData)
         .eq('id', noteId)
@@ -315,7 +315,7 @@ export function useRealtimeNotes({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('notes')
         .insert({
           title: noteData.title || 'Neue Notiz',
@@ -397,7 +397,7 @@ export function useRealtimeNotes({
         if (!user) return
 
         // Unlock all notes that current user was editing
-        await supabase
+        await (supabase as any)
           .from('notes')
           .update({
             is_locked: false,

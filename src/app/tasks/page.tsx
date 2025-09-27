@@ -93,8 +93,20 @@ export default function TasksPage() {
       }
 
       // Transform tasks data to match our interface
-      const transformedTasks: Task[] = (tasksResponse.data || []).map(task => ({
-        ...task,
+      const transformedTasks: Task[] = (tasksResponse.data || []).map((task: any) => ({
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        priority: task.priority,
+        due_date: task.due_date,
+        department_id: task.department_id,
+        assigned_to: task.assigned_to,
+        created_by: task.created_by,
+        is_private: task.is_private,
+        created_at: task.created_at,
+        updated_at: task.updated_at,
+        department: task.department,
         tags: task.tags?.map((tt: any) => tt.tag) || []
       }))
 
@@ -112,7 +124,7 @@ export default function TasksPage() {
   const handleTaskUpdate = async (updatedTask: Task) => {
     try {
       // Update task basic properties
-      const { error: taskError } = await supabase
+      const { error: taskError } = await (supabase as any)
         .from('tasks')
         .update({
           title: updatedTask.title,
@@ -145,7 +157,7 @@ export default function TasksPage() {
             tag_id: tag.id
           }))
 
-          const { error: insertError } = await supabase
+          const { error: insertError } = await (supabase as any)
             .from('task_tag_assignments')
             .insert(tagAssignments)
 
@@ -162,7 +174,7 @@ export default function TasksPage() {
 
   const handleTaskStatusChange = async (taskId: string, newStatus: Task['status']) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('tasks')
         .update({ status: newStatus })
         .eq('id', taskId)
@@ -185,7 +197,7 @@ export default function TasksPage() {
       if (!user) throw new Error('User not authenticated')
 
       // Create the task with assignee
-      const { data: createdTask, error: taskError } = await supabase
+      const { data: createdTask, error: taskError } = await (supabase as any)
         .from('tasks')
         .insert({
           title: newTaskData.title,
@@ -210,7 +222,7 @@ export default function TasksPage() {
           tag_id: tag.id
         }))
 
-        const { error: tagError } = await supabase
+        const { error: tagError } = await (supabase as any)
           .from('task_tag_assignments')
           .insert(tagAssignments)
 

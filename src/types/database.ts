@@ -219,6 +219,7 @@ export interface Database {
           department_id: string | null
           assigned_to: string | null
           created_by: string | null
+          is_private: boolean
           created_at: string
           updated_at: string
         }
@@ -232,6 +233,7 @@ export interface Database {
           department_id?: string | null
           assigned_to?: string | null
           created_by?: string | null
+          is_private?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -245,6 +247,7 @@ export interface Database {
           department_id?: string | null
           assigned_to?: string | null
           created_by?: string | null
+          is_private?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -294,6 +297,7 @@ export interface Database {
           locked_at: string | null
           department_id: string | null
           created_by: string | null
+          is_private: boolean
           created_at: string
           updated_at: string
         }
@@ -307,6 +311,7 @@ export interface Database {
           locked_at?: string | null
           department_id?: string | null
           created_by?: string | null
+          is_private?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -320,6 +325,7 @@ export interface Database {
           locked_at?: string | null
           department_id?: string | null
           created_by?: string | null
+          is_private?: boolean
           created_at?: string
           updated_at?: string
         }

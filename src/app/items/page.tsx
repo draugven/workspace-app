@@ -119,8 +119,22 @@ export default function ItemsPage() {
       if (error) throw error
 
       // Transform the data to match our Item interface
-      const transformedItems: Item[] = (data || []).map(item => ({
-        ...item,
+      const transformedItems: Item[] = (data || []).map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        type: item.type,
+        scene: item.scene,
+        status: item.status,
+        is_consumable: item.is_consumable,
+        needs_clarification: item.needs_clarification,
+        needed_for_rehearsal: item.needed_for_rehearsal,
+        source: item.source,
+        notes: item.notes,
+        category_id: item.category_id,
+        created_by: item.created_by,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        category: item.category,
         characters: item.characters?.map((ic: any) => ic.character) || [],
         files: item.files || []
       }))
@@ -133,14 +147,23 @@ export default function ItemsPage() {
     }
   }
 
-  const handleCreateItem = async (itemData: Partial<Item>) => {
+  const handleCreateItem = async (itemData: Partial<Item> & { character_ids?: string[] }) => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
 
-      const { data: newItem, error } = await supabase
+      const { data: newItem, error } = await (supabase as any)
         .from('items')
         .insert({
-          ...itemData,
+          name: itemData.name!,
+          type: itemData.type!,
+          scene: itemData.scene,
+          status: itemData.status || 'klären',
+          is_consumable: itemData.is_consumable || false,
+          needs_clarification: itemData.needs_clarification || false,
+          needed_for_rehearsal: itemData.needed_for_rehearsal || false,
+          source: itemData.source,
+          notes: itemData.notes,
+          category_id: itemData.category_id,
           created_by: user?.id
         })
         .select()
@@ -155,7 +178,7 @@ export default function ItemsPage() {
           character_id: charId
         }))
 
-        await supabase
+        await (supabase as any)
           .from('item_characters')
           .insert(characterLinks)
       }
@@ -167,11 +190,11 @@ export default function ItemsPage() {
     }
   }
 
-  const handleEditItem = async (itemData: Partial<Item>) => {
+  const handleEditItem = async (itemData: Partial<Item> & { character_ids?: string[] }) => {
     if (!editingItem) return
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('items')
         .update(itemData)
         .eq('id', editingItem.id)
@@ -193,7 +216,7 @@ export default function ItemsPage() {
             character_id: charId
           }))
 
-          await supabase
+          await (supabase as any)
             .from('item_characters')
             .insert(characterLinks)
         }

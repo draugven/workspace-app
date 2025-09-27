@@ -160,8 +160,8 @@ export function TaskEditDialog({
                   const department = departments.find(d => d.id === value)
                   setEditedTask({
                     ...editedTask,
-                    department_id: value === 'none' ? null : value,
-                    department: value === 'none' ? null : department || null
+                    department_id: value === 'none' ? undefined : value,
+                    department: value === 'none' ? undefined : department || undefined
                   })
                 }}
                 placeholder="Abteilung wählen..."
@@ -176,7 +176,7 @@ export function TaskEditDialog({
                 id="due_date"
                 type="date"
                 value={editedTask.due_date || ''}
-                onChange={(e) => setEditedTask({ ...editedTask, due_date: e.target.value || null })}
+                onChange={(e) => setEditedTask({ ...editedTask, due_date: e.target.value || undefined })}
               />
             </div>
           </div>
@@ -190,7 +190,7 @@ export function TaskEditDialog({
                 ...users.map(user => ({ value: user.id, label: `${user.full_name} (${user.email})` }))
               ]}
               value={editedTask.assigned_to || 'none'}
-              onValueChange={(value) => setEditedTask({ ...editedTask, assigned_to: value === 'none' ? null : value })}
+              onValueChange={(value) => setEditedTask({ ...editedTask, assigned_to: value === 'none' ? undefined : value })}
               placeholder="Person zuweisen..."
               searchPlaceholder="Person suchen..."
               emptyText="Keine Person gefunden."

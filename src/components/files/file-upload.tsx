@@ -69,7 +69,7 @@ export function FileUpload({
       const { data: { user } } = await supabase.auth.getUser()
 
       // Save file record to database
-      const { data: fileRecord, error: dbError } = await supabase
+      const { data: fileRecord, error: dbError } = await (supabase as any)
         .from('item_files')
         .insert({
           item_id: itemId,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Sheet,
   SheetContent,
@@ -38,12 +38,6 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit }: ItemDetailDraw
   const [files, setFiles] = useState<ItemFile[]>([])
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    if (item && open) {
-      loadFiles()
-    }
-  }, [item, open, loadFiles])
-
   const loadFiles = useCallback(async () => {
     if (!item) return
 
@@ -63,6 +57,12 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit }: ItemDetailDraw
       setLoading(false)
     }
   }, [item])
+
+  useEffect(() => {
+    if (item && open) {
+      loadFiles()
+    }
+  }, [item, open, loadFiles])
 
   const handleFileUploaded = (newFile: ItemFile) => {
     setFiles(prev => [newFile, ...prev])

@@ -68,7 +68,7 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
         is_consumable: editingItem.is_consumable,
         needs_clarification: editingItem.needs_clarification,
         needed_for_rehearsal: editingItem.needed_for_rehearsal,
-        source: editingItem.source || 'none',
+        source: editingItem.source,
         notes: editingItem.notes || '',
         category_id: editingItem.category_id || 'none',
         character_ids: editingItem.characters?.map(c => c.id) || []
@@ -83,7 +83,7 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
         is_consumable: false,
         needs_clarification: false,
         needed_for_rehearsal: false,
-        source: 'none',
+        source: undefined,
         notes: '',
         category_id: 'none',
         character_ids: []
@@ -127,7 +127,7 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
         name: formData.name.trim(),
         scene: formData.scene.trim() || undefined,
         notes: formData.notes.trim() || undefined,
-        source: formData.source === 'none' ? undefined : formData.source,
+        source: formData.source,
         category_id: formData.category_id === 'none' ? undefined : formData.category_id,
         character_ids: formData.character_ids
       }

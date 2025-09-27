@@ -89,12 +89,12 @@ export function TaskAddDialog({
     // Convert to the format expected by parent component
     const taskToSave: Partial<Task> = {
       title: newTask.title.trim(),
-      description: newTask.description.trim() || null,
+      description: newTask.description.trim() || undefined,
       status: newTask.status,
       priority: newTask.priority,
-      department_id: newTask.department_id === 'none' ? null : newTask.department_id,
-      assigned_to: newTask.assigned_to === 'none' ? null : newTask.assigned_to,
-      due_date: newTask.due_date,
+      department_id: newTask.department_id === 'none' ? undefined : newTask.department_id,
+      assigned_to: newTask.assigned_to === 'none' ? undefined : newTask.assigned_to,
+      due_date: newTask.due_date || undefined,
       is_private: newTask.is_private,
       tags: newTask.tags.map(tagId => tags.find(t => t.id === tagId)).filter(Boolean) as TaskTag[]
     }

@@ -38,7 +38,7 @@ export function NoteCard({
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(note.content || '')
   const [editTitle, setEditTitle] = useState(note.title)
-  const [editDepartmentId, setEditDepartmentId] = useState<string | null>(note.department_id)
+  const [editDepartmentId, setEditDepartmentId] = useState<string | null>(note.department_id || null)
   const [editIsPrivate, setEditIsPrivate] = useState(note.is_private || false)
 
   const isLocked = note.is_locked && note.locked_by !== currentUser?.id
@@ -66,7 +66,7 @@ export function NoteCard({
   const handleCancel = async () => {
     setEditContent(note.content || '')
     setEditTitle(note.title)
-    setEditDepartmentId(note.department_id)
+    setEditDepartmentId(note.department_id || null)
     setEditIsPrivate(note.is_private || false)
     if (onLock && lockedByCurrentUser) {
       await onLock(note.id, false) // Unlock on cancel

@@ -42,8 +42,8 @@ export function TasksTable({
   const priorityOrder = { 'urgent': 4, 'high': 3, 'medium': 2, 'low': 1 }
 
   const sortedTasks = [...tasks].sort((a, b) => {
-    let aVal = a[sortField] || ''
-    let bVal = b[sortField] || ''
+    let aVal: any = a[sortField] || ''
+    let bVal: any = b[sortField] || ''
 
     // Special handling for priority sorting
     if (sortField === 'priority') {
