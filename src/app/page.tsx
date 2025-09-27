@@ -11,53 +11,53 @@ export default function HomePage() {
       <main className="container mx-auto py-10">
         <div className="flex flex-col items-center justify-center space-y-4">
           <h1 className="text-4xl font-bold tracking-tight">
-            Theater Production Dashboard
+            Theater Produktions Dashboard
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl text-center">
-            Collaboration tool for theater productions - manage requisiten, tasks, and notes.
+            Kollaborations-Tool für Theaterproduktionen - verwalte Requisiten, Aufgaben und Notizen.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 w-full max-w-4xl">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Requisiten</CardTitle>
                 <CardDescription>
-                  Track items with customizable properties, status, and character assignments.
+                  Verwalte Gegenstände mit anpassbaren Eigenschaften, Status und Charakterzuordnungen.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Link href="/items">
                   <Button variant="outline" className="w-full">
-                    Manage Items
+                    Requisiten verwalten
                   </Button>
                 </Link>
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Task Management</CardTitle>
+                <CardTitle className="text-lg">Aufgabenverwaltung</CardTitle>
                 <CardDescription>
-                  Organize tasks by department with multi-status workflow.
+                  Organisiere Aufgaben nach Abteilungen mit mehrstufigem Workflow.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Link href="/tasks">
                   <Button variant="outline" className="w-full">
-                    View Tasks
+                    Aufgaben anzeigen
                   </Button>
                 </Link>
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Collaborative Notes</CardTitle>
+                <CardTitle className="text-lg">Kollaborative Notizen</CardTitle>
                 <CardDescription>
-                  Rich text editing with conflict warnings and version history.
+                  Rich-Text-Bearbeitung mit Konfliktwarnung und Versionsverlauf.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Link href="/notes">
                   <Button variant="outline" className="w-full">
-                    Open Notes
+                    Notizen öffnen
                   </Button>
                 </Link>
               </CardContent>

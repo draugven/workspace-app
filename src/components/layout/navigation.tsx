@@ -7,8 +7,8 @@ import { supabase } from '@/lib/supabase'
 
 const navItems = [
   { name: 'Requisiten', href: '/items' },
-  { name: 'Tasks', href: '/tasks' },
-  { name: 'Notes', href: '/notes' },
+  { name: 'Aufgaben', href: '/tasks' },
+  { name: 'Notizen', href: '/notes' },
 ]
 
 import { useAuth } from '../auth/auth-provider'
@@ -52,7 +52,7 @@ export function Navigation() {
                 {user.email}
               </span>
               <Button variant="outline" size="sm" onClick={handleSignOut}>
-                Sign Out
+                Abmelden
               </Button>
             </div>
           )}
