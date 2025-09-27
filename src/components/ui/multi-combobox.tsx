@@ -107,7 +107,7 @@ export function MultiCombobox({
               className="border-0 bg-transparent p-2 placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
-          <div className="max-h-60 overflow-auto p-1">
+          <div className="max-h-60 overflow-y-auto p-1">
             {filteredOptions.length === 0 ? (
               <div className="py-6 text-center text-sm text-muted-foreground">
                 {emptyText}

@@ -121,7 +121,8 @@ export default function TasksPage() {
           priority: updatedTask.priority,
           due_date: updatedTask.due_date,
           department_id: updatedTask.department_id,
-          assigned_to: updatedTask.assigned_to
+          assigned_to: updatedTask.assigned_to,
+          is_private: updatedTask.is_private
         })
         .eq('id', updatedTask.id)
 
@@ -194,7 +195,8 @@ export default function TasksPage() {
           department_id: newTaskData.department_id,
           due_date: newTaskData.due_date,
           created_by: user.id,
-          assigned_to: newTaskData.assigned_to
+          assigned_to: newTaskData.assigned_to,
+          is_private: newTaskData.is_private || false
         })
         .select()
         .single()
