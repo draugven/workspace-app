@@ -202,17 +202,19 @@ export function NoteCard({
               />
             </div>
 
-            {/* Privacy Toggle */}
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="is_private"
-                checked={editIsPrivate}
-                onCheckedChange={setEditIsPrivate}
-              />
-              <Label htmlFor="is_private" className="text-sm">
-                Privat (nur für mich sichtbar)
-              </Label>
-            </div>
+            {/* Privacy Toggle - only show to creator */}
+            {currentUser && note.created_by === currentUser.id && (
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="is_private"
+                  checked={editIsPrivate}
+                  onCheckedChange={setEditIsPrivate}
+                />
+                <Label htmlFor="is_private" className="text-sm">
+                  Privat (nur für mich sichtbar)
+                </Label>
+              </div>
+            )}
 
             <TiptapEditorWrapper
               content={editContent}

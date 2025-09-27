@@ -23,6 +23,7 @@ interface TaskEditDialogProps {
   departments: Department[]
   tags: TaskTag[]
   users?: User[]
+  currentUser?: User | null
 }
 
 export function TaskEditDialog({
@@ -32,7 +33,8 @@ export function TaskEditDialog({
   onSave,
   departments,
   tags,
-  users = []
+  users = [],
+  currentUser
 }: TaskEditDialogProps) {
   const [editedTask, setEditedTask] = useState<Task | null>(null)
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
@@ -252,19 +254,21 @@ export function TaskEditDialog({
             )}
           </div>
 
-          {/* Privacy Toggle */}
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="is_private"
-              checked={editedTask.is_private || false}
-              onCheckedChange={(checked) =>
-                setEditedTask(prev => ({ ...prev!, is_private: checked }))
-              }
-            />
-            <Label htmlFor="is_private" className="text-sm">
-              Privat (nur für mich sichtbar)
-            </Label>
-          </div>
+          {/* Privacy Toggle - only show to creator */}
+          {currentUser && editedTask.created_by === currentUser.id && (
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="is_private"
+                checked={editedTask.is_private || false}
+                onCheckedChange={(checked) =>
+                  setEditedTask(prev => ({ ...prev!, is_private: checked }))
+                }
+              />
+              <Label htmlFor="is_private" className="text-sm">
+                Privat (nur für mich sichtbar)
+              </Label>
+            </div>
+          )}
         </div>
 
         <DialogFooter>

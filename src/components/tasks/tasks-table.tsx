@@ -23,6 +23,7 @@ interface TasksTableProps {
   departments?: Department[]
   tags?: TaskTag[]
   users?: User[]
+  currentUser?: User | null
 }
 
 export function TasksTable({
@@ -30,7 +31,8 @@ export function TasksTable({
   onTaskUpdate,
   departments = [],
   tags = [],
-  users = []
+  users = [],
+  currentUser
 }: TasksTableProps) {
   const [sortField, setSortField] = useState<keyof Task>('priority')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
@@ -245,6 +247,7 @@ export function TasksTable({
         departments={departments}
         tags={tags}
         users={users}
+        currentUser={currentUser}
       />
     </div>
   )

@@ -201,9 +201,9 @@ export default function NotesPage() {
     return matchesSearch && matchesDepartment
   })
 
-  const handleSaveNote = async (noteId: string, content: string, title?: string, departmentId?: string | null) => {
+  const handleSaveNote = async (noteId: string, content: string, title?: string, departmentId?: string | null, isPrivate?: boolean) => {
     try {
-      await saveNote(noteId, content, title, departmentId)
+      await saveNote(noteId, content, title, departmentId, isPrivate)
       await stopEditing(noteId)
     } catch (error) {
       console.error('Failed to save note:', error)

@@ -34,6 +34,7 @@ export default function TasksPage() {
   const [departments, setDepartments] = useState<Department[]>([])
   const [tags, setTags] = useState<TaskTag[]>([])
   const [users, setUsers] = useState<User[]>([])
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [addDialogOpen, setAddDialogOpen] = useState(false)
@@ -86,6 +87,9 @@ export default function TasksPage() {
         setUsers([])
       } else {
         setUsers(usersResponse)
+        // Find current user in the users list
+        const currentUserData = usersResponse.find((u: User) => u.id === user.id)
+        setCurrentUser(currentUserData || null)
       }
 
       // Transform tasks data to match our interface
@@ -723,6 +727,7 @@ export default function TasksPage() {
                       departments={departments}
                       tags={tags}
                       users={users}
+                      currentUser={currentUser}
                     />
                   </div>
                 ) : (
@@ -739,6 +744,7 @@ export default function TasksPage() {
                       departments={departments}
                       tags={tags}
                       users={users}
+                      currentUser={currentUser}
                     />
                   </div>
                 )}

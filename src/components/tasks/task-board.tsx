@@ -44,6 +44,7 @@ interface TaskBoardProps {
   departments?: Department[]
   tags?: TaskTag[]
   users?: User[]
+  currentUser?: User | null
 }
 
 const statusColumns = [
@@ -232,7 +233,8 @@ export function TaskBoard({
   onTaskUpdate,
   departments = [],
   tags = [],
-  users = []
+  users = [],
+  currentUser
 }: TaskBoardProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
@@ -348,6 +350,7 @@ export function TaskBoard({
         departments={departments}
         tags={tags}
         users={users}
+        currentUser={currentUser}
       />
     </>
   )
