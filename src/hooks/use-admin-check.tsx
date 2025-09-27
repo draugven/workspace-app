@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { isUserAdmin } from '@/lib/auth-utils'
 import { useAuth } from '@/components/auth/auth-provider'
 
 export function useAdminCheck() {
@@ -18,23 +18,8 @@ export function useAdminCheck() {
       }
 
       try {
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .single()
-
-        if (error) {
-          // If no role exists, user is not admin
-          if (error.code === 'PGRST116') {
-            setIsAdmin(false)
-          } else {
-            console.error('Error checking admin status:', error)
-            setIsAdmin(false)
-          }
-        } else {
-          setIsAdmin(data.role === 'admin')
-        }
+        const adminStatus = await isUserAdmin(user.id)
+        setIsAdmin(adminStatus)
       } catch (error) {
         console.error('Error checking admin status:', error)
         setIsAdmin(false)

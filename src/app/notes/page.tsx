@@ -150,6 +150,7 @@ export default function NotesPage() {
     loading,
     error,
     activeEditors,
+    loadNotes,
     saveNote,
     createNote,
     startEditing,
@@ -232,15 +233,32 @@ export default function NotesPage() {
 
   const handleDeleteNote = async (noteId: string) => {
     try {
-      const { error } = await supabase
-        .from('notes')
-        .delete()
-        .eq('id', noteId)
+      // Get the current session token
+      const { data: { session } } = await supabase.auth.getSession()
 
-      if (error) {
+      if (!session) {
+        alert('Nicht authentifiziert')
+        return
+      }
+
+      const response = await fetch(`/api/admin/notes/${noteId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
         console.error('Failed to delete note:', error)
         alert('Fehler beim Löschen der Notiz')
+        return
       }
+
+      // Reload notes to reflect the deletion
+      // This ensures the UI updates even if real-time subscription doesn't catch it
+      await loadNotes()
     } catch (error) {
       console.error('Failed to delete note:', error)
       alert('Fehler beim Löschen der Notiz')

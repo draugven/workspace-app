@@ -54,7 +54,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - Semantic HTML elements
 
 ## Version Management
-**Current Version**: `0.4.0`
+**Current Version**: `0.5.0`
 
 Follow semantic versioning (SemVer) when creating commits and updating package.json version:
 
@@ -91,6 +91,9 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - `notes/page.tsx` - Collaborative notes
 - `login/page.tsx` - Authentication
 - `api/users/route.ts` - Users API endpoint (secure auth.users fetching)
+- `api/admin/items/[id]/route.ts` - Admin-only item deletion endpoint
+- `api/admin/tasks/[id]/route.ts` - Admin-only task deletion endpoint
+- `api/admin/notes/[id]/route.ts` - Admin-only note deletion endpoint
 
 ### Components (`src/components/`)
 - `auth/` - Authentication (AuthProvider, LoginForm, ProtectedRoute)
@@ -103,12 +106,14 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 
 ### Core Services (`src/`)
 - `lib/supabase.ts` - Supabase client configuration
+- `lib/auth-utils.ts` - Server-side admin utilities and role checking
 - `lib/utils.ts` - Utility functions
+- `hooks/use-admin-check.tsx` - Client-side admin role checking hook
 - `hooks/use-realtime-notes.tsx` - Real-time notes hook
 - `types/` - TypeScript definitions (database.ts, index.ts)
 
 ### Database & Scripts
-- `scripts/database-setup/` - Schema and setup (database-schema.sql, database-setup-complete.sql, supabase-storage-setup.sql, current-database-schema.sql)
+- `scripts/database-setup/` - Schema and setup (database-schema.sql, database-setup-complete.sql, supabase-storage-setup.sql, current-database-schema.sql, disable-rls-simplify.sql, assign-admin-role.sql, setup-default-user-roles.sql, SETUP-SIMPLIFIED-ADMIN.md)
 - `scripts/data-import/` - Active data utilities (populate-task-tags.sql, cleanup-tasks.sql)
 - `scripts/archive/` - Archived/obsolete scripts (cleanup-migration.sql, update-departments.sql, legacy-seed-data/)
 - `scripts/` - Processing utilities (parse-todos.js, parse-csv-data.js, run-import.mjs)
@@ -120,6 +125,7 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - **Real-time cleanup**: Avoid `channel.off()` - Supabase channels don't support it
 - **Database schema changes**: When adding/removing table columns, ALWAYS update both database schema AND TypeScript types in `src/types/database.ts`
 - **Supabase typing workaround**: Use `(supabase as any)` for insert/update operations when TypeScript inference fails (temporary solution until better typing)
+- **Admin system architecture**: App-level security without RLS complexity. Client-side admin checks for UI, server-side validation in API routes using Authorization headers, simple database tables without RLS policies for single-app use cases
 
 ## TODO Backlog
 
@@ -145,7 +151,7 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 17. ~~**German localization** - Translate navigation bar items and dashboard text to German~~ ✅ **COMPLETED**
 18. ~~**Improve sign up functionality** - Add display name to the sign in form and persist it to DB. Currently auth.users populates "Display name" property automatically by taking everything in the email before "@". Would be nice to be able to add a custom display name. Also if user is not logged in, display log in mask by default instead of sign up mask~~ ✅ **COMPLETED**
 19. **Add task ranking within priority** - Add possibility to rank tasks within one priority. Currently they are ordered by created_at DESC by default. Would be cool to be able to drag and drop them within one column in Kanban view to change rank within one status and priority, and in the table within a priority and status
-20. **Real-time data synchronization** - Implement automatic polling/refresh mechanism on Requisiten, Tasks, and Notes pages to display latest updates from other users without requiring manual page refresh. Currently only Notes has real-time updates via Supabase subscriptions
+20. **Real-time data synchronization** - Fix WebSocket connection issues preventing real-time updates across all pages. Currently Notes has broken WebSocket subscriptions (connection closes before establishing), and Tasks/Items have no real-time updates. Users don't see changes made by others without manual refresh. Investigate Supabase real-time configuration and implement proper multi-user collaboration
 21. ~~**German localization for authentication** - Translate sign in/sign up forms to German (currently in English). Update field labels, buttons, messages, and placeholder text to match the German localization used throughout the rest of the application~~ ✅ **COMPLETED**
 22. **Database RLS policy review** - Review and implement comprehensive Row Level Security (RLS) policies for all database tables (items, tasks, notes, etc.) to ensure proper data access control and security. Currently only user_roles table has RLS enabled
 

@@ -174,12 +174,24 @@ export default function TasksPage() {
 
   const handleTaskDelete = async (taskId: string) => {
     try {
-      const { error } = await supabase
-        .from('tasks')
-        .delete()
-        .eq('id', taskId)
+      // Get the current session token
+      const { data: { session } } = await supabase.auth.getSession()
 
-      if (error) {
+      if (!session) {
+        alert('Nicht authentifiziert')
+        return
+      }
+
+      const response = await fetch(`/api/admin/tasks/${taskId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
         console.error('Failed to delete task:', error)
         alert('Fehler beim Löschen der Aufgabe')
         return

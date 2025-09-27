@@ -245,17 +245,33 @@ export default function ItemsPage() {
 
   const handleDeleteItem = async (itemId: string) => {
     try {
-      const { error } = await supabase
-        .from('items')
-        .delete()
-        .eq('id', itemId)
+      // Get the current session token
+      const { data: { session } } = await supabase.auth.getSession()
 
-      if (error) throw error
+      if (!session) {
+        alert('Nicht authentifiziert')
+        return
+      }
+
+      const response = await fetch(`/api/admin/items/${itemId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        console.error('Failed to delete item:', error)
+        alert('Fehler beim Löschen des Items')
+        return
+      }
 
       await loadItems() // Reload items after deletion
     } catch (error) {
       console.error('Failed to delete item:', error)
-      throw error
+      alert('Fehler beim Löschen des Items')
     }
   }
 
