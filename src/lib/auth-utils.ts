@@ -115,7 +115,7 @@ export async function ensureUserRole(userId: string): Promise<UserRole> {
 
   if (!userRole) {
     // Create default "user" role
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('user_roles')
       .insert({
         user_id: userId,
@@ -124,12 +124,16 @@ export async function ensureUserRole(userId: string): Promise<UserRole> {
       .select()
       .single()
 
-    if (error) {
+    if (error || !data) {
       console.error('Error creating user role:', error)
       throw new Error('Failed to create user role')
     }
 
     userRole = data
+  }
+
+  if (!userRole) {
+    throw new Error('Failed to ensure user role')
   }
 
   return userRole

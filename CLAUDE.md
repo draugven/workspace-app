@@ -32,19 +32,17 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ## Implementation Status
 
-### ✅ Completed Features
-- **Authentication**: Supabase Auth with protected routes
-- **Requisiten**: Complete CRUD with file uploads
-- **Task Management**: Interactive Kanban + table with drag-and-drop, assignees, search, department colors
-- **Collaborative Notes**: Real-time Tiptap editor with SSR fixes and lock cleanup
-- **Database**: Clean schema using Supabase Auth users
-- **UI/UX**: Compact design, searchable comboboxes, collapsible filters
+### ✅ Core System Complete
+- **Authentication**: Supabase Auth with protected routes and admin role system
+- **Requisiten Management**: Full CRUD with file uploads, search, and filtering
+- **Task Management**: Kanban + table views with drag-and-drop, assignees, rich text descriptions
+- **Collaborative Notes**: Rich text editor with hyperlink support and department assignment
+- **Admin System**: App-level security with delete permissions (no RLS complexity)
+- **UI/UX**: German localization, compact design, mobile-responsive
 
-### 🏗️ Architecture
-- German localization throughout
-- Mobile-responsive design
-- Dynamic imports for SSR-sensitive components (Tiptap)
-- Real-time subscriptions with proper cleanup
+### ⚠️ Known Issues
+- **Real-time Updates**: WebSocket connections fail, requiring manual refresh after changes
+- **Mobile Optimization**: Needs improvement across all views
 
 ## Technical Preferences
 - kebab-case component names (my-component.tsx)
@@ -52,6 +50,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - Minimize client components ('use client')
 - Always add loading/error states
 - Semantic HTML elements
+- **ALWAYS run `npm run lint` and `npm run typecheck` after implementing large functionality or refactoring**
 
 ## Version Management
 **Current Version**: `0.5.0`
@@ -64,11 +63,9 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - **PATCH** version when you make backward compatible bug fixes
 
 **Version Update Guidelines**:
-- **CRITICAL**: ALWAYS bump version FIRST before creating any commits with significant changes
-- Update `package.json` version number according to SemVer before committing
-- Update the "Current Version" in this CLAUDE.md file to match package.json
-- Use conventional commit messages with version context (feat:, fix:, BREAKING CHANGE:)
-- **Workflow**: 1) Implement changes → 2) Bump version → 3) Create commit
+- Follow SemVer: MAJOR.MINOR.PATCH for breaking/feature/fix changes
+- Update both `package.json` and CLAUDE.md version before committing
+- Use conventional commit messages (feat:, fix:, BREAKING CHANGE:)
 
 ## General Preferences
 - Follow requirements to the letter
@@ -125,99 +122,52 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - **Real-time cleanup**: Avoid `channel.off()` - Supabase channels don't support it
 - **Database schema changes**: When adding/removing table columns, ALWAYS update both database schema AND TypeScript types in `src/types/database.ts`
 - **Supabase typing workaround**: Use `(supabase as any)` for insert/update operations when TypeScript inference fails (temporary solution until better typing)
-- **Admin system architecture**: App-level security without RLS complexity. Client-side admin checks for UI, server-side validation in API routes using Authorization headers, simple database tables without RLS policies for single-app use cases
+- **Admin system architecture**: App-level security without RLS complexity. Client-side admin checks for UI, server-side validation in API routes using Authorization headers. No RLS policies needed for single-app use cases
+- **Real-time issues**: WebSocket connections close before establishing. Use manual refresh after data changes until resolved
 
 ## TODO Backlog
 
-### Active Tasks
-1. **Archive legacy scripts** - Review and archive remaining obsolete data import/processing scripts
-2. **Offline capabilities strategy** - Research and plan options for offline data access
+### High Priority
+1. **Real-time data synchronization** - Fix WebSocket connection issues preventing real-time updates. Critical for multi-user collaboration
+2. **Task ranking within priority** - Add drag-and-drop ranking within status/priority columns for better task organization
+3. **Mobile UI optimization** - Improve responsiveness across all views for mobile devices
 
-### New Feature Requests
-3. ~~**Private content functionality** - Add privacy toggle for notes and tasks (creator-only visibility) in add/edit dialogs~~ ✅ **COMPLETED**
-4. ~~**Department assignment for notes** - Add department selection to note edit dialog~~ ✅ **COMPLETED**
-5. ~~**Rename Items to Requisiten** - Change "Props" terminology to "Requisiten" throughout (Kostüme will be separate later)~~ ✅ **COMPLETED**
-6. ~~**Remove Dashboard nav item** - Remove redundant navigation since logo already links to dashboard~~ ✅ **COMPLETED**
-7. **Typography and styling updates** - General design improvements (requires input on preferences)
-8. **Dark theme implementation** - Add dark mode support (requires input on design approach)
-9. ~~**Admin role and deletion** - Implement admin role with delete permissions for notes, tasks, and items~~ ✅ **COMPLETED**
-10. **Done task management** - Strategy for completed tasks (hide after X days, archive, etc.)
-11. **Mobile UI optimization** - Improve mobile responsiveness across all views
-12. **Note versioning review** - Investigate current note version saving and potential usage
-13. ~~**Rich text link support** - Add hyperlink functionality to note editor~~ ✅ **COMPLETED**
-14. ~~**Task description rich text** - Replace plain text task descriptions with rich text editor~~ ✅ **COMPLETED**
-15. **Branding updates** - Replace logo and add custom favicon
-16. **Deployment setup** - Prepare and deploy application
-17. ~~**German localization** - Translate navigation bar items and dashboard text to German~~ ✅ **COMPLETED**
-18. ~~**Improve sign up functionality** - Add display name to the sign in form and persist it to DB. Currently auth.users populates "Display name" property automatically by taking everything in the email before "@". Would be nice to be able to add a custom display name. Also if user is not logged in, display log in mask by default instead of sign up mask~~ ✅ **COMPLETED**
-19. **Add task ranking within priority** - Add possibility to rank tasks within one priority. Currently they are ordered by created_at DESC by default. Would be cool to be able to drag and drop them within one column in Kanban view to change rank within one status and priority, and in the table within a priority and status
-20. **Real-time data synchronization** - Fix WebSocket connection issues preventing real-time updates across all pages. Currently Notes has broken WebSocket subscriptions (connection closes before establishing), and Tasks/Items have no real-time updates. Users don't see changes made by others without manual refresh. Investigate Supabase real-time configuration and implement proper multi-user collaboration
-21. ~~**German localization for authentication** - Translate sign in/sign up forms to German (currently in English). Update field labels, buttons, messages, and placeholder text to match the German localization used throughout the rest of the application~~ ✅ **COMPLETED**
-22. **Database RLS policy review** - Review and implement comprehensive Row Level Security (RLS) policies for all database tables (items, tasks, notes, etc.) to ensure proper data access control and security. Currently only user_roles table has RLS enabled
+### Medium Priority
+4. **Done task management** - Strategy for completed tasks (archive, hide after X days, etc.)
+5. **Typography and styling updates** - General design improvements
+6. **Dark theme implementation** - Add dark mode support
+7. **Branding updates** - Replace logo and add custom favicon
+8. **Deployment setup** - Prepare and deploy application
 
-## Recent Development History
+### Low Priority
+9. **Archive legacy scripts** - Clean up obsolete data import/processing scripts
+10. **Note versioning review** - Investigate current note version saving potential
+11. **Offline capabilities strategy** - Research offline data access options
 
-### Major Features Completed
-- **Assignee System**: Full user assignment functionality with auth.users integration
-- **Search & Filters**: Comprehensive text search and searchable comboboxes
-- **UI Optimization**: Compact design with collapsible filters and department color coding
-- **Database Cleanup**: Archived obsolete scripts, fixed lock mechanisms
-- **Navigation Cleanup**: Removed redundant Dashboard navigation item (logo already navigates home)
-- **Note Department Assignment**: Added department selection to note editing with real-time updates
-- **Terminology Update**: Changed "Props" to "Requisiten" throughout application for German terminology consistency
-- **German Localization**: Translated navigation and dashboard to German (Tasks→Aufgaben, Notes→Notizen, etc.)
+## Recent Major Changes
 
-## 22:14 27.01.2025 – Compact Session
+### v0.5.0 - Simplified Admin System (Sept 2024)
+- **BREAKING CHANGE**: Removed RLS policies in favor of app-level security
+- Implemented admin delete functionality for all entity types
+- Added Authorization header authentication for API routes
 
-### CurrentFocus
-Implemented private content functionality with creator-only privacy toggles and resolved UI/UX issues in task dialogs.
+### v0.2.0 - Rich Text & Versioning (Sept 2024)
+- Added Tiptap rich text editor with hyperlink support for notes and tasks
+- Implemented semantic versioning workflow and deployment tracking
+- Added privacy toggles for creator-only content visibility
 
-### SessionChanges
-- Added `is_private` boolean fields to tasks/notes database schema with migration script
-- Updated TypeScript interfaces to include `is_private` for Task and Note types
-- Implemented privacy toggles in task-add-dialog and task-edit-dialog components
-- Added privacy indicator badges (EyeOff icon) to task cards, table rows, and note cards
-- Implemented privacy filtering in data queries to show private content only to creators
-- Enhanced real-time notes functionality to handle privacy field changes
-- Restricted privacy toggle visibility to content creators only (currentUser checks)
-- Added currentUser prop propagation through TaskBoard, TasksTable, and parent components
-- Created database population script to assign existing tasks/notes to authenticated user
-- Fixed note privacy saving by updating handleSaveNote parameter signature
-- Created MultiCombobox component for compact tag selection with search and color coding
-- Replaced large scrollable checkbox lists with compact dropdown tag selection
-- Fixed MultiCombobox scrolling with overflow-y-auto for proper dropdown navigation
-- Fixed task privacy persistence by adding is_private to handleTaskCreate and handleTaskUpdate
+## Development Sessions
 
-## 12:19 27.09.2025 – Compact Session
+### Sept 2024 - Admin System Overhaul
+**Key Achievement**: Replaced complex RLS with simplified app-level admin security
+- Resolved infinite recursion in authentication policies
+- Created admin-only API routes with Authorization header validation
+- Added admin delete functionality with confirmation dialogs across all entities
+- Fixed authentication consistency and implemented manual refresh workarounds
 
-### CurrentFocus
-Resolved comprehensive TypeScript build errors and linting issues preventing production deployment.
-
-### SessionChanges
-- Fixed all ESLint warnings in file-upload.tsx, item-detail-drawer.tsx, and note-card.tsx
-- Updated database types to include missing is_private fields for tasks and notes
-- Resolved Supabase type inference issues with explicit type assertions
-- Fixed spread operator errors by replacing with explicit property mapping
-- Corrected null/undefined type mismatches throughout components and hooks
-- Added character_ids property to function parameter types for item operations
-- Fixed React Hook dependency arrays and function declaration ordering
-- Resolved Set iteration compatibility issues for older TypeScript targets
-- Updated form validation logic to handle undefined values properly
-- Committed all TypeScript build fixes enabling successful production builds
-
-## 13:13 27.09.2025 – Compact Session
-
-### CurrentFocus
-Implemented rich text editors with hyperlink support for notes and tasks, plus semantic versioning and deployment tracking.
-
-### SessionChanges
-- Added Tiptap Link extension with Cmd+K/Ctrl+K keyboard shortcut to notes editor
-- Created TaskDescriptionEditor component with simplified rich text functionality for tasks
-- Replaced plain text areas in task add/edit dialogs with rich text editors
-- Updated task display components to render HTML with dangerouslySetInnerHTML and prose styling
-- Added semantic versioning guidelines to CLAUDE.md with version tracking (bumped to v0.2.0)
-- Created Footer component displaying version number from package.json for deployment verification
-- Integrated Footer into root layout with flexbox sticky positioning
-- Added .claude/ directory to .gitignore and removed from git tracking for local-only settings
-- Completed todos 13 (rich text links) and 14 (task rich text), added todos 18-19
-- Committed 4 feature commits with conventional commit messages and SemVer compliance
+### Sept 2024 - Rich Text & Build Fixes
+**Key Achievement**: Enhanced editor functionality and resolved TypeScript issues
+- Added Tiptap Link extension with Cmd+K/Ctrl+K shortcuts to notes
+- Created TaskDescriptionEditor for rich text in task descriptions
+- Fixed comprehensive TypeScript build errors and ESLint warnings
+- Implemented privacy toggles for creator-only content visibility
