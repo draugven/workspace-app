@@ -243,6 +243,22 @@ export default function ItemsPage() {
     setFormOpen(true)
   }
 
+  const handleDeleteItem = async (itemId: string) => {
+    try {
+      const { error } = await supabase
+        .from('items')
+        .delete()
+        .eq('id', itemId)
+
+      if (error) throw error
+
+      await loadItems() // Reload items after deletion
+    } catch (error) {
+      console.error('Failed to delete item:', error)
+      throw error
+    }
+  }
+
   // Filter items based on search term
   const filteredItems = items.filter(item =>
     searchTerm === '' ||
@@ -350,7 +366,7 @@ export default function ItemsPage() {
             </CardHeader>
             <CardContent>
               {filteredItems.length > 0 ? (
-                <ItemsTable items={filteredItems} onEditItem={openEditForm} />
+                <ItemsTable items={filteredItems} onEditItem={openEditForm} onDeleteItem={handleDeleteItem} />
               ) : items.length === 0 ? (
                 <div className="text-center py-6">
                   <div className="text-muted-foreground mb-4">

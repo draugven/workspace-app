@@ -128,6 +128,15 @@ CREATE TABLE note_versions (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- User roles table for admin permissions
+CREATE TABLE user_roles (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id),
+  role TEXT NOT NULL CHECK (role IN ('admin', 'user')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id)
+);
+
 -- Step 2: Create Indexes
 CREATE INDEX idx_items_type ON items(type);
 CREATE INDEX idx_items_status ON items(status);
@@ -138,6 +147,7 @@ CREATE INDEX idx_tasks_assigned_to ON tasks(assigned_to);
 CREATE INDEX idx_tasks_due_date ON tasks(due_date);
 CREATE INDEX idx_notes_department ON notes(department_id);
 CREATE INDEX idx_notes_updated_at ON notes(updated_at);
+CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);
 
 -- Step 3: Create Triggers
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -151,6 +161,68 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_items_updated_at BEFORE UPDATE ON items FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_tasks_updated_at BEFORE UPDATE ON tasks FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_notes_updated_at BEFORE UPDATE ON notes FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- User role management triggers and functions
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    -- Insert default "user" role for new user
+    INSERT INTO public.user_roles (user_id, role)
+    VALUES (NEW.id, 'user');
+
+    RETURN NEW;
+END;
+$$;
+
+-- Create trigger to run the function when new user signs up
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Step 3a: Enable Row Level Security and Policies
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+
+-- Create policy to allow users to read their own roles and admins to read all roles
+CREATE POLICY "Users can read their own role" ON public.user_roles
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Admins can read all roles" ON public.user_roles
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM public.user_roles
+            WHERE user_id = auth.uid() AND role = 'admin'
+        )
+    );
+
+-- Create policy to allow only admins to insert/update/delete roles
+CREATE POLICY "Only admins can manage roles" ON public.user_roles
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM public.user_roles
+            WHERE user_id = auth.uid() AND role = 'admin'
+        )
+    );
+
+-- Create helper function to check if user is admin
+CREATE OR REPLACE FUNCTION public.is_admin(user_id uuid DEFAULT auth.uid())
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+    SELECT EXISTS (
+        SELECT 1 FROM public.user_roles
+        WHERE user_roles.user_id = $1 AND role = 'admin'
+    );
+$$;
+
+-- Grant necessary permissions
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT SELECT ON public.user_roles TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.user_roles TO authenticated;
 
 -- Step 4: Insert Initial Data
 
@@ -229,5 +301,8 @@ DO $$
 BEGIN
   RAISE NOTICE 'Database setup completed successfully!';
   RAISE NOTICE 'Tables created, indexes added, and initial data inserted.';
+  RAISE NOTICE 'Admin role system configured with automatic user role assignment.';
+  RAISE NOTICE 'New users will automatically get "user" role on signup.';
   RAISE NOTICE 'You can now run the items and tasks seed scripts if desired.';
+  RAISE NOTICE 'To assign admin role to a user, run assign-admin-role.sql script.';
 END $$;

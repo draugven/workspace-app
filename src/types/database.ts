@@ -359,6 +359,26 @@ export interface Database {
           created_at?: string
         }
       }
+      user_roles: {
+        Row: {
+          id: string
+          user_id: string
+          role: 'admin' | 'user'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          role: 'admin' | 'user'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          role?: 'admin' | 'user'
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

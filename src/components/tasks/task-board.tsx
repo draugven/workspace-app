@@ -41,6 +41,7 @@ interface TaskBoardProps {
   tasks: Task[]
   onTaskStatusChange?: (taskId: string, newStatus: Task['status']) => void
   onTaskUpdate?: (updatedTask: Task) => void
+  onTaskDelete?: (taskId: string) => void
   departments?: Department[]
   tags?: TaskTag[]
   users?: User[]
@@ -232,6 +233,7 @@ export function TaskBoard({
   tasks,
   onTaskStatusChange,
   onTaskUpdate,
+  onTaskDelete,
   departments = [],
   tags = [],
   users = [],
@@ -348,6 +350,7 @@ export function TaskBoard({
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         onSave={handleTaskSave}
+        onDelete={onTaskDelete}
         departments={departments}
         tags={tags}
         users={users}

@@ -23,8 +23,10 @@ import {
   Clock,
   Package,
   FileImage,
-  Edit
+  Edit,
+  Trash2
 } from 'lucide-react'
+import { useAdminCheck } from '@/hooks/use-admin-check'
 import type { Item, ItemFile } from '@/types'
 
 interface ItemDetailDrawerProps {
@@ -32,11 +34,14 @@ interface ItemDetailDrawerProps {
   open: boolean
   onClose: () => void
   onEdit?: (item: Item) => void
+  onDelete?: (itemId: string) => void
 }
 
-export function ItemDetailDrawer({ item, open, onClose, onEdit }: ItemDetailDrawerProps) {
+export function ItemDetailDrawer({ item, open, onClose, onEdit, onDelete }: ItemDetailDrawerProps) {
   const [files, setFiles] = useState<ItemFile[]>([])
   const [loading, setLoading] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const { isAdmin } = useAdminCheck()
 
   const loadFiles = useCallback(async () => {
     if (!item) return
@@ -70,6 +75,14 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit }: ItemDetailDraw
 
   const handleFileDeleted = (fileId: string) => {
     setFiles(prev => prev.filter(f => f.id !== fileId))
+  }
+
+  const handleDelete = async () => {
+    if (onDelete && item && showDeleteConfirm) {
+      await onDelete(item.id)
+      onClose()
+      setShowDeleteConfirm(false)
+    }
   }
 
   const getStatusIcon = (status: string) => {
@@ -125,17 +138,54 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit }: ItemDetailDraw
                 {item.category?.name && ` ${item.category.name}`}
               </SheetDescription>
             </div>
-            {onEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onEdit(item)}
-                className="gap-2"
-              >
-                <Edit className="h-4 w-4" />
-                Bearbeiten
-              </Button>
-            )}
+            <div className="flex gap-2">
+              {onEdit && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEdit(item)}
+                  className="gap-2"
+                >
+                  <Edit className="h-4 w-4" />
+                  Bearbeiten
+                </Button>
+              )}
+
+              {/* Admin delete button */}
+              {isAdmin && onDelete && (
+                showDeleteConfirm ? (
+                  <div className="flex gap-1">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDelete}
+                      className="gap-1 text-xs"
+                    >
+                      Bestätigen
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="gap-1 text-xs"
+                    >
+                      Abbrechen
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="gap-2 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    title="Als Admin löschen"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Löschen
+                  </Button>
+                )
+              )}
+            </div>
           </div>
         </SheetHeader>
 

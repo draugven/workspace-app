@@ -13,7 +13,8 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
-import { Calendar, Save, X, Tag } from 'lucide-react'
+import { Calendar, Save, X, Tag, Trash2 } from 'lucide-react'
+import { useAdminCheck } from '@/hooks/use-admin-check'
 import type { Task, Department, TaskTag, User } from '@/types'
 
 interface TaskEditDialogProps {
@@ -21,6 +22,7 @@ interface TaskEditDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSave: (updatedTask: Task) => void
+  onDelete?: (taskId: string) => void
   departments: Department[]
   tags: TaskTag[]
   users?: User[]
@@ -32,6 +34,7 @@ export function TaskEditDialog({
   open,
   onOpenChange,
   onSave,
+  onDelete,
   departments,
   tags,
   users = [],
@@ -39,6 +42,8 @@ export function TaskEditDialog({
 }: TaskEditDialogProps) {
   const [editedTask, setEditedTask] = useState<Task | null>(null)
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const { isAdmin } = useAdminCheck()
 
   // Initialize edited task when dialog opens
   if (task && !editedTask && open) {
@@ -73,6 +78,17 @@ export function TaskEditDialog({
     onOpenChange(false)
     setEditedTask(null)
     setSelectedTagIds([])
+    setShowDeleteConfirm(false)
+  }
+
+  const handleDelete = async () => {
+    if (onDelete && editedTask && showDeleteConfirm) {
+      await onDelete(editedTask.id)
+      onOpenChange(false)
+      setEditedTask(null)
+      setSelectedTagIds([])
+      setShowDeleteConfirm(false)
+    }
   }
 
 
@@ -232,15 +248,48 @@ export function TaskEditDialog({
           )}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={handleCancel}>
-            <X className="h-4 w-4 mr-2" />
-            Abbrechen
-          </Button>
-          <Button onClick={handleSave}>
-            <Save className="h-4 w-4 mr-2" />
-            Speichern
-          </Button>
+        <DialogFooter className="flex justify-between">
+          {/* Admin delete button */}
+          {isAdmin && (
+            <div className="flex gap-2">
+              {showDeleteConfirm ? (
+                <>
+                  <Button
+                    variant="destructive"
+                    onClick={handleDelete}
+                    className="gap-2"
+                  >
+                    Bestätigen
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowDeleteConfirm(false)}
+                  >
+                    Abbrechen
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="gap-2 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Löschen
+                </Button>
+              )}
+            </div>
+          )}
+          <div className="flex gap-2 ml-auto">
+            <Button variant="outline" onClick={handleCancel}>
+              <X className="h-4 w-4 mr-2" />
+              Abbrechen
+            </Button>
+            <Button onClick={handleSave}>
+              <Save className="h-4 w-4 mr-2" />
+              Speichern
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

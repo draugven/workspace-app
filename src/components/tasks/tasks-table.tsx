@@ -20,6 +20,7 @@ import type { Task, Department, TaskTag, User } from "@/types"
 interface TasksTableProps {
   tasks: Task[]
   onTaskUpdate?: (updatedTask: Task) => void
+  onTaskDelete?: (taskId: string) => void
   departments?: Department[]
   tags?: TaskTag[]
   users?: User[]
@@ -29,6 +30,7 @@ interface TasksTableProps {
 export function TasksTable({
   tasks,
   onTaskUpdate,
+  onTaskDelete,
   departments = [],
   tags = [],
   users = [],
@@ -245,6 +247,7 @@ export function TasksTable({
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         onSave={handleTaskSave}
+        onDelete={onTaskDelete}
         departments={departments}
         tags={tags}
         users={users}

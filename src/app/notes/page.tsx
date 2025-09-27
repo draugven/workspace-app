@@ -230,6 +230,23 @@ export default function NotesPage() {
     }
   }
 
+  const handleDeleteNote = async (noteId: string) => {
+    try {
+      const { error } = await supabase
+        .from('notes')
+        .delete()
+        .eq('id', noteId)
+
+      if (error) {
+        console.error('Failed to delete note:', error)
+        alert('Fehler beim Löschen der Notiz')
+      }
+    } catch (error) {
+      console.error('Failed to delete note:', error)
+      alert('Fehler beim Löschen der Notiz')
+    }
+  }
+
   const handleOpenAddDialog = () => {
     setShowAddDialog(true)
   }
@@ -417,6 +434,7 @@ export default function NotesPage() {
                   }}
                   currentUser={currentUser}
                   onSave={handleSaveNote}
+                  onDelete={handleDeleteNote}
                   onLock={handleLockNote}
                   departments={departments}
                   isBeingEditedByOthers={isBeingEdited}

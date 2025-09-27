@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { TiptapEditorWrapper } from './tiptap-editor-wrapper'
 import type { Note, Department, User } from "@/types"
-import { Edit, Lock, History, Save, Users, AlertTriangle, Eye, EyeOff } from 'lucide-react'
+import { Edit, Lock, History, Save, Users, AlertTriangle, Eye, EyeOff, Trash2 } from 'lucide-react'
+import { useAdminCheck } from '@/hooks/use-admin-check'
 
 interface NoteCardProps {
   note: Note & {
@@ -22,6 +23,7 @@ interface NoteCardProps {
   }
   currentUser?: User | null
   onSave: (noteId: string, content: string, title?: string, departmentId?: string | null, isPrivate?: boolean) => void
+  onDelete?: (noteId: string) => void
   onLock?: (noteId: string, lock: boolean) => void
   departments?: Department[]
   isBeingEditedByOthers?: boolean
@@ -31,6 +33,7 @@ export function NoteCard({
   note,
   currentUser,
   onSave,
+  onDelete,
   onLock,
   departments = [],
   isBeingEditedByOthers = false
@@ -40,6 +43,8 @@ export function NoteCard({
   const [editTitle, setEditTitle] = useState(note.title)
   const [editDepartmentId, setEditDepartmentId] = useState<string | null>(note.department_id || null)
   const [editIsPrivate, setEditIsPrivate] = useState(note.is_private || false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const { isAdmin } = useAdminCheck()
 
   const isLocked = note.is_locked && note.locked_by !== currentUser?.id
   const lockedByCurrentUser = note.is_locked && note.locked_by === currentUser?.id
@@ -77,6 +82,12 @@ export function NoteCard({
   const getLockedByName = () => {
     // In a real app, you'd fetch this from the users table
     return 'Ein anderer Benutzer'
+  }
+
+  const handleDelete = async () => {
+    if (onDelete && showDeleteConfirm) {
+      await onDelete(note.id)
+    }
   }
 
   return (
@@ -178,6 +189,41 @@ export function NoteCard({
                 <History className="h-4 w-4" />
                 v{note.versions.length}
               </Button>
+            )}
+
+            {/* Admin delete button */}
+            {isAdmin && !isEditing && (
+              showDeleteConfirm ? (
+                <div className="flex gap-1">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleDelete}
+                    className="gap-1 text-xs"
+                  >
+                    Bestätigen
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="gap-1 text-xs"
+                  >
+                    Abbrechen
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="gap-2 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                  title="Als Admin löschen"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Löschen
+                </Button>
+              )
             )}
           </div>
         </div>

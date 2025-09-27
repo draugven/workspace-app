@@ -54,7 +54,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - Semantic HTML elements
 
 ## Version Management
-**Current Version**: `0.3.0`
+**Current Version**: `0.4.0`
 
 Follow semantic versioning (SemVer) when creating commits and updating package.json version:
 
@@ -134,7 +134,7 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 6. ~~**Remove Dashboard nav item** - Remove redundant navigation since logo already links to dashboard~~ ✅ **COMPLETED**
 7. **Typography and styling updates** - General design improvements (requires input on preferences)
 8. **Dark theme implementation** - Add dark mode support (requires input on design approach)
-9. **Admin role and deletion** - Implement admin role with delete permissions for notes, tasks, and items
+9. ~~**Admin role and deletion** - Implement admin role with delete permissions for notes, tasks, and items~~ ✅ **COMPLETED**
 10. **Done task management** - Strategy for completed tasks (hide after X days, archive, etc.)
 11. **Mobile UI optimization** - Improve mobile responsiveness across all views
 12. **Note versioning review** - Investigate current note version saving and potential usage
@@ -147,6 +147,7 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 19. **Add task ranking within priority** - Add possibility to rank tasks within one priority. Currently they are ordered by created_at DESC by default. Would be cool to be able to drag and drop them within one column in Kanban view to change rank within one status and priority, and in the table within a priority and status
 20. **Real-time data synchronization** - Implement automatic polling/refresh mechanism on Requisiten, Tasks, and Notes pages to display latest updates from other users without requiring manual page refresh. Currently only Notes has real-time updates via Supabase subscriptions
 21. ~~**German localization for authentication** - Translate sign in/sign up forms to German (currently in English). Update field labels, buttons, messages, and placeholder text to match the German localization used throughout the rest of the application~~ ✅ **COMPLETED**
+22. **Database RLS policy review** - Review and implement comprehensive Row Level Security (RLS) policies for all database tables (items, tasks, notes, etc.) to ensure proper data access control and security. Currently only user_roles table has RLS enabled
 
 ## Recent Development History
 

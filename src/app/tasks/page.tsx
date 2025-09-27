@@ -172,6 +172,27 @@ export default function TasksPage() {
     }
   }
 
+  const handleTaskDelete = async (taskId: string) => {
+    try {
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', taskId)
+
+      if (error) {
+        console.error('Failed to delete task:', error)
+        alert('Fehler beim Löschen der Aufgabe')
+        return
+      }
+
+      // Reload tasks to reflect the deletion
+      await loadData()
+    } catch (error) {
+      console.error('Failed to delete task:', error)
+      alert('Fehler beim Löschen der Aufgabe')
+    }
+  }
+
   const handleTaskStatusChange = async (taskId: string, newStatus: Task['status']) => {
     try {
       const { error } = await (supabase as any)
@@ -738,6 +759,7 @@ export default function TasksPage() {
                       tasks={filteredTasks}
                       onTaskStatusChange={handleTaskStatusChange}
                       onTaskUpdate={handleTaskUpdate}
+                      onTaskDelete={handleTaskDelete}
                       departments={departments}
                       tags={tags}
                       users={users}
@@ -755,6 +777,7 @@ export default function TasksPage() {
                     <TasksTable
                       tasks={filteredTasks}
                       onTaskUpdate={handleTaskUpdate}
+                      onTaskDelete={handleTaskDelete}
                       departments={departments}
                       tags={tags}
                       users={users}
