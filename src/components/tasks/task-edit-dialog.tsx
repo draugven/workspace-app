@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import { TaskDescriptionEditorWrapper } from './task-description-editor-wrapper'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
 import { MultiCombobox } from '@/components/ui/multi-combobox'
@@ -57,8 +57,11 @@ export function TaskEditDialog({
   const handleSave = () => {
     // Update task with selected tags
     const selectedTags = tags.filter(tag => selectedTagIds.includes(tag.id))
+    // Check if description has meaningful content (not just empty HTML)
+    const descriptionText = editedTask.description?.replace(/<[^>]*>/g, '').trim()
     const taskWithTags = {
       ...editedTask,
+      description: descriptionText ? editedTask.description : undefined,
       tags: selectedTags
     }
     onSave(taskWithTags)
@@ -98,12 +101,10 @@ export function TaskEditDialog({
           {/* Description */}
           <div className="grid gap-2">
             <Label htmlFor="description">Beschreibung</Label>
-            <Textarea
-              id="description"
-              value={editedTask.description || ''}
-              onChange={(e) => setEditedTask({ ...editedTask, description: e.target.value })}
+            <TaskDescriptionEditorWrapper
+              content={editedTask.description || ''}
+              onChange={(content) => setEditedTask({ ...editedTask, description: content })}
               placeholder="Beschreibung der Aufgabe..."
-              rows={3}
             />
           </div>
 

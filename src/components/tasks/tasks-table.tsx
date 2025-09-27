@@ -173,9 +173,10 @@ export function TasksTable({
                     )}
                   </div>
                   {task.description && (
-                    <div className="text-sm text-muted-foreground line-clamp-2">
-                      {task.description}
-                    </div>
+                    <div
+                      className="text-sm text-muted-foreground line-clamp-2 prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: task.description }}
+                    />
                   )}
                 </div>
               </TableCell>

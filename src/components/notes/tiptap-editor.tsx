@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import Link from '@tiptap/extension-link'
 import { Button } from '@/components/ui/button'
 import {
   Bold,
@@ -17,7 +18,8 @@ import {
   Heading3,
   Undo,
   Redo,
-  Save
+  Save,
+  Link as LinkIcon
 } from 'lucide-react'
 
 export interface TiptapEditorProps {
@@ -37,6 +39,8 @@ export function TiptapEditor({
   lockedBy,
   placeholder = "Schreibe deine Notizen hier..."
 }: TiptapEditorProps) {
+  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false)
+  const [linkUrl, setLinkUrl] = useState('')
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -66,6 +70,12 @@ export function TiptapEditor({
           },
         },
       }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-600 underline hover:text-blue-800 cursor-pointer',
+        },
+      }),
     ],
     content,
     editable: !isLocked,
@@ -76,6 +86,15 @@ export function TiptapEditor({
     editorProps: {
       attributes: {
         class: 'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 border rounded-md [&_h1]:!text-2xl [&_h1]:!font-bold [&_h2]:!text-xl [&_h2]:!font-bold [&_h3]:!text-lg [&_h3]:!font-bold [&_h1]:!mt-4 [&_h1]:!mb-2 [&_h2]:!mt-4 [&_h2]:!mb-2 [&_h3]:!mt-4 [&_h3]:!mb-2',
+      },
+      handleKeyDown: (view, event) => {
+        // Handle Cmd+K (Mac) or Ctrl+K (Windows/Linux) for link dialog
+        if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+          event.preventDefault()
+          handleSetLink()
+          return true
+        }
+        return false
       },
     },
   })
@@ -93,6 +112,33 @@ export function TiptapEditor({
       editor.setEditable(!isLocked)
     }
   }, [editor, isLocked])
+
+  // Helper functions for link management
+  const handleSetLink = () => {
+    if (!editor) return
+
+    const previousUrl = editor.getAttributes('link').href || ''
+    setLinkUrl(previousUrl)
+    setIsLinkDialogOpen(true)
+  }
+
+  const handleConfirmLink = () => {
+    if (!editor) return
+
+    if (linkUrl === '') {
+      editor.chain().focus().extendMarkRange('link').unsetLink().run()
+    } else {
+      editor.chain().focus().extendMarkRange('link').setLink({ href: linkUrl }).run()
+    }
+
+    setIsLinkDialogOpen(false)
+    setLinkUrl('')
+  }
+
+  const handleCancelLink = () => {
+    setIsLinkDialogOpen(false)
+    setLinkUrl('')
+  }
 
   if (!editor) {
     return null
@@ -152,6 +198,12 @@ export function TiptapEditor({
       isActive: editor.isActive('codeBlock'),
       icon: Code,
       tooltip: 'Codeblock'
+    },
+    {
+      action: handleSetLink,
+      isActive: editor.isActive('link'),
+      icon: LinkIcon,
+      tooltip: 'Link hinzufügen/bearbeiten (Strg+K)'
     }
   ]
 
@@ -241,6 +293,47 @@ export function TiptapEditor({
       {isLocked && (
         <div className="flex justify-end text-xs text-muted-foreground">
           <span className="text-yellow-600">Schreibgeschützt</span>
+        </div>
+      )}
+
+      {/* Link Dialog */}
+      {isLinkDialogOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-[90vw]">
+            <h3 className="text-lg font-medium mb-4">Link bearbeiten</h3>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="link-url" className="block text-sm font-medium text-gray-700 mb-1">
+                  URL
+                </label>
+                <input
+                  id="link-url"
+                  type="url"
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                  placeholder="https://example.com"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCancelLink}
+                >
+                  Abbrechen
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleConfirmLink}
+                >
+                  {linkUrl ? 'Link setzen' : 'Link entfernen'}
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

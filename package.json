@@ -27,6 +27,7 @@
     "@tanstack/react-table": "^8.11.0",
     "@tiptap/extension-collaboration": "^2.1.0",
     "@tiptap/extension-collaboration-cursor": "^2.1.0",
+    "@tiptap/extension-link": "^2.26.2",
     "@tiptap/react": "^2.1.0",
     "@tiptap/starter-kit": "^2.1.0",
     "class-variance-authority": "^0.7.0",

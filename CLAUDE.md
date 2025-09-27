@@ -78,7 +78,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 ### Components (`src/components/`)
 - `auth/` - Authentication (AuthProvider, LoginForm, ProtectedRoute)
 - `items/` - Requisiten (ItemsTable, ItemForm, ItemDetailDrawer, StatusBadge)
-- `tasks/` - Task management (TaskBoard, TasksTable, TaskAddDialog, TaskEditDialog, PriorityBadge)
+- `tasks/` - Task management (TaskBoard, TasksTable, TaskAddDialog, TaskEditDialog, PriorityBadge, TaskDescriptionEditor)
 - `notes/` - Collaborative notes (NoteCard, NoteAddDialog, TiptapEditor + SSR wrapper)
 - `files/` - File handling (FileUpload)
 - `layout/` - Navigation
@@ -101,6 +101,8 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Drag-and-drop**: Use @dnd-kit with rectIntersection collision detection
 - **Select validation**: Use 'none' placeholder values, convert for database
 - **Real-time cleanup**: Avoid `channel.off()` - Supabase channels don't support it
+- **Database schema changes**: When adding/removing table columns, ALWAYS update both database schema AND TypeScript types in `src/types/database.ts`
+- **Supabase typing workaround**: Use `(supabase as any)` for insert/update operations when TypeScript inference fails (temporary solution until better typing)
 
 ## TODO Backlog
 
@@ -109,7 +111,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 2. **Offline capabilities strategy** - Research and plan options for offline data access
 
 ### New Feature Requests
-3. **Private content functionality** - Add privacy toggle for notes and tasks (creator-only visibility) in add/edit dialogs
+3. ~~**Private content functionality** - Add privacy toggle for notes and tasks (creator-only visibility) in add/edit dialogs~~ ✅ **COMPLETED**
 4. ~~**Department assignment for notes** - Add department selection to note edit dialog~~ ✅ **COMPLETED**
 5. ~~**Rename Items to Requisiten** - Change "Props" terminology to "Requisiten" throughout (Kostüme will be separate later)~~ ✅ **COMPLETED**
 6. ~~**Remove Dashboard nav item** - Remove redundant navigation since logo already links to dashboard~~ ✅ **COMPLETED**
@@ -119,11 +121,13 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 10. **Done task management** - Strategy for completed tasks (hide after X days, archive, etc.)
 11. **Mobile UI optimization** - Improve mobile responsiveness across all views
 12. **Note versioning review** - Investigate current note version saving and potential usage
-13. **Rich text link support** - Add hyperlink functionality to note editor
-14. **Task description rich text** - Replace plain text task descriptions with rich text editor
+13. ~~**Rich text link support** - Add hyperlink functionality to note editor~~ ✅ **COMPLETED**
+14. ~~**Task description rich text** - Replace plain text task descriptions with rich text editor~~ ✅ **COMPLETED**
 15. **Branding updates** - Replace logo and add custom favicon
 16. **Deployment setup** - Prepare and deploy application
 17. ~~**German localization** - Translate navigation bar items and dashboard text to German~~ ✅ **COMPLETED**
+18. **Improve sign up functionality** - Add display name to the sign in form and persist it to DB. Currently auth.users populates "Display name" property automatically by taking everything in the email before "@". Would be nice to be able to add a custom display name. Also if user is not logged in, display log in mask by default instead of sign up mask
+19. **Add task ranking within priority** - Add possibility to rank tasks within one priority. Currently they are ordered by created_at DESC by default. Would be cool to be able to drag and drop them within one column in Kanban view to change rank within one status and priority, and in the table within a priority and status
 
 ## Recent Development History
 
@@ -136,3 +140,41 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Note Department Assignment**: Added department selection to note editing with real-time updates
 - **Terminology Update**: Changed "Props" to "Requisiten" throughout application for German terminology consistency
 - **German Localization**: Translated navigation and dashboard to German (Tasks→Aufgaben, Notes→Notizen, etc.)
+
+## 22:14 27.01.2025 – Compact Session
+
+### CurrentFocus
+Implemented private content functionality with creator-only privacy toggles and resolved UI/UX issues in task dialogs.
+
+### SessionChanges
+- Added `is_private` boolean fields to tasks/notes database schema with migration script
+- Updated TypeScript interfaces to include `is_private` for Task and Note types
+- Implemented privacy toggles in task-add-dialog and task-edit-dialog components
+- Added privacy indicator badges (EyeOff icon) to task cards, table rows, and note cards
+- Implemented privacy filtering in data queries to show private content only to creators
+- Enhanced real-time notes functionality to handle privacy field changes
+- Restricted privacy toggle visibility to content creators only (currentUser checks)
+- Added currentUser prop propagation through TaskBoard, TasksTable, and parent components
+- Created database population script to assign existing tasks/notes to authenticated user
+- Fixed note privacy saving by updating handleSaveNote parameter signature
+- Created MultiCombobox component for compact tag selection with search and color coding
+- Replaced large scrollable checkbox lists with compact dropdown tag selection
+- Fixed MultiCombobox scrolling with overflow-y-auto for proper dropdown navigation
+- Fixed task privacy persistence by adding is_private to handleTaskCreate and handleTaskUpdate
+
+## 12:19 27.09.2025 – Compact Session
+
+### CurrentFocus
+Resolved comprehensive TypeScript build errors and linting issues preventing production deployment.
+
+### SessionChanges
+- Fixed all ESLint warnings in file-upload.tsx, item-detail-drawer.tsx, and note-card.tsx
+- Updated database types to include missing is_private fields for tasks and notes
+- Resolved Supabase type inference issues with explicit type assertions
+- Fixed spread operator errors by replacing with explicit property mapping
+- Corrected null/undefined type mismatches throughout components and hooks
+- Added character_ids property to function parameter types for item operations
+- Fixed React Hook dependency arrays and function declaration ordering
+- Resolved Set iteration compatibility issues for older TypeScript targets
+- Updated form validation logic to handle undefined values properly
+- Committed all TypeScript build fixes enabling successful production builds

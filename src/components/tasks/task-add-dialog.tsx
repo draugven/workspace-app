@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import { TaskDescriptionEditorWrapper } from './task-description-editor-wrapper'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
 import { MultiCombobox } from '@/components/ui/multi-combobox'
@@ -87,9 +87,11 @@ export function TaskAddDialog({
     }
 
     // Convert to the format expected by parent component
+    // Check if description has meaningful content (not just empty HTML)
+    const descriptionText = newTask.description.replace(/<[^>]*>/g, '').trim()
     const taskToSave: Partial<Task> = {
       title: newTask.title.trim(),
-      description: newTask.description.trim() || undefined,
+      description: descriptionText ? newTask.description : undefined,
       status: newTask.status,
       priority: newTask.priority,
       department_id: newTask.department_id === 'none' ? undefined : newTask.department_id,
@@ -139,12 +141,10 @@ export function TaskAddDialog({
           {/* Description */}
           <div className="grid gap-2">
             <Label htmlFor="description">Beschreibung</Label>
-            <Textarea
-              id="description"
-              value={newTask.description}
-              onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+            <TaskDescriptionEditorWrapper
+              content={newTask.description}
+              onChange={(content) => setNewTask({ ...newTask, description: content })}
               placeholder="Beschreibung der Aufgabe..."
-              rows={3}
             />
           </div>
 

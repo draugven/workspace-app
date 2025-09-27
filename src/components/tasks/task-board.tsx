@@ -169,9 +169,10 @@ function DraggableTaskCard({ task, onClick, users = [] }: DraggableTaskCardProps
             <PriorityBadge priority={task.priority} />
           </div>
           {task.description && (
-            <CardDescription className="text-xs line-clamp-2">
-              {task.description}
-            </CardDescription>
+            <CardDescription
+              className="text-xs line-clamp-2 prose prose-xs max-w-none"
+              dangerouslySetInnerHTML={{ __html: task.description }}
+            />
           )}
         </CardHeader>
         <CardContent className="pt-0">
