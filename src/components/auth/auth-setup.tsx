@@ -32,9 +32,9 @@ export function AuthSetup() {
           }
         })
         if (error) {
-          setMessage(`Sign up error: ${error.message}`)
+          setMessage(`Registrierungsfehler: ${error.message}`)
         } else {
-          setMessage('Check your email for verification link!')
+          setMessage('Überprüfen Sie Ihre E-Mail für den Bestätigungslink!')
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -42,11 +42,11 @@ export function AuthSetup() {
           password,
         })
         if (error) {
-          setMessage(`Sign in error: ${error.message}`)
+          setMessage(`Anmeldefehler: ${error.message}`)
         }
       }
     } catch (err) {
-      setMessage('An unexpected error occurred')
+      setMessage('Ein unerwarteter Fehler ist aufgetreten')
     } finally {
       setIsLoading(false)
     }
@@ -55,11 +55,11 @@ export function AuthSetup() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>{isSignUp ? 'Create Account' : 'Sign In'}</CardTitle>
+        <CardTitle>{isSignUp ? 'Konto erstellen' : 'Anmelden'}</CardTitle>
         <CardDescription>
           {isSignUp
-            ? 'Create your account for the theater production app'
-            : 'Sign in to access the theater production app'
+            ? 'Erstellen Sie Ihr Konto für die Theater-Produktions-App'
+            : 'Melden Sie sich an, um auf die Theater-Produktions-App zuzugreifen'
           }
         </CardDescription>
       </CardHeader>
@@ -77,46 +77,46 @@ export function AuthSetup() {
 
           {isSignUp && (
             <div className="space-y-2">
-              <Label htmlFor="displayName">Display Name (optional)</Label>
+              <Label htmlFor="displayName">Anzeigename (optional)</Label>
               <Input
                 id="displayName"
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Your display name"
+                placeholder="Ihr Anzeigename"
               />
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">E-Mail</Label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="your-email@example.com"
+              placeholder="ihre-email@example.com"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Passwort</Label>
             <Input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="Enter your password"
+              placeholder="Geben Sie Ihr Passwort ein"
               minLength={6}
             />
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading
-              ? (isSignUp ? 'Creating account...' : 'Signing in...')
-              : (isSignUp ? 'Create Account' : 'Sign In')
+              ? (isSignUp ? 'Konto wird erstellt...' : 'Wird angemeldet...')
+              : (isSignUp ? 'Konto erstellen' : 'Anmelden')
             }
           </Button>
 
@@ -131,8 +131,8 @@ export function AuthSetup() {
               className="text-sm text-muted-foreground hover:text-foreground underline"
             >
               {isSignUp
-                ? 'Already have an account? Sign in'
-                : 'Need an account? Create one'
+                ? 'Haben Sie bereits ein Konto? Anmelden'
+                : 'Benötigen Sie ein Konto? Erstellen Sie eines'
               }
             </button>
           </div>
