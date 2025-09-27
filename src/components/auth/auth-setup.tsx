@@ -10,9 +10,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 export function AuthSetup() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [displayName, setDisplayName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
-  const [isSignUp, setIsSignUp] = useState(true)
+  const [isSignUp, setIsSignUp] = useState(false)
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,7 +27,7 @@ export function AuthSetup() {
           password,
           options: {
             data: {
-              full_name: email.split('@')[0], // Use email prefix as default name
+              full_name: displayName.trim() || email.split('@')[0], // Use custom display name or email prefix fallback
             }
           }
         })
@@ -74,6 +75,19 @@ export function AuthSetup() {
             </div>
           )}
 
+          {isSignUp && (
+            <div className="space-y-2">
+              <Label htmlFor="displayName">Display Name (optional)</Label>
+              <Input
+                id="displayName"
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Your display name"
+              />
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -112,6 +126,7 @@ export function AuthSetup() {
               onClick={() => {
                 setIsSignUp(!isSignUp)
                 setMessage(null)
+                setDisplayName('') // Clear display name when switching
               }}
               className="text-sm text-muted-foreground hover:text-foreground underline"
             >

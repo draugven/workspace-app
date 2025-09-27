@@ -141,8 +141,10 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 15. **Branding updates** - Replace logo and add custom favicon
 16. **Deployment setup** - Prepare and deploy application
 17. ~~**German localization** - Translate navigation bar items and dashboard text to German~~ ✅ **COMPLETED**
-18. **Improve sign up functionality** - Add display name to the sign in form and persist it to DB. Currently auth.users populates "Display name" property automatically by taking everything in the email before "@". Would be nice to be able to add a custom display name. Also if user is not logged in, display log in mask by default instead of sign up mask
+18. ~~**Improve sign up functionality** - Add display name to the sign in form and persist it to DB. Currently auth.users populates "Display name" property automatically by taking everything in the email before "@". Would be nice to be able to add a custom display name. Also if user is not logged in, display log in mask by default instead of sign up mask~~ ✅ **COMPLETED**
 19. **Add task ranking within priority** - Add possibility to rank tasks within one priority. Currently they are ordered by created_at DESC by default. Would be cool to be able to drag and drop them within one column in Kanban view to change rank within one status and priority, and in the table within a priority and status
+20. **Real-time data synchronization** - Implement automatic polling/refresh mechanism on Requisiten, Tasks, and Notes pages to display latest updates from other users without requiring manual page refresh. Currently only Notes has real-time updates via Supabase subscriptions
+21. **German localization for authentication** - Translate sign in/sign up forms to German (currently in English). Update field labels, buttons, messages, and placeholder text to match the German localization used throughout the rest of the application
 
 ## Recent Development History
 
@@ -193,3 +195,20 @@ Resolved comprehensive TypeScript build errors and linting issues preventing pro
 - Resolved Set iteration compatibility issues for older TypeScript targets
 - Updated form validation logic to handle undefined values properly
 - Committed all TypeScript build fixes enabling successful production builds
+
+## 13:13 27.09.2025 – Compact Session
+
+### CurrentFocus
+Implemented rich text editors with hyperlink support for notes and tasks, plus semantic versioning and deployment tracking.
+
+### SessionChanges
+- Added Tiptap Link extension with Cmd+K/Ctrl+K keyboard shortcut to notes editor
+- Created TaskDescriptionEditor component with simplified rich text functionality for tasks
+- Replaced plain text areas in task add/edit dialogs with rich text editors
+- Updated task display components to render HTML with dangerouslySetInnerHTML and prose styling
+- Added semantic versioning guidelines to CLAUDE.md with version tracking (bumped to v0.2.0)
+- Created Footer component displaying version number from package.json for deployment verification
+- Integrated Footer into root layout with flexbox sticky positioning
+- Added .claude/ directory to .gitignore and removed from git tracking for local-only settings
+- Completed todos 13 (rich text links) and 14 (task rich text), added todos 18-19
+- Committed 4 feature commits with conventional commit messages and SemVer compliance

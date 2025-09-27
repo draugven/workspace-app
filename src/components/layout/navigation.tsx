@@ -49,7 +49,7 @@ export function Navigation() {
           {user && (
             <div className="flex items-center space-x-4">
               <span className="text-sm text-muted-foreground">
-                {user.email}
+                {user.user_metadata?.full_name || user.email}
               </span>
               <Button variant="outline" size="sm" onClick={handleSignOut}>
                 Abmelden
