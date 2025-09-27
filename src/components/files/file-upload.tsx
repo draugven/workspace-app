@@ -39,7 +39,7 @@ export function FileUpload({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
-  const uploadFile = async (file: File): Promise<ItemFile | null> => {
+  const uploadFile = useCallback(async (file: File): Promise<ItemFile | null> => {
     try {
       // Check file size
       if (file.size > maxSizeMB * 1024 * 1024) {
@@ -93,7 +93,7 @@ export function FileUpload({
       console.error('File upload error:', error)
       throw error
     }
-  }
+  }, [itemId, maxSizeMB, acceptedTypes])
 
   const deleteFile = async (fileId: string, filePath: string) => {
     try {
@@ -144,7 +144,7 @@ export function FileUpload({
     } finally {
       setUploading(false)
     }
-  }, [itemId, existingFiles.length, maxFiles, onFileUploaded])
+  }, [existingFiles.length, maxFiles, onFileUploaded, uploadFile])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

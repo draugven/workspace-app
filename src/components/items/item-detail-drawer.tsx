@@ -42,9 +42,9 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit }: ItemDetailDraw
     if (item && open) {
       loadFiles()
     }
-  }, [item?.id, open])
+  }, [item, open, loadFiles])
 
-  const loadFiles = async () => {
+  const loadFiles = useCallback(async () => {
     if (!item) return
 
     setLoading(true)
@@ -62,7 +62,7 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit }: ItemDetailDraw
     } finally {
       setLoading(false)
     }
-  }
+  }, [item])
 
   const handleFileUploaded = (newFile: ItemFile) => {
     setFiles(prev => [newFile, ...prev])

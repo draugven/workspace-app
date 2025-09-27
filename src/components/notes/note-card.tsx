@@ -243,7 +243,7 @@ export function NoteCard({
               />
             ) : (
               <div className="text-muted-foreground italic">
-                Keine Inhalte vorhanden. Klicke auf "Bearbeiten" um Notizen hinzuzufügen.
+                Keine Inhalte vorhanden. Klicke auf &quot;Bearbeiten&quot; um Notizen hinzuzufügen.
               </div>
             )}
           </div>
