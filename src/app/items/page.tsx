@@ -243,8 +243,8 @@ export default function ItemsPage() {
       <Navigation />
       <div className="container mx-auto py-4 space-y-4">
         <PageHeader
-          title="Requisiten & Kostüme"
-          description="Verwalte Requisiten und Kostüme für die Produktion"
+          title="Requisiten"
+          description="Verwalte Requisiten für die Produktion"
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
           searchPlaceholder="Items durchsuchen..."

@@ -10,7 +10,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 ## Core Features
 
 ### Database & Tables
-- Requisiten/costume tables with cross-references and customizable views
+- Requisiten tables with cross-references and customizable views
 - Property types: text, date, dropdown, file links, status
 - Filter by department, priority, status
 
@@ -34,7 +34,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ### ✅ Completed Features
 - **Authentication**: Supabase Auth with protected routes
-- **Requisiten & Costumes**: Complete CRUD with file uploads
+- **Requisiten**: Complete CRUD with file uploads
 - **Task Management**: Interactive Kanban + table with drag-and-drop, assignees, search, department colors
 - **Collaborative Notes**: Real-time Tiptap editor with SSR fixes and lock cleanup
 - **Database**: Clean schema using Supabase Auth users
@@ -69,7 +69,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ### Core App Routes (`src/app/`)
 - `page.tsx` - Dashboard/home page
-- `items/page.tsx` - Requisiten & costumes management
+- `items/page.tsx` - Requisiten management
 - `tasks/page.tsx` - Task management (Kanban + table)
 - `notes/page.tsx` - Collaborative notes
 - `login/page.tsx` - Authentication
@@ -77,7 +77,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ### Components (`src/components/`)
 - `auth/` - Authentication (AuthProvider, LoginForm, ProtectedRoute)
-- `items/` - Requisiten/costumes (ItemsTable, ItemForm, ItemDetailDrawer, StatusBadge)
+- `items/` - Requisiten (ItemsTable, ItemForm, ItemDetailDrawer, StatusBadge)
 - `tasks/` - Task management (TaskBoard, TasksTable, TaskAddDialog, TaskEditDialog, PriorityBadge)
 - `notes/` - Collaborative notes (NoteCard, NoteAddDialog, TiptapEditor + SSR wrapper)
 - `files/` - File handling (FileUpload)

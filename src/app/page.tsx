@@ -14,12 +14,12 @@ export default function HomePage() {
             Theater Production Dashboard
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl text-center">
-            Collaboration tool for theater productions - manage props, costumes, tasks, and notes.
+            Collaboration tool for theater productions - manage requisiten, tasks, and notes.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 w-full max-w-4xl">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Requisiten & Kostüme</CardTitle>
+                <CardTitle className="text-lg">Requisiten</CardTitle>
                 <CardDescription>
                   Track items with customizable properties, status, and character assignments.
                 </CardDescription>
