@@ -54,7 +54,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - Semantic HTML elements
 
 ## Version Management
-**Current Version**: `0.2.0`
+**Current Version**: `0.3.0`
 
 Follow semantic versioning (SemVer) when creating commits and updating package.json version:
 
@@ -64,9 +64,11 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - **PATCH** version when you make backward compatible bug fixes
 
 **Version Update Guidelines**:
-- Always update `package.json` version number when committing significant changes
-- Update the "Current Version" in this CLAUDE.md file to match
+- **CRITICAL**: ALWAYS bump version FIRST before creating any commits with significant changes
+- Update `package.json` version number according to SemVer before committing
+- Update the "Current Version" in this CLAUDE.md file to match package.json
 - Use conventional commit messages with version context (feat:, fix:, BREAKING CHANGE:)
+- **Workflow**: 1) Implement changes → 2) Bump version → 3) Create commit
 
 ## General Preferences
 - Follow requirements to the letter
