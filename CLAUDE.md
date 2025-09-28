@@ -44,6 +44,14 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Mobile Optimization**: Needs improvement across all views
 - **Next.js Image warning**: Console warning about aspect ratio for main logo (functional, cosmetic only)
 
+### 🔄 Current Development Status (Sept 2024)
+- **Version**: 0.8.0 (committed: bba112a)
+- **Active**: Typography & branding system fully implemented
+- **Dev Server**: Running on port 3001 (multiple background instances)
+- **Fonts**: Lexend + Roboto loading correctly via Next.js Google Fonts
+- **Colors**: Blue primary (#3A4D7A) + Red accent (#E74746) applied to all components
+- **Next Steps**: Mobile optimization, assignee removal bug fix, console cleanup
+
 ## Technical Preferences
 - kebab-case component names (my-component.tsx)
 - Favor React Server Components
@@ -136,6 +144,10 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - **Real-time data sync**: Implemented robust real-time hooks with retry logic for all entities (items, tasks, notes). Uses generic `useRealtimeData` hook with automatic reconnection and error handling
 - **Task ranking system**: Use INTEGER field with 1000-unit spacing for drag-and-drop ranking. Avoid fractional values that cause PostgreSQL errors. Sort by priority → status → ranking for logical ordering
 - **Drag-and-drop animations**: Use DragOverlay with full-size card preview, custom drop animations, and proper isOverlay prop handling for better UX
+- **Typography system**: Lexend for headings, Roboto for body text. Custom CSS classes: .text-h1, .text-h2, .text-h3, .text-body, .text-button, .text-caption
+- **Color scheme**: Blue primary (#3A4D7A), Red accent (#E74746), Light Gray background (#F7F7F7), Dark Gray text (#2C2C2E)
+- **Font loading**: Next.js Google Fonts with CSS variables, Tailwind config extended for custom fonts
+- **Branding consistency**: "Back2Stage" used throughout, informal German (du/dir) in auth forms
 
 ## TODO Backlog
 
