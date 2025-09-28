@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
 
@@ -26,8 +27,14 @@ export function Navigation() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Link href="/" className="text-xl font-bold">
-              Theater App
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/back2stage_logo.svg"
+                alt="Back2Stage"
+                width={150}
+                height={32}
+                priority
+              />
             </Link>
             <div className="hidden md:flex space-x-4">
               {navItems.map((item) => (

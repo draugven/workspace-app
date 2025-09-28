@@ -9,6 +9,11 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Theater Production App',
   description: 'Collaboration tool for theater productions',
+  icons: {
+    icon: '/b2s_curtain_logo.svg',
+    shortcut: '/b2s_curtain_logo.svg',
+    apple: '/b2s_curtain_logo.svg',
+  },
 }
 
 export default function RootLayout({
