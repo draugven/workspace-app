@@ -34,7 +34,8 @@ export function Navigation() {
                 width={150}
                 height={28}
                 priority
-                style={{ width: 'auto', height: 'auto' }}
+                className="h-7"
+                style={{ width: 'auto' }}
               />
             </Link>
             <div className="hidden md:flex space-x-4">

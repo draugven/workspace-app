@@ -42,6 +42,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ### ⚠️ Known Issues
 - **Mobile Optimization**: Needs improvement across all views
+- **Next.js Image warning**: Console warning about aspect ratio for main logo (functional, cosmetic only)
 
 ## Technical Preferences
 - kebab-case component names (my-component.tsx)
@@ -118,6 +119,12 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - `scripts/archive/` - Archived/obsolete scripts (add-privacy-fields.sql, add-user-roles.sql, fix-rls-policies.sql, populate-created-by-fields.sql, setup-default-user-roles.sql, cleanup-migration.sql, update-departments.sql, legacy-seed-data/)
 - `scripts/` - Processing utilities (parse-todos.js, parse-csv-data.js, run-import.mjs)
 
+### Static Assets (`public/`)
+- `back2stage_logo.svg` - Main logo with converted text outlines
+- `b2s_curtain_logo.svg` - Curtain logo/favicon
+- `site.webmanifest` - Web app manifest for PWA support
+- Favicon files (favicon.ico, favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png)
+
 ## Known Technical Solutions
 - **Tiptap SSR**: Use dynamic imports with `ssr: false` and `immediatelyRender: false`
 - **Drag-and-drop**: Use @dnd-kit with rectIntersection collision detection
@@ -127,6 +134,8 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - **Supabase typing workaround**: Use `(supabase as any)` for insert/update operations when TypeScript inference fails (temporary solution until better typing)
 - **Admin system architecture**: App-level security without RLS complexity. Client-side admin checks for UI, server-side validation in API routes using Authorization headers. No RLS policies needed for single-app use cases
 - **Real-time data sync**: Implemented robust real-time hooks with retry logic for all entities (items, tasks, notes). Uses generic `useRealtimeData` hook with automatic reconnection and error handling
+- **Task ranking system**: Use INTEGER field with 1000-unit spacing for drag-and-drop ranking. Avoid fractional values that cause PostgreSQL errors. Sort by priority → status → ranking for logical ordering
+- **Drag-and-drop animations**: Use DragOverlay with full-size card preview, custom drop animations, and proper isOverlay prop handling for better UX
 
 ## TODO Backlog
 
