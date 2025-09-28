@@ -41,7 +41,6 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **UI/UX**: German localization, compact design, mobile-responsive
 
 ### ⚠️ Known Issues
-- **Real-time Updates**: WebSocket connections fail, requiring manual refresh after changes
 - **Mobile Optimization**: Needs improvement across all views
 
 ## Technical Preferences
@@ -50,10 +49,10 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - Minimize client components ('use client')
 - Always add loading/error states
 - Semantic HTML elements
-- **ALWAYS run `npm run lint` and `npm run typecheck` after implementing large functionality or refactoring**
+- **ALWAYS run `npm run lint`, `npm run typecheck`, and `npm run build` after implementing large functionality or refactoring** (build catches additional TypeScript errors that typecheck might miss)
 
 ## Version Management
-**Current Version**: `0.5.0`
+**Current Version**: `0.6.0`
 
 Follow semantic versioning (SemVer) when creating commits and updating package.json version:
 
@@ -106,13 +105,17 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - `lib/auth-utils.ts` - Server-side admin utilities and role checking
 - `lib/utils.ts` - Utility functions
 - `hooks/use-admin-check.tsx` - Client-side admin role checking hook
-- `hooks/use-realtime-notes.tsx` - Real-time notes hook
+- `hooks/use-realtime-data.tsx` - Generic real-time hook for all entities with retry logic
+- `hooks/use-realtime-items.tsx` - Real-time items hook
+- `hooks/use-realtime-tasks.tsx` - Real-time tasks hook
+- `hooks/use-realtime-notes.tsx` - Legacy real-time notes hook
+- `hooks/use-realtime-notes-v2.tsx` - Improved real-time notes hook
 - `types/` - TypeScript definitions (database.ts, index.ts)
 
 ### Database & Scripts
-- `scripts/database-setup/` - Schema and setup (database-schema.sql, database-setup-complete.sql, supabase-storage-setup.sql, current-database-schema.sql, disable-rls-simplify.sql, assign-admin-role.sql, setup-default-user-roles.sql, SETUP-SIMPLIFIED-ADMIN.md)
+- `scripts/database-setup/` - Core schema and setup (database-schema.sql, database-setup-complete.sql, supabase-storage-setup.sql, disable-rls-simplify.sql, assign-admin-role.sql, SETUP-SIMPLIFIED-ADMIN.md)
 - `scripts/data-import/` - Active data utilities (populate-task-tags.sql, cleanup-tasks.sql)
-- `scripts/archive/` - Archived/obsolete scripts (cleanup-migration.sql, update-departments.sql, legacy-seed-data/)
+- `scripts/archive/` - Archived/obsolete scripts (add-privacy-fields.sql, add-user-roles.sql, fix-rls-policies.sql, populate-created-by-fields.sql, setup-default-user-roles.sql, cleanup-migration.sql, update-departments.sql, legacy-seed-data/)
 - `scripts/` - Processing utilities (parse-todos.js, parse-csv-data.js, run-import.mjs)
 
 ## Known Technical Solutions
@@ -123,28 +126,38 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - **Database schema changes**: When adding/removing table columns, ALWAYS update both database schema AND TypeScript types in `src/types/database.ts`
 - **Supabase typing workaround**: Use `(supabase as any)` for insert/update operations when TypeScript inference fails (temporary solution until better typing)
 - **Admin system architecture**: App-level security without RLS complexity. Client-side admin checks for UI, server-side validation in API routes using Authorization headers. No RLS policies needed for single-app use cases
-- **Real-time issues**: WebSocket connections close before establishing. Use manual refresh after data changes until resolved
+- **Real-time data sync**: Implemented robust real-time hooks with retry logic for all entities (items, tasks, notes). Uses generic `useRealtimeData` hook with automatic reconnection and error handling
 
 ## TODO Backlog
 
 ### High Priority
-1. **Real-time data synchronization** - Fix WebSocket connection issues preventing real-time updates. Critical for multi-user collaboration
-2. **Task ranking within priority** - Add drag-and-drop ranking within status/priority columns for better task organization
-3. **Mobile UI optimization** - Improve responsiveness across all views for mobile devices
+1. ~~**Real-time data synchronization** - Fix WebSocket connection issues preventing real-time updates. Critical for multi-user collaboration~~ ✅ **COMPLETED**
+2. **Clean up console output** - Remove excessive logging especially for tasks page to improve developer experience
+3. **Fix assignee removal bug** - Cannot select "Niemandem zugewiesen" to remove task assignee, last assignee persists
+4. **Task ranking within priority** - Add drag-and-drop ranking within status/priority columns for better task organization
+5. **Mobile UI optimization** - Improve responsiveness across all views for mobile devices
 
 ### Medium Priority
-4. **Done task management** - Strategy for completed tasks (archive, hide after X days, etc.)
-5. **Typography and styling updates** - General design improvements
-6. **Dark theme implementation** - Add dark mode support
-7. **Branding updates** - Replace logo and add custom favicon
-8. **Deployment setup** - Prepare and deploy application
+6. **Done task management** - Strategy for completed tasks (archive, hide after X days, etc.)
+7. **Typography and styling updates** - General design improvements
+8. **Dark theme implementation** - Add dark mode support
+9. **Branding updates** - Replace logo and add custom favicon
+10. **Deployment setup** - Prepare and deploy application
 
 ### Low Priority
-9. **Archive legacy scripts** - Clean up obsolete data import/processing scripts
-10. **Note versioning review** - Investigate current note version saving potential
-11. **Offline capabilities strategy** - Research offline data access options
+11. **Archive legacy scripts** - Clean up obsolete data import/processing scripts
+12. **Note versioning review** - Investigate current note version saving potential
+13. **Offline capabilities strategy** - Research offline data access options
 
 ## Recent Major Changes
+
+### v0.6.0 - Real-time Data Synchronization (Sept 2024)
+- **FEATURE**: Implemented comprehensive real-time data sync for all entities (items, tasks, notes)
+- **FEATURE**: Created generic `useRealtimeData` hook with retry logic and automatic reconnection
+- **FEATURE**: Added specialized real-time hooks: `useRealtimeItems`, `useRealtimeTasks`, `useRealtimeNotesV2`
+- **BUG FIX**: Resolved infinite subscription loop causing loading flicker in UI
+- **BUG FIX**: Fixed Supabase query syntax errors preventing task data loading
+- **IMPROVEMENT**: Task updates now reflect immediately without page refresh (privacy, assignee, status changes)
 
 ### v0.5.0 - Simplified Admin System (Sept 2024)
 - **BREAKING CHANGE**: Removed RLS policies in favor of app-level security

@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatsBar } from '@/components/ui/stats-bar'
-import { useRealtimeNotes } from '@/hooks/use-realtime-notes'
+import { useRealtimeNotesV2 } from '@/hooks/use-realtime-notes-v2'
 import { supabase } from '@/lib/supabase'
 import { Plus, Search, Users, ChevronDown, ChevronUp, X, Filter } from 'lucide-react'
 import type { Note, Department, User } from '@/types'
@@ -149,14 +149,14 @@ export default function NotesPage() {
     notes,
     loading,
     error,
-    activeEditors,
-    loadNotes,
-    saveNote,
+    refresh,
     createNote,
-    startEditing,
-    stopEditing,
-    getActiveEditors
-  } = useRealtimeNotes()
+    saveNote,
+    deleteNote,
+    toggleNoteLock,
+    canEdit,
+    isLocking
+  } = useRealtimeNotesV2({ enableLogs: true })
 
   // Load user and departments data
   useEffect(() => {
@@ -205,7 +205,7 @@ export default function NotesPage() {
   const handleSaveNote = async (noteId: string, content: string, title?: string, departmentId?: string | null, isPrivate?: boolean) => {
     try {
       await saveNote(noteId, content, title, departmentId, isPrivate)
-      await stopEditing(noteId)
+      await toggleNoteLock(noteId, false) // Unlock after saving
     } catch (error) {
       console.error('Failed to save note:', error)
     }
@@ -213,11 +213,7 @@ export default function NotesPage() {
 
   const handleLockNote = async (noteId: string, lock: boolean) => {
     try {
-      if (lock) {
-        await startEditing(noteId)
-      } else {
-        await stopEditing(noteId)
-      }
+      await toggleNoteLock(noteId, lock)
     } catch (error) {
       console.error('Failed to lock/unlock note:', error)
     }
@@ -233,32 +229,7 @@ export default function NotesPage() {
 
   const handleDeleteNote = async (noteId: string) => {
     try {
-      // Get the current session token
-      const { data: { session } } = await supabase.auth.getSession()
-
-      if (!session) {
-        alert('Nicht authentifiziert')
-        return
-      }
-
-      const response = await fetch(`/api/admin/notes/${noteId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        console.error('Failed to delete note:', error)
-        alert('Fehler beim Löschen der Notiz')
-        return
-      }
-
-      // Reload notes to reflect the deletion
-      // This ensures the UI updates even if real-time subscription doesn't catch it
-      await loadNotes()
+      await deleteNote(noteId)
     } catch (error) {
       console.error('Failed to delete note:', error)
       alert('Fehler beim Löschen der Notiz')
@@ -272,7 +243,6 @@ export default function NotesPage() {
   const statsData = {
     total: notes.length,
     locked: notes.filter(n => n.is_locked).length,
-    activeEditors: activeEditors.length,
     byDepartment: departments.map(dept => ({
       ...dept,
       count: notes.filter(n => n.department_id === dept.id).length
@@ -319,16 +289,6 @@ export default function NotesPage() {
             { label: 'Gesamt Notizen:', value: statsData.total },
             { label: 'Gesperrt:', value: statsData.locked, className: 'text-yellow-600' },
             { label: 'Bearbeitbar:', value: statsData.total - statsData.locked, className: 'text-green-600' },
-            {
-              label: (
-                <div className="flex items-center gap-1">
-                  <Users className="h-3 w-3" />
-                  Aktive Bearbeiter:
-                </div>
-              ),
-              value: statsData.activeEditors,
-              className: 'text-blue-600'
-            }
           ]}
         />
 
@@ -437,28 +397,18 @@ export default function NotesPage() {
         {/* Notes Grid */}
         {!loading && !error && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {filteredNotes.map((note) => {
-              const editors = getActiveEditors(note.id)
-              const isBeingEdited = editors.length > 0 &&
-                editors.some(e => e.userId !== currentUser?.id)
-
-              return (
-                <NoteCard
-                  key={note.id}
-                  note={{
-                    ...note,
-                    // Add real-time editing indicators
-                    activeEditors: editors
-                  }}
-                  currentUser={currentUser}
-                  onSave={handleSaveNote}
-                  onDelete={handleDeleteNote}
-                  onLock={handleLockNote}
-                  departments={departments}
-                  isBeingEditedByOthers={isBeingEdited}
-                />
-              )
-            })}
+            {filteredNotes.map((note) => (
+              <NoteCard
+                key={note.id}
+                note={note}
+                currentUser={currentUser}
+                onSave={handleSaveNote}
+                onDelete={handleDeleteNote}
+                onLock={handleLockNote}
+                departments={departments}
+                isBeingEditedByOthers={false} // Simplified for now
+              />
+            ))}
           </div>
         )}
 

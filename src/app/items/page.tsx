@@ -10,8 +10,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatsBar } from '@/components/ui/stats-bar'
+import { useRealtimeItems } from '@/hooks/use-realtime-items'
 import { supabase } from '@/lib/supabase'
-import { Plus, RefreshCw } from 'lucide-react'
+import { Plus, RefreshCw, Wifi, WifiOff } from 'lucide-react'
 import type { Item } from '@/types'
 
 // Mock data for now - this will be replaced with actual Supabase queries
@@ -91,61 +92,21 @@ const mockItems: Item[] = [
 ]
 
 export default function ItemsPage() {
-  const [items, setItems] = useState<Item[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // Use real-time hook instead of manual state management
+  const {
+    data: items,
+    loading,
+    error,
+    refresh,
+    insert: createItem,
+    update: updateItem,
+    remove: deleteItem
+  } = useRealtimeItems(true) // Enable logging for debugging
+
   const [formOpen, setFormOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
 
-  useEffect(() => {
-    loadItems()
-  }, [])
-
-  const loadItems = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const { data, error } = await supabase
-        .from('items')
-        .select(`
-          *,
-          category:categories(*),
-          characters:item_characters(character:characters(*)),
-          files:item_files(*)
-        `)
-        .order('updated_at', { ascending: false })
-
-      if (error) throw error
-
-      // Transform the data to match our Item interface
-      const transformedItems: Item[] = (data || []).map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        type: item.type,
-        scene: item.scene,
-        status: item.status,
-        is_consumable: item.is_consumable,
-        needs_clarification: item.needs_clarification,
-        needed_for_rehearsal: item.needed_for_rehearsal,
-        source: item.source,
-        notes: item.notes,
-        category_id: item.category_id,
-        created_by: item.created_by,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-        category: item.category,
-        characters: item.characters?.map((ic: any) => ic.character) || [],
-        files: item.files || []
-      }))
-
-      setItems(transformedItems)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load items')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleCreateItem = async (itemData: Partial<Item> & { character_ids?: string[] }) => {
     try {
@@ -183,7 +144,7 @@ export default function ItemsPage() {
           .insert(characterLinks)
       }
 
-      await loadItems() // Reload to get the full data with relations
+      // Real-time hook will automatically update the UI
     } catch (error) {
       console.error('Failed to create item:', error)
       throw error
@@ -222,7 +183,7 @@ export default function ItemsPage() {
         }
       }
 
-      await loadItems() // Reload to get updated data
+      // Real-time hook will automatically update the UI
       setEditingItem(null)
     } catch (error) {
       console.error('Failed to update item:', error)
@@ -268,7 +229,7 @@ export default function ItemsPage() {
         return
       }
 
-      await loadItems() // Reload items after deletion
+      // Real-time hook will automatically update the UI
     } catch (error) {
       console.error('Failed to delete item:', error)
       alert('Fehler beim Löschen des Items')
@@ -308,7 +269,7 @@ export default function ItemsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={loadItems}
+                onClick={refresh}
                 disabled={loading}
                 className="gap-2"
               >
@@ -356,7 +317,7 @@ export default function ItemsPage() {
               <div className="text-red-800 mb-2">{error}</div>
               <Button
                 variant="outline"
-                onClick={loadItems}
+                onClick={refresh}
                 className="gap-2"
               >
                 <RefreshCw className="h-4 w-4" />

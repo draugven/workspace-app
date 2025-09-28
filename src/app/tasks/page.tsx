@@ -15,13 +15,25 @@ import { StatsBar } from '@/components/ui/stats-bar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { useRealtimeTasks } from '@/hooks/use-realtime-tasks'
 import { supabase } from '@/lib/supabase'
-import { RefreshCw, Plus, Users, Filter, X, Search, ChevronDown, ChevronUp } from 'lucide-react'
+import { RefreshCw, Plus, Users, Filter, X, Search, ChevronDown, ChevronUp, Wifi, WifiOff } from 'lucide-react'
 import type { Task, Department, TaskTag, User } from '@/types'
 
 // All data is now loaded from Supabase - no mock data needed
 
 export default function TasksPage() {
+  // Use real-time hook for tasks
+  const {
+    data: tasks,
+    loading,
+    error,
+    refresh,
+    insert: createTask,
+    update: updateTask,
+    remove: deleteTask
+  } = useRealtimeTasks(true) // Enable logging
+
   const [viewMode, setViewMode] = useState<'board' | 'table'>('board')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null)
@@ -30,39 +42,24 @@ export default function TasksPage() {
   const [selectedPriority, setSelectedPriority] = useState<string | null>(null)
   const [selectedAssignee, setSelectedAssignee] = useState<string | null>(null)
   const [filtersExpanded, setFiltersExpanded] = useState(false)
-  const [tasks, setTasks] = useState<Task[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
   const [tags, setTags] = useState<TaskTag[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [addDialogOpen, setAddDialogOpen] = useState(false)
 
   useEffect(() => {
-    loadData()
+    loadSupportingData()
   }, [])
 
-  const loadData = async () => {
-    setLoading(true)
-    setError(null)
+  const loadSupportingData = async () => {
     try {
       // Get current user for privacy filtering
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      // Load all data in parallel
-      const [tasksResponse, departmentsResponse, tagsResponse, usersResponse] = await Promise.all([
-        supabase
-          .from('tasks')
-          .select(`
-            *,
-            department:departments(*),
-            tags:task_tag_assignments(tag:task_tags(*))
-          `)
-          .or(`is_private.eq.false,and(is_private.eq.true,created_by.eq.${user.id})`)
-          .order('updated_at', { ascending: false }),
-
+      // Load supporting data in parallel (tasks are handled by real-time hook)
+      const [departmentsResponse, tagsResponse, usersResponse] = await Promise.all([
         supabase
           .from('departments')
           .select('*')
@@ -77,7 +74,6 @@ export default function TasksPage() {
         fetch('/api/users').then(res => res.json())
       ])
 
-      if (tasksResponse.error) throw tasksResponse.error
       if (departmentsResponse.error) throw departmentsResponse.error
       if (tagsResponse.error) throw tagsResponse.error
 
@@ -92,53 +88,27 @@ export default function TasksPage() {
         setCurrentUser(currentUserData || null)
       }
 
-      // Transform tasks data to match our interface
-      const transformedTasks: Task[] = (tasksResponse.data || []).map((task: any) => ({
-        id: task.id,
-        title: task.title,
-        description: task.description,
-        status: task.status,
-        priority: task.priority,
-        due_date: task.due_date,
-        department_id: task.department_id,
-        assigned_to: task.assigned_to,
-        created_by: task.created_by,
-        is_private: task.is_private,
-        created_at: task.created_at,
-        updated_at: task.updated_at,
-        department: task.department,
-        tags: task.tags?.map((tt: any) => tt.tag) || []
-      }))
-
-      setTasks(transformedTasks)
       setDepartments(departmentsResponse.data || [])
       setTags(tagsResponse.data || [])
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load tasks')
-    } finally {
-      setLoading(false)
+      console.error('Failed to load supporting data:', err)
     }
   }
 
   const handleTaskUpdate = async (updatedTask: Task) => {
     try {
-      // Update task basic properties
-      const { error: taskError } = await (supabase as any)
-        .from('tasks')
-        .update({
-          title: updatedTask.title,
-          description: updatedTask.description,
-          status: updatedTask.status,
-          priority: updatedTask.priority,
-          due_date: updatedTask.due_date,
-          department_id: updatedTask.department_id,
-          assigned_to: updatedTask.assigned_to,
-          is_private: updatedTask.is_private
-        })
-        .eq('id', updatedTask.id)
-
-      if (taskError) throw taskError
+      // Use the real-time hook's update function instead of manual Supabase call
+      await updateTask(updatedTask.id, {
+        title: updatedTask.title,
+        description: updatedTask.description,
+        status: updatedTask.status,
+        priority: updatedTask.priority,
+        due_date: updatedTask.due_date,
+        department_id: updatedTask.department_id,
+        assigned_to: updatedTask.assigned_to,
+        is_private: updatedTask.is_private
+      })
 
       // Handle tag assignments if tags are provided
       if (updatedTask.tags !== undefined) {
@@ -165,8 +135,7 @@ export default function TasksPage() {
         }
       }
 
-      // Reload tasks to get updated data
-      await loadData()
+      // Real-time hook will automatically update the UI
     } catch (error) {
       console.error('Failed to update task:', error)
     }
@@ -174,31 +143,9 @@ export default function TasksPage() {
 
   const handleTaskDelete = async (taskId: string) => {
     try {
-      // Get the current session token
-      const { data: { session } } = await supabase.auth.getSession()
-
-      if (!session) {
-        alert('Nicht authentifiziert')
-        return
-      }
-
-      const response = await fetch(`/api/admin/tasks/${taskId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        console.error('Failed to delete task:', error)
-        alert('Fehler beim Löschen der Aufgabe')
-        return
-      }
-
-      // Reload tasks to reflect the deletion
-      await loadData()
+      // Use the real-time hook's delete function
+      await deleteTask(taskId)
+      // Real-time hook will automatically update the UI
     } catch (error) {
       console.error('Failed to delete task:', error)
       alert('Fehler beim Löschen der Aufgabe')
@@ -207,17 +154,9 @@ export default function TasksPage() {
 
   const handleTaskStatusChange = async (taskId: string, newStatus: Task['status']) => {
     try {
-      const { error } = await (supabase as any)
-        .from('tasks')
-        .update({ status: newStatus })
-        .eq('id', taskId)
-
-      if (error) throw error
-
-      // Update local state immediately for better UX
-      setTasks(prev => prev.map(task =>
-        task.id === taskId ? { ...task, status: newStatus } : task
-      ))
+      // Use the real-time hook's update function instead of manual Supabase call
+      await updateTask(taskId, { status: newStatus })
+      // Real-time hook will automatically update the UI
     } catch (error) {
       console.error('Failed to update task status:', error)
     }
@@ -225,28 +164,17 @@ export default function TasksPage() {
 
   const handleTaskCreate = async (newTaskData: Partial<Task>) => {
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('User not authenticated')
-
-      // Create the task with assignee
-      const { data: createdTask, error: taskError } = await (supabase as any)
-        .from('tasks')
-        .insert({
-          title: newTaskData.title,
-          description: newTaskData.description,
-          status: newTaskData.status || 'not_started',
-          priority: newTaskData.priority || 'medium',
-          department_id: newTaskData.department_id,
-          due_date: newTaskData.due_date,
-          created_by: user.id,
-          assigned_to: newTaskData.assigned_to,
-          is_private: newTaskData.is_private || false
-        })
-        .select()
-        .single()
-
-      if (taskError) throw taskError
+      // Use the real-time hook's create function instead of manual Supabase call
+      const createdTask = await createTask({
+        title: newTaskData.title!,
+        description: newTaskData.description,
+        status: newTaskData.status || 'not_started',
+        priority: newTaskData.priority || 'medium',
+        department_id: newTaskData.department_id,
+        due_date: newTaskData.due_date,
+        assigned_to: newTaskData.assigned_to,
+        is_private: newTaskData.is_private || false
+      })
 
       // Handle tag assignments if tags are provided
       if (newTaskData.tags && newTaskData.tags.length > 0) {
@@ -262,8 +190,7 @@ export default function TasksPage() {
         if (tagError) throw tagError
       }
 
-      // Reload tasks to get updated data with relations
-      await loadData()
+      // Real-time hook will automatically update the UI
     } catch (error) {
       console.error('Failed to create task:', error)
     }
@@ -725,7 +652,7 @@ export default function TasksPage() {
               <div className="text-red-800 mb-2">{error}</div>
               <Button
                 variant="outline"
-                onClick={loadData}
+                onClick={refresh}
                 className="gap-2"
               >
                 <RefreshCw className="h-4 w-4" />
