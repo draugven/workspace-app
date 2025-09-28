@@ -1,13 +1,23 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Lexend, Roboto } from 'next/font/google'
 import { AuthProvider } from '@/components/auth/auth-provider'
 import { Footer } from '@/components/layout/footer'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const lexend = Lexend({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-lexend',
+})
+
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+  variable: '--font-roboto',
+})
 
 export const metadata: Metadata = {
-  title: 'Theater Production App',
+  title: 'Back2Stage',
   description: 'Collaboration tool for theater productions',
   icons: {
     icon: [
@@ -36,7 +46,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
-      <body className={inter.className}>
+      <body className={`${roboto.variable} ${lexend.variable} font-sans`}>
         <AuthProvider>
           <div className="min-h-screen bg-background flex flex-col">
             <div className="flex-1">

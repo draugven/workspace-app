@@ -4,25 +4,26 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Branding Colors */
+    --background: 0 0% 97%; /* Light Gray #F7F7F7 */
+    --foreground: 217 18% 17%; /* Dark Gray #2C2C2E */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 217 18% 17%; /* Dark Gray #2C2C2E */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 47.4% 11.2%;
+    --popover-foreground: 217 18% 17%;
+    --primary: 220 36% 36%; /* Blue Primary #3A4D7A */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 97%; /* Light Gray #F7F7F7 */
+    --secondary-foreground: 217 18% 17%;
+    --muted: 0 0% 97%; /* Light Gray #F7F7F7 */
+    --muted-foreground: 0 0% 34%; /* Medium Gray #565656 */
+    --accent: 359 71% 58%; /* Red Accent #E74746 */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 359 71% 58%; /* Red for destructive actions */
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%;
+    --input: 0 0% 100%;
+    --ring: 220 36% 36%; /* Blue Primary for focus rings */
     --radius: 0.5rem;
   }
 
@@ -54,6 +55,36 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-roboto;
+  }
+}
+
+@layer utilities {
+  /* Font Families */
+  .font-lexend {
+    font-family: var(--font-lexend), 'Lexend', ui-sans-serif, system-ui, sans-serif;
+  }
+  .font-roboto {
+    font-family: var(--font-roboto), 'Roboto', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* Typography Hierarchy */
+  .text-h1 {
+    @apply font-lexend font-bold text-5xl leading-tight;
+  }
+  .text-h2 {
+    @apply font-lexend font-semibold text-4xl leading-tight;
+  }
+  .text-h3 {
+    @apply font-lexend font-medium text-2xl leading-tight;
+  }
+  .text-body {
+    @apply font-roboto font-normal text-base leading-relaxed;
+  }
+  .text-button {
+    @apply font-roboto font-medium text-sm;
+  }
+  .text-caption {
+    @apply font-roboto font-normal text-xs;
   }
 }

@@ -10,17 +10,17 @@ export default function HomePage() {
       <Navigation />
       <main className="container mx-auto py-10">
         <div className="flex flex-col items-center justify-center space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight">
-            Theater Produktions Dashboard
+          <h1 className="text-h1">
+            Dashboard
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl text-center">
-            Kollaborations-Tool für Theaterproduktionen - verwalte Requisiten, Aufgaben und Notizen.
+          <p className="text-body text-muted-foreground max-w-2xl text-center">
+            Kollaborations-Tool für Theaterproduktionen.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 w-full max-w-4xl">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Requisiten</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-h3">Requisiten</CardTitle>
+                <CardDescription className="text-body">
                   Verwalte Gegenstände mit anpassbaren Eigenschaften, Status und Charakterzuordnungen.
                 </CardDescription>
               </CardHeader>
@@ -34,8 +34,8 @@ export default function HomePage() {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Aufgabenverwaltung</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-h3">Aufgabenverwaltung</CardTitle>
+                <CardDescription className="text-body">
                   Organisiere Aufgaben nach Abteilungen mit mehrstufigem Workflow.
                 </CardDescription>
               </CardHeader>
@@ -49,8 +49,8 @@ export default function HomePage() {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Kollaborative Notizen</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-h3">Kollaborative Notizen</CardTitle>
+                <CardDescription className="text-body">
                   Rich-Text-Bearbeitung mit Konfliktwarnung und Versionsverlauf.
                 </CardDescription>
               </CardHeader>

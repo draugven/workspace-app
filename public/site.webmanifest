@@ -1,5 +1,5 @@
 {
-  "name": "Theater Production App",
+  "name": "Back2Stage",
   "short_name": "Back2Stage",
   "description": "Collaboration tool for theater productions",
   "icons": [
@@ -19,8 +19,8 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#ed1c24",
-  "background_color": "#ffffff",
+  "theme_color": "#3A4D7A",
+  "background_color": "#F7F7F7",
   "display": "standalone",
   "start_url": "/"
 }

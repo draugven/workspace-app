@@ -34,7 +34,7 @@ export function AuthSetup() {
         if (error) {
           setMessage(`Registrierungsfehler: ${error.message}`)
         } else {
-          setMessage('Überprüfen Sie Ihre E-Mail für den Bestätigungslink!')
+          setMessage('Überprüfe deine E-Mail für den Bestätigungslink!')
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -55,13 +55,7 @@ export function AuthSetup() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>{isSignUp ? 'Konto erstellen' : 'Anmelden'}</CardTitle>
-        <CardDescription>
-          {isSignUp
-            ? 'Erstellen Sie Ihr Konto für die Theater-Produktions-App'
-            : 'Melden Sie sich an, um auf die Theater-Produktions-App zuzugreifen'
-          }
-        </CardDescription>
+        <CardTitle className="text-h3">{isSignUp ? 'Konto erstellen' : 'Anmelden'}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleAuth} className="space-y-4">
@@ -83,7 +77,7 @@ export function AuthSetup() {
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Ihr Anzeigename"
+                placeholder="Dein Anzeigename"
               />
             </div>
           )}
@@ -96,7 +90,7 @@ export function AuthSetup() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="ihre-email@example.com"
+              placeholder="deine-email@example.com"
             />
           </div>
 
@@ -108,7 +102,7 @@ export function AuthSetup() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="Geben Sie Ihr Passwort ein"
+              placeholder="Gib dein Passwort ein"
               minLength={6}
             />
           </div>
@@ -131,8 +125,8 @@ export function AuthSetup() {
               className="text-sm text-muted-foreground hover:text-foreground underline"
             >
               {isSignUp
-                ? 'Haben Sie bereits ein Konto? Anmelden'
-                : 'Benötigen Sie ein Konto? Erstellen Sie eines'
+                ? 'Hast du bereits ein Konto? Anmelden'
+                : 'Brauchst du ein Konto? Erstelle eines'
               }
             </button>
           </div>

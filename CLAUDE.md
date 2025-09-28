@@ -53,7 +53,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **ALWAYS run `npm run lint`, `npm run typecheck`, and `npm run build` after implementing large functionality or refactoring** (build catches additional TypeScript errors that typecheck might miss)
 
 ## Version Management
-**Current Version**: `0.7.0`
+**Current Version**: `0.8.0`
 
 Follow semantic versioning (SemVer) when creating commits and updating package.json version:
 
@@ -149,7 +149,7 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 
 ### Medium Priority
 7. **Done task management** - Strategy for completed tasks (archive, hide after X days, etc.)
-8. **Typography and styling updates** - General design improvements
+8. ~~**Typography and styling updates** - General design improvements~~ ✅ **COMPLETED**
 9. **Dark theme implementation** - Add dark mode support
 10. ~~**Branding updates** - Replace logo and add custom favicon~~ ✅ **COMPLETED**
 11. **Deployment setup** - Prepare and deploy application
@@ -160,6 +160,15 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 14. **Offline capabilities strategy** - Research offline data access options
 
 ## Recent Major Changes
+
+### v0.8.0 - Typography & Branding System (Sept 2024)
+- **FEATURE**: Implemented comprehensive branding system with Lexend + Roboto font stack
+- **FEATURE**: Updated color scheme with professional blue primary (#3A4D7A) and red accent (#E74746)
+- **FEATURE**: Created typography hierarchy with custom CSS classes (text-h1, text-h2, text-h3, text-body, etc.)
+- **IMPROVEMENT**: Updated all major components to use new typography system
+- **IMPROVEMENT**: Replaced "Theater Production App" branding with "Back2Stage" throughout
+- **IMPROVEMENT**: Converted login/signup forms to informal German language (du/dir)
+- **IMPROVEMENT**: Enhanced web manifest with new theme colors for PWA support
 
 ### v0.7.0 - Task Ranking System & UI Enhancements (Sept 2024)
 - **FEATURE**: Implemented comprehensive drag-and-drop task ranking within priority groups
