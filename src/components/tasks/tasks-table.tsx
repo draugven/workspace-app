@@ -44,14 +44,24 @@ export function TasksTable({
   const priorityOrder = { 'urgent': 4, 'high': 3, 'medium': 2, 'low': 1 }
 
   const sortedTasks = [...tasks].sort((a, b) => {
+    // Default sorting: priority first, then status, then ranking
+    if (sortField === 'priority' || (!sortField)) {
+      // Priority sorting (urgent > high > medium > low)
+      const priorityDiff = (priorityOrder[b.priority as keyof typeof priorityOrder] || 0) - (priorityOrder[a.priority as keyof typeof priorityOrder] || 0)
+      if (priorityDiff !== 0) return priorityDiff
+
+      // Then by status (not_started, in_progress, blocked, done)
+      const statusOrder = { 'not_started': 4, 'in_progress': 3, 'blocked': 2, 'done': 1 }
+      const statusDiff = (statusOrder[b.status as keyof typeof statusOrder] || 0) - (statusOrder[a.status as keyof typeof statusOrder] || 0)
+      if (statusDiff !== 0) return statusDiff
+
+      // Finally by ranking within the same priority+status group
+      return (a.ranking || 0) - (b.ranking || 0)
+    }
+
+    // Handle other field sorting
     let aVal: any = a[sortField] || ''
     let bVal: any = b[sortField] || ''
-
-    // Special handling for priority sorting
-    if (sortField === 'priority') {
-      aVal = priorityOrder[a.priority as keyof typeof priorityOrder] || 0
-      bVal = priorityOrder[b.priority as keyof typeof priorityOrder] || 0
-    }
 
     // Special handling for due date
     if (sortField === 'due_date') {

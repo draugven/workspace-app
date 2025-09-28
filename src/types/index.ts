@@ -72,6 +72,7 @@ export interface Task {
   assigned_to?: string
   created_by?: string
   is_private?: boolean
+  ranking: number
   created_at: string
   updated_at: string
   // Relations

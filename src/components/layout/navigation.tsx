@@ -32,8 +32,9 @@ export function Navigation() {
                 src="/back2stage_logo.svg"
                 alt="Back2Stage"
                 width={150}
-                height={32}
+                height={28}
                 priority
+                style={{ width: 'auto', height: 'auto' }}
               />
             </Link>
             <div className="hidden md:flex space-x-4">

@@ -81,6 +81,7 @@ CREATE TABLE tasks (
   assigned_to UUID REFERENCES auth.users(id),
   created_by UUID REFERENCES auth.users(id),
   is_private BOOLEAN DEFAULT FALSE,
+  ranking INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -145,6 +146,8 @@ CREATE INDEX idx_tasks_status ON tasks(status);
 CREATE INDEX idx_tasks_department ON tasks(department_id);
 CREATE INDEX idx_tasks_assigned_to ON tasks(assigned_to);
 CREATE INDEX idx_tasks_due_date ON tasks(due_date);
+CREATE INDEX idx_tasks_ranking ON tasks(priority, status, ranking);
+CREATE INDEX idx_tasks_priority_ranking ON tasks(priority, ranking);
 CREATE INDEX idx_notes_department ON notes(department_id);
 CREATE INDEX idx_notes_updated_at ON notes(updated_at);
 CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);

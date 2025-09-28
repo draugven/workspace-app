@@ -15,7 +15,9 @@ import {
   DragOverlay,
   Active,
   Over,
-  useDroppable
+  useDroppable,
+  defaultDropAnimationSideEffects,
+  DragOverlayProps
 } from '@dnd-kit/core'
 import { GripVertical, EyeOff } from 'lucide-react'
 import {
@@ -41,6 +43,7 @@ interface TaskBoardProps {
   tasks: Task[]
   onTaskStatusChange?: (taskId: string, newStatus: Task['status']) => void
   onTaskUpdate?: (updatedTask: Task) => void
+  onTaskRankingUpdate?: (taskId: string, newRanking: number, newStatus?: Task['status']) => void
   onTaskDelete?: (taskId: string) => void
   departments?: Department[]
   tags?: TaskTag[]
@@ -120,9 +123,10 @@ interface DraggableTaskCardProps {
   task: Task
   onClick: (task: Task) => void
   users?: User[]
+  isOverlay?: boolean
 }
 
-function DraggableTaskCard({ task, onClick, users = [] }: DraggableTaskCardProps) {
+function DraggableTaskCard({ task, onClick, users = [], isOverlay = false }: DraggableTaskCardProps) {
   const {
     attributes,
     listeners,
@@ -139,31 +143,44 @@ function DraggableTaskCard({ task, onClick, users = [] }: DraggableTaskCardProps
   })
 
   const departmentStyle = getDepartmentCardStyle(task.department)
-  const style = {
+
+  // Different styles for overlay vs normal card
+  const style = isOverlay ? {
+    ...departmentStyle,
+    cursor: 'grabbing',
+  } : {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.3 : 1,
     ...departmentStyle
   }
 
   return (
     <Card
-      ref={setNodeRef}
+      ref={isOverlay ? undefined : setNodeRef}
       style={style}
-      {...attributes}
-      className="bg-white shadow-sm hover:shadow-md transition-shadow relative"
+      {...(isOverlay ? {} : attributes)}
+      className={isOverlay
+        ? "bg-white shadow-xl border-2 border-blue-400 transform rotate-2 scale-105 relative"
+        : "bg-white shadow-sm hover:shadow-md transition-shadow relative"
+      }
     >
-      {/* Drag Handle */}
-      <div
-        {...listeners}
-        className="absolute top-2 left-2 p-1 opacity-30 hover:opacity-60 cursor-grab active:cursor-grabbing"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <GripVertical className="h-3 w-3 text-gray-400" />
-      </div>
+      {/* Drag Handle - only show for non-overlay cards */}
+      {!isOverlay && (
+        <div
+          {...listeners}
+          className="absolute top-2 left-2 p-1 opacity-30 hover:opacity-60 cursor-grab active:cursor-grabbing"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVertical className="h-3 w-3 text-gray-400" />
+        </div>
+      )}
 
       {/* Clickable Card Content */}
-      <div onClick={() => onClick(task)} className="cursor-pointer pl-6">
+      <div
+        onClick={() => onClick(task)}
+        className={isOverlay ? "cursor-grabbing" : "cursor-pointer pl-6"}
+      >
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="text-sm line-clamp-2">{task.title}</CardTitle>
@@ -233,6 +250,7 @@ export function TaskBoard({
   tasks,
   onTaskStatusChange,
   onTaskUpdate,
+  onTaskRankingUpdate,
   onTaskDelete,
   departments = [],
   tags = [],
@@ -280,26 +298,91 @@ export function TaskBoard({
 
     const activeId = active.id as string
     const overId = over.id as string
+    const activeTask = tasks.find(t => t.id === activeId)
+
+    if (!activeTask) return
 
     console.log('Drag end:', { activeId, overId })
 
-    // Check if we're dropping over a status column
-    let targetStatus = overId
-    if (!statusColumns.find(col => col.status === overId)) {
-      // If not dropped on column directly, check if dropped on a task
+    // Check if we're dropping over a status column or another task
+    let targetStatus = activeTask.status
+    let targetTaskIndex = -1
+
+    // If dropped on a column
+    if (statusColumns.find(col => col.status === overId)) {
+      targetStatus = overId as Task['status']
+    } else {
+      // If dropped on another task
       const overTask = tasks.find(t => t.id === overId)
       if (overTask) {
         targetStatus = overTask.status
+        // Find the target task's position in its priority group
+        const tasksInStatus = tasks
+          .filter(t => t.status === overTask.status && t.priority === activeTask.priority)
+          .sort((a, b) => (a.ranking || 0) - (b.ranking || 0))
+        targetTaskIndex = tasksInStatus.findIndex(t => t.id === overId)
       }
     }
 
-    // Validate targetStatus
-    const validStatus = statusColumns.find(col => col.status === targetStatus)?.status
-    if (validStatus) {
-      const task = tasks.find(t => t.id === activeId)
-      if (task && task.status !== validStatus && onTaskStatusChange) {
-        console.log('Updating task status:', activeId, 'to', validStatus)
-        onTaskStatusChange(activeId, validStatus as Task['status'])
+    // Handle status change
+    if (activeTask.status !== targetStatus) {
+      if (onTaskStatusChange) {
+        console.log('Updating task status:', activeId, 'to', targetStatus)
+        onTaskStatusChange(activeId, targetStatus)
+      }
+      return
+    }
+
+    // Handle ranking change within the same status and priority
+    if (activeTask.status === targetStatus && targetTaskIndex >= 0 && onTaskRankingUpdate) {
+      // Get all tasks in the same status and priority (INCLUDING the active task for now)
+      const allTasksInPriority = tasks
+        .filter(t => t.status === targetStatus && t.priority === activeTask.priority)
+        .sort((a, b) => (a.ranking || 0) - (b.ranking || 0))
+
+      // Find where we want to insert (the target task's current position)
+      const targetTask = tasks.find(t => t.id === overId)
+      const targetRanking = targetTask?.ranking || 0
+
+      // Now get the list without the active task for calculating new position
+      const tasksWithoutActive = allTasksInPriority.filter(t => t.id !== activeId)
+
+      // Calculate new ranking based on where we want to insert relative to target
+      let newRanking = 0
+
+      if (tasksWithoutActive.length === 0) {
+        // Only task in this priority group
+        newRanking = 1000
+      } else {
+        // Find the target task in the filtered list
+        const targetTaskInFiltered = tasksWithoutActive.find(t => t.id === overId)
+
+        if (!targetTaskInFiltered) {
+          // Target task is not in the same priority - shouldn't happen, but fallback
+          newRanking = tasksWithoutActive[tasksWithoutActive.length - 1].ranking + 1000
+        } else {
+          const targetIndexInFiltered = tasksWithoutActive.indexOf(targetTaskInFiltered)
+
+          if (targetIndexInFiltered === 0) {
+            // Insert before the first task
+            newRanking = Math.max(targetTaskInFiltered.ranking - 1000, 1)
+          } else {
+            // Insert between the previous task and the target task
+            const prevTask = tasksWithoutActive[targetIndexInFiltered - 1]
+            const gap = targetTaskInFiltered.ranking - prevTask.ranking
+
+            if (gap > 1) {
+              newRanking = Math.floor(prevTask.ranking + gap / 2)
+            } else {
+              newRanking = prevTask.ranking + 500
+            }
+          }
+        }
+      }
+
+      if (newRanking !== activeTask.ranking) {
+        console.log('Updating task ranking:', activeId, 'from', activeTask.ranking, 'to', newRanking)
+        onTaskRankingUpdate(activeId, newRanking)
       }
     }
   }
@@ -314,33 +397,59 @@ export function TaskBoard({
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {statusColumns.map(({ status, title, color }) => {
-            const columnTasks = tasks.filter(task => task.status === status)
+            const columnTasks = tasks
+              .filter(task => task.status === status)
+              .sort((a, b) => {
+                // First sort by priority (urgent > high > medium > low)
+                const priorityOrder = { 'urgent': 4, 'high': 3, 'medium': 2, 'low': 1 }
+                const priorityDiff = (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0)
+                if (priorityDiff !== 0) return priorityDiff
+
+                // Then sort by ranking within the same priority
+                return (a.ranking || 0) - (b.ranking || 0)
+              })
 
             return (
-              <DroppableColumn
+              <SortableContext
                 key={status}
-                status={status}
-                title={title}
-                color={color}
-                tasks={columnTasks}
-                activeTask={activeTask}
-                onTaskClick={handleTaskClick}
-                users={users}
-              />
+                id={status}
+                items={columnTasks.map(task => task.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <DroppableColumn
+                  status={status}
+                  title={title}
+                  color={color}
+                  tasks={columnTasks}
+                  activeTask={activeTask}
+                  onTaskClick={handleTaskClick}
+                  users={users}
+                />
+              </SortableContext>
             )
           })}
         </div>
 
-        <DragOverlay>
+        <DragOverlay
+          dropAnimation={{
+            duration: 200,
+            easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+            sideEffects: defaultDropAnimationSideEffects({
+              styles: {
+                active: {
+                  opacity: '0.5',
+                },
+              },
+            }),
+          }}
+        >
           {activeTask ? (
-            <Card className="bg-white shadow-lg border-2 border-blue-500 opacity-90 rotate-3">
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="text-sm line-clamp-2">{activeTask.title}</CardTitle>
-                  <PriorityBadge priority={activeTask.priority} />
-                </div>
-              </CardHeader>
-            </Card>
+            <DraggableTaskCard
+              task={activeTask}
+              onClick={() => {}}
+              users={users}
+              isOverlay
+            />
           ) : null}
         </DragOverlay>
       </DndContext>

@@ -52,7 +52,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **ALWAYS run `npm run lint`, `npm run typecheck`, and `npm run build` after implementing large functionality or refactoring** (build catches additional TypeScript errors that typecheck might miss)
 
 ## Version Management
-**Current Version**: `0.6.0`
+**Current Version**: `0.7.0`
 
 Follow semantic versioning (SemVer) when creating commits and updating package.json version:
 
@@ -113,7 +113,7 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - `types/` - TypeScript definitions (database.ts, index.ts)
 
 ### Database & Scripts
-- `scripts/database-setup/` - Core schema and setup (database-schema.sql, database-setup-complete.sql, supabase-storage-setup.sql, disable-rls-simplify.sql, assign-admin-role.sql, SETUP-SIMPLIFIED-ADMIN.md)
+- `scripts/database-setup/` - Core schema and setup (database-schema.sql, database-setup-complete.sql, supabase-storage-setup.sql, disable-rls-simplify.sql, assign-admin-role.sql, add-task-ranking.sql, SETUP-SIMPLIFIED-ADMIN.md)
 - `scripts/data-import/` - Active data utilities (populate-task-tags.sql, cleanup-tasks.sql)
 - `scripts/archive/` - Archived/obsolete scripts (add-privacy-fields.sql, add-user-roles.sql, fix-rls-policies.sql, populate-created-by-fields.sql, setup-default-user-roles.sql, cleanup-migration.sql, update-departments.sql, legacy-seed-data/)
 - `scripts/` - Processing utilities (parse-todos.js, parse-csv-data.js, run-import.mjs)
@@ -134,22 +134,32 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 1. ~~**Real-time data synchronization** - Fix WebSocket connection issues preventing real-time updates. Critical for multi-user collaboration~~ ✅ **COMPLETED**
 2. **Clean up console output** - Remove excessive logging especially for tasks page to improve developer experience
 3. **Fix assignee removal bug** - Cannot select "Niemandem zugewiesen" to remove task assignee, last assignee persists
-4. **Task ranking within priority** - Add drag-and-drop ranking within status/priority columns for better task organization
-5. **Mobile UI optimization** - Improve responsiveness across all views for mobile devices
+4. ~~**Task ranking within priority** - Add drag-and-drop ranking within status/priority columns for better task organization~~ ✅ **COMPLETED**
+5. **Debug task ranking drag-and-drop** - Fix remaining positioning bugs in Kanban view task reordering within priority groups
+6. **Mobile UI optimization** - Improve responsiveness across all views for mobile devices
 
 ### Medium Priority
-6. **Done task management** - Strategy for completed tasks (archive, hide after X days, etc.)
-7. **Typography and styling updates** - General design improvements
-8. **Dark theme implementation** - Add dark mode support
-9. ~~**Branding updates** - Replace logo and add custom favicon~~ ✅ **COMPLETED**
-10. **Deployment setup** - Prepare and deploy application
+7. **Done task management** - Strategy for completed tasks (archive, hide after X days, etc.)
+8. **Typography and styling updates** - General design improvements
+9. **Dark theme implementation** - Add dark mode support
+10. ~~**Branding updates** - Replace logo and add custom favicon~~ ✅ **COMPLETED**
+11. **Deployment setup** - Prepare and deploy application
 
 ### Low Priority
-11. **Archive legacy scripts** - Clean up obsolete data import/processing scripts
-12. **Note versioning review** - Investigate current note version saving potential
-13. **Offline capabilities strategy** - Research offline data access options
+12. **Archive legacy scripts** - Clean up obsolete data import/processing scripts
+13. **Note versioning review** - Investigate current note version saving potential
+14. **Offline capabilities strategy** - Research offline data access options
 
 ## Recent Major Changes
+
+### v0.7.0 - Task Ranking System & UI Enhancements (Sept 2024)
+- **FEATURE**: Implemented comprehensive drag-and-drop task ranking within priority groups
+- **FEATURE**: Added ranking field to database schema with proper indexing for performance
+- **FEATURE**: Enhanced Kanban view with within-priority column ranking using @dnd-kit SortableContext
+- **FEATURE**: Improved Table view default sorting: priority → status → ranking for logical task ordering
+- **IMPROVEMENT**: Better drag-and-drop animations with full-size card preview and smooth drop effects
+- **BUG FIX**: Fixed image aspect ratio warning for Back2Stage logo in navigation
+- **IMPROVEMENT**: Task creation now automatically assigns ranking for proper positioning within priority groups
 
 ### v0.6.0 - Real-time Data Synchronization (Sept 2024)
 - **FEATURE**: Implemented comprehensive real-time data sync for all entities (items, tasks, notes)
@@ -170,6 +180,17 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - Added privacy toggles for creator-only content visibility
 
 ## Development Sessions
+
+### Sept 2024 - Task Ranking System Implementation
+**Key Achievement**: Implemented comprehensive drag-and-drop ranking within priority groups for better task organization
+- Added `ranking` field to database schema with proper indexing for performance
+- Updated TypeScript types and database schema files (database-schema.sql, database-setup-complete.sql)
+- Created ranking migration script (add-task-ranking.sql) with automatic ranking initialization
+- Enhanced Kanban view with within-priority column ranking using @dnd-kit SortableContext
+- Improved Table view default sorting: priority → status → ranking for logical task ordering
+- Added ranking calculation logic for task creation (places new tasks at bottom of priority group)
+- Implemented drag-and-drop ranking updates with fractional ranking system for smooth reordering
+- All changes pass TypeScript checking and build successfully
 
 ### Sept 2024 - Real-time Data Synchronization Implementation
 **Key Achievement**: Fixed comprehensive real-time updates for all entities (items, tasks, notes)

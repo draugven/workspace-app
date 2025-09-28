@@ -220,6 +220,7 @@ export interface Database {
           assigned_to: string | null
           created_by: string | null
           is_private: boolean
+          ranking: number
           created_at: string
           updated_at: string
         }
@@ -234,6 +235,7 @@ export interface Database {
           assigned_to?: string | null
           created_by?: string | null
           is_private?: boolean
+          ranking?: number
           created_at?: string
           updated_at?: string
         }
@@ -248,6 +250,7 @@ export interface Database {
           assigned_to?: string | null
           created_by?: string | null
           is_private?: boolean
+          ranking?: number
           created_at?: string
           updated_at?: string
         }

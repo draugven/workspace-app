@@ -162,18 +162,41 @@ export default function TasksPage() {
     }
   }
 
+  const handleTaskRankingUpdate = async (taskId: string, newRanking: number, newStatus?: Task['status']) => {
+    try {
+      // Use the real-time hook's update function to update ranking
+      const updateData: any = { ranking: newRanking }
+      if (newStatus) {
+        updateData.status = newStatus
+      }
+      await updateTask(taskId, updateData)
+      // Real-time hook will automatically update the UI
+    } catch (error) {
+      console.error('Failed to update task ranking:', error)
+    }
+  }
+
   const handleTaskCreate = async (newTaskData: Partial<Task>) => {
     try {
+      const status = newTaskData.status || 'not_started'
+      const priority = newTaskData.priority || 'medium'
+
+      // Calculate initial ranking to place new task at the bottom of its priority+status group
+      const tasksInGroup = tasks.filter(t => t.status === status && t.priority === priority)
+      const maxRanking = tasksInGroup.length > 0 ? Math.max(...tasksInGroup.map(t => t.ranking || 0)) : 0
+      const newRanking = maxRanking + 1000
+
       // Use the real-time hook's create function instead of manual Supabase call
       const createdTask = await createTask({
         title: newTaskData.title!,
         description: newTaskData.description,
-        status: newTaskData.status || 'not_started',
-        priority: newTaskData.priority || 'medium',
+        status: status,
+        priority: priority,
         department_id: newTaskData.department_id,
         due_date: newTaskData.due_date,
         assigned_to: newTaskData.assigned_to,
-        is_private: newTaskData.is_private || false
+        is_private: newTaskData.is_private || false,
+        ranking: newRanking
       })
 
       // Handle tag assignments if tags are provided
@@ -698,6 +721,7 @@ export default function TasksPage() {
                       tasks={filteredTasks}
                       onTaskStatusChange={handleTaskStatusChange}
                       onTaskUpdate={handleTaskUpdate}
+                      onTaskRankingUpdate={handleTaskRankingUpdate}
                       onTaskDelete={handleTaskDelete}
                       departments={departments}
                       tags={tags}
