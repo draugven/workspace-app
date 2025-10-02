@@ -53,7 +53,7 @@ export function Combobox({
   const selectedOption = options.find((option) => option.value === value)
 
   const handleSelect = (selectedValue: string) => {
-    onValueChange?.(selectedValue === value ? "" : selectedValue)
+    onValueChange?.(selectedValue)
     setOpen(false)
     setSearchValue("")
   }

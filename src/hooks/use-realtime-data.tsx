@@ -274,8 +274,13 @@ export function useRealtimeData<T extends { id: string }>({
 
   const update = useCallback(async (id: string, updates: Partial<T>) => {
     try {
+      // Convert undefined values to null for proper Supabase handling
+      const cleanUpdates = Object.fromEntries(
+        Object.entries(updates).map(([key, value]) => [key, value === undefined ? null : value])
+      )
+
       const updateData = {
-        ...updates,
+        ...cleanUpdates,
         updated_at: new Date().toISOString()
       }
 
