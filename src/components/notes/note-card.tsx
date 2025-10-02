@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { TiptapEditorWrapper } from './tiptap-editor-wrapper'
 import type { Note, Department, User } from "@/types"
-import { Edit, Lock, History, Save, Users, AlertTriangle, Eye, EyeOff, Trash2 } from 'lucide-react'
+import { Edit, Lock, History, Save, Users, AlertTriangle, Eye, EyeOff, Trash2, X } from 'lucide-react'
 import { useAdminCheck } from '@/hooks/use-admin-check'
 
 interface NoteCardProps {
@@ -93,7 +93,7 @@ export function NoteCard({
   return (
     <Card className="h-fit">
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-2">
+        <div className="sm:flex sm:items-start sm:justify-between sm:gap-2 space-y-2 sm:space-y-0">
           <div className="flex-1 min-w-0">
             {isEditing ? (
               <input
@@ -106,7 +106,7 @@ export function NoteCard({
             ) : (
               <CardTitle className="text-lg">{note.title}</CardTitle>
             )}
-            <CardDescription className="flex items-center gap-2 mt-1">
+            <CardDescription className="flex items-center gap-2 mt-1 hidden sm:flex">
               <span>Erstellt: {new Date(note.created_at).toLocaleDateString('de-DE')}</span>
               {note.updated_at !== note.created_at && (
                 <span>• Geändert: {new Date(note.updated_at).toLocaleDateString('de-DE')}</span>
@@ -114,11 +114,11 @@ export function NoteCard({
             </CardDescription>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {note.is_private && (
               <Badge variant="secondary" className="gap-1">
                 <EyeOff className="h-3 w-3" />
-                Privat
+                <span className="hidden sm:inline">Privat</span>
               </Badge>
             )}
 
@@ -163,7 +163,7 @@ export function NoteCard({
                 className="gap-2"
               >
                 <Edit className="h-4 w-4" />
-                Bearbeiten
+                <span className="hidden sm:inline">Bearbeiten</span>
               </Button>
             )}
 
@@ -221,7 +221,7 @@ export function NoteCard({
                   title="Als Admin löschen"
                 >
                   <Trash2 className="h-4 w-4" />
-                  Löschen
+                  <span className="hidden sm:inline">Löschen</span>
                 </Button>
               )
             )}
@@ -231,9 +231,9 @@ export function NoteCard({
 
       <CardContent>
         {isEditing ? (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="department">Abteilung</Label>
+              <Label htmlFor="department" className="text-sm">Abteilung</Label>
               <Combobox
                 options={[
                   { value: "none", label: "Keine Abteilung" },
@@ -256,7 +256,7 @@ export function NoteCard({
                   checked={editIsPrivate}
                   onCheckedChange={setEditIsPrivate}
                 />
-                <Label htmlFor="is_private" className="text-sm">
+                <Label htmlFor="is_private" className="text-xs sm:text-sm">
                   Privat (nur für mich sichtbar)
                 </Label>
               </div>
@@ -270,13 +270,14 @@ export function NoteCard({
               lockedBy={isLocked ? getLockedByName() : undefined}
               placeholder="Schreibe deine Notizen für die Produktion..."
             />
-            <div className="flex gap-2">
-              <Button onClick={handleSave} className="gap-2">
+            <div className="flex gap-2 pt-2">
+              <Button onClick={handleSave} className="gap-2 flex-1 sm:flex-none">
                 <Save className="h-4 w-4" />
-                Speichern
+                <span className="hidden sm:inline">Speichern</span>
               </Button>
-              <Button variant="outline" onClick={handleCancel}>
-                Abbrechen
+              <Button variant="outline" onClick={handleCancel} className="flex-1 sm:flex-none">
+                <X className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Abbrechen</span>
               </Button>
             </div>
           </div>

@@ -20,30 +20,35 @@ export function PageHeader({
   actions
 }: PageHeaderProps) {
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex-1">
-        <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-        <p className="text-muted-foreground">{description}</p>
-      </div>
+    <div className="space-y-4">
+      {/* Title Section and Actions - desktop: same line, mobile: stacked */}
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+        {/* Title Section */}
+        <div className="flex-shrink-0">
+          <h1 className="text-h3 text-foreground">{title}</h1>
+          <p className="text-muted-foreground text-sm">{description}</p>
+        </div>
 
-      <div className="flex items-center gap-4">
-        {onSearchChange && (
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder={searchPlaceholder}
-              value={searchValue}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        )}
+        {/* Search and Actions */}
+        <div className="flex flex-col sm:flex-row gap-4 lg:flex-shrink-0">
+          {onSearchChange && (
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={searchPlaceholder}
+                value={searchValue}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          )}
 
-        {actions && (
-          <div className="flex items-center gap-2">
-            {actions}
-          </div>
-        )}
+          {actions && (
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              {actions}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

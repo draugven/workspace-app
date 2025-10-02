@@ -266,11 +266,11 @@ export function TaskAddDialog({
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel}>
             <X className="h-4 w-4 mr-2" />
-            Abbrechen
+            <span className="hidden sm:inline">Abbrechen</span>
           </Button>
           <Button onClick={handleSave} disabled={!isFormValid}>
             <Plus className="h-4 w-4 mr-2" />
-            Aufgabe erstellen
+            <span className="hidden sm:inline">Aufgabe erstellen</span>
           </Button>
         </DialogFooter>
       </DialogContent>

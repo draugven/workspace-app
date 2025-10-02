@@ -269,7 +269,7 @@ export function TiptapEditor({
           size="sm"
           onClick={onSave}
           disabled={isLocked}
-          className="gap-2"
+          className="gap-2 hidden sm:flex"
         >
           <Save className="h-4 w-4" />
           Speichern

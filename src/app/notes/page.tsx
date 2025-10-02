@@ -266,9 +266,10 @@ export default function NotesPage() {
                   variant="outline"
                   onClick={() => setFiltersExpanded(true)}
                   className="gap-2"
+                  title="Filter"
                 >
                   <Filter className="h-4 w-4" />
-                  Filter
+                  <span className="hidden sm:inline">Filter</span>
                   {hasActiveFilters && (
                     <Badge variant="secondary" className="ml-1">
                       {[filterDepartment && 'Abteilung'].filter(Boolean).length}
@@ -276,9 +277,9 @@ export default function NotesPage() {
                   )}
                 </Button>
               )}
-              <Button className="gap-2" onClick={handleOpenAddDialog} disabled={loading}>
+              <Button className="gap-2" onClick={handleOpenAddDialog} disabled={loading} title="Neue Notiz">
                 <Plus className="h-4 w-4" />
-                Neue Notiz
+                <span className="hidden sm:inline">Neue Notiz</span>
               </Button>
             </>
           }

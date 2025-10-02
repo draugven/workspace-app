@@ -155,11 +155,11 @@ export function NoteAddDialog({
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel}>
             <X className="h-4 w-4 mr-2" />
-            Abbrechen
+            <span className="hidden sm:inline">Abbrechen</span>
           </Button>
           <Button onClick={handleSave} disabled={!isFormValid}>
             <Plus className="h-4 w-4 mr-2" />
-            Notiz erstellen
+            <span className="hidden sm:inline">Notiz erstellen</span>
           </Button>
         </DialogFooter>
       </DialogContent>

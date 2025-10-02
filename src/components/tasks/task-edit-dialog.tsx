@@ -248,7 +248,7 @@ export function TaskEditDialog({
           )}
         </div>
 
-        <DialogFooter className="flex justify-between">
+        <DialogFooter className="flex flex-row justify-between items-center">
           {/* Admin delete button */}
           {isAdmin && (
             <div className="flex gap-2">
@@ -265,7 +265,7 @@ export function TaskEditDialog({
                     variant="outline"
                     onClick={() => setShowDeleteConfirm(false)}
                   >
-                    Abbrechen
+                    <span className="hidden sm:inline">Abbrechen</span>
                   </Button>
                 </>
               ) : (
@@ -275,19 +275,19 @@ export function TaskEditDialog({
                   className="gap-2 text-destructive hover:bg-destructive hover:text-destructive-foreground"
                 >
                   <Trash2 className="h-4 w-4" />
-                  Löschen
+                  <span className="hidden sm:inline">Löschen</span>
                 </Button>
               )}
             </div>
           )}
-          <div className="flex gap-2 ml-auto">
+          <div className="flex gap-2">
             <Button variant="outline" onClick={handleCancel}>
               <X className="h-4 w-4 mr-2" />
-              Abbrechen
+              <span className="hidden sm:inline">Abbrechen</span>
             </Button>
             <Button onClick={handleSave}>
               <Save className="h-4 w-4 mr-2" />
-              Speichern
+              <span className="hidden sm:inline">Speichern</span>
             </Button>
           </div>
         </DialogFooter>

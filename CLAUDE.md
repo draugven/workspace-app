@@ -38,19 +38,18 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Task Management**: Kanban + table views with drag-and-drop, assignees, rich text descriptions
 - **Collaborative Notes**: Rich text editor with hyperlink support and department assignment
 - **Admin System**: App-level security with delete permissions (no RLS complexity)
-- **UI/UX**: German localization, compact design, mobile-responsive
+- **UI/UX**: German localization, compact design, fully mobile-responsive
 
 ### ⚠️ Known Issues
-- **Mobile Optimization**: Needs improvement across all views
 - **Next.js Image warning**: Console warning about aspect ratio for main logo (functional, cosmetic only)
 
-### 🔄 Current Development Status (Sept 2024)
-- **Version**: 0.8.1 (committed: 503b455)
-- **Active**: Typography & branding system fully implemented
-- **Dev Server**: Running on port 3001 (multiple background instances)
-- **Fonts**: Lexend + Roboto loading correctly via Next.js Google Fonts
-- **Colors**: Blue primary (#3A4D7A) + Red accent (#E74746) applied to all components
-- **Next Steps**: Mobile optimization, assignee removal bug fix, console cleanup
+### 🔄 Current Development Status (Oct 2024)
+- **Version**: 0.9.0
+- **Active**: Mobile responsiveness optimization completed
+- **Dev Server**: Running on port 3000
+- **Mobile UI**: Icon-only buttons, optimized layouts, single-line stats, burger menu navigation
+- **Desktop UI**: Restored original layout with enhanced mobile-first components
+- **Next Steps**: Assignee removal bug fix, console cleanup, deployment preparation
 
 ## Technical Preferences
 - kebab-case component names (my-component.tsx)
@@ -61,7 +60,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **ALWAYS run `npm run lint`, `npm run typecheck`, and `npm run build` after implementing large functionality or refactoring** (build catches additional TypeScript errors that typecheck might miss)
 
 ## Version Management
-**Current Version**: `0.8.1`
+**Current Version**: `0.9.0`
 
 Follow semantic versioning (SemVer) when creating commits and updating package.json version:
 
@@ -154,7 +153,7 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 ### High Priority
 1. ~~**Clean up console output** - Remove excessive logging especially for tasks page to improve developer experience~~ ✅ **COMPLETED**
 2. **Debug task ranking drag-and-drop** - Fix remaining positioning bugs in Kanban view task reordering within priority groups
-3. **Mobile UI optimization** - Improve responsiveness across all views for mobile devices
+3. ~~**Mobile UI optimization** - Improve responsiveness across all views for mobile devices~~ ✅ **COMPLETED**
 
 ### Medium Priority
 4. **Done task management** - Strategy for completed tasks (archive, hide after X days, etc.)
@@ -167,6 +166,18 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 9. **Offline capabilities strategy** - Research offline data access options
 
 ## Recent Major Changes
+
+### v0.9.0 - Mobile Responsiveness Optimization (Oct 2024)
+- **FEATURE**: Comprehensive mobile UI optimization across all pages and components
+- **FEATURE**: Icon-only button behavior on mobile screens with text labels on desktop
+- **FEATURE**: Burger menu navigation system for mobile devices with collapsible menu
+- **FEATURE**: Single-line stats display on mobile with horizontal scrolling support
+- **IMPROVEMENT**: Mobile-first note card layout with stacked title and badge sections
+- **IMPROVEMENT**: Optimized dialog layouts for mobile with proper button positioning
+- **IMPROVEMENT**: Enhanced PageHeader component with responsive desktop/mobile layouts
+- **IMPROVEMENT**: TiptapEditor toolbar optimization with hidden save button on mobile
+- **IMPROVEMENT**: StatsBar component redesigned for compact mobile display
+- **BUG FIX**: Restored original desktop layout behavior while maintaining mobile improvements
 
 ### v0.8.1 - Assignee Removal Bug Fix (Sept 2024)
 - **BUG FIX**: Fixed assignee removal functionality in task management

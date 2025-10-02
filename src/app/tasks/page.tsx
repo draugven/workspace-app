@@ -17,7 +17,7 @@ import { Combobox } from '@/components/ui/combobox'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useRealtimeTasks } from '@/hooks/use-realtime-tasks'
 import { supabase } from '@/lib/supabase'
-import { RefreshCw, Plus, Users, Filter, X, Search, ChevronDown, ChevronUp, Wifi, WifiOff } from 'lucide-react'
+import { RefreshCw, Plus, Users, Filter, X, Search, ChevronDown, ChevronUp, Wifi, WifiOff, LayoutGrid, Table } from 'lucide-react'
 import type { Task, Department, TaskTag, User } from '@/types'
 
 // All data is now loaded from Supabase - no mock data needed
@@ -273,9 +273,10 @@ export default function TasksPage() {
                   variant="outline"
                   onClick={() => setFiltersExpanded(true)}
                   className="gap-2"
+                  title="Filter"
                 >
                   <Filter className="h-4 w-4" />
-                  Filter
+                  <span className="hidden sm:inline">Filter</span>
                   {hasActiveFilters && (
                     <Badge variant="secondary" className="ml-1">
                       {[selectedDepartment && 'Abteilung', selectedStatus && 'Status',
@@ -288,21 +289,28 @@ export default function TasksPage() {
               <Button
                 onClick={() => setAddDialogOpen(true)}
                 className="gap-2"
+                title="Neue Aufgabe"
               >
                 <Plus className="h-4 w-4" />
-                Neue Aufgabe
+                <span className="hidden sm:inline">Neue Aufgabe</span>
               </Button>
               <Button
                 variant={viewMode === 'board' ? 'default' : 'outline'}
                 onClick={() => setViewMode('board')}
+                title="Kanban Board"
+                className="gap-2"
               >
-                Kanban Board
+                <LayoutGrid className="h-4 w-4" />
+                <span className="hidden sm:inline">Kanban Board</span>
               </Button>
               <Button
                 variant={viewMode === 'table' ? 'default' : 'outline'}
                 onClick={() => setViewMode('table')}
+                title="Tabelle"
+                className="gap-2"
               >
-                Tabelle
+                <Table className="h-4 w-4" />
+                <span className="hidden sm:inline">Tabelle</span>
               </Button>
             </>
           }

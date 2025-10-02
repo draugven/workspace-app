@@ -274,7 +274,7 @@ export default function ItemsPage() {
                 className="gap-2"
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                Aktualisieren
+                <span className="hidden sm:inline">Aktualisieren</span>
               </Button>
               <Button
                 onClick={() => {
@@ -284,7 +284,7 @@ export default function ItemsPage() {
                 className="gap-2"
               >
                 <Plus className="h-4 w-4" />
-                Neues Item
+                <span className="hidden sm:inline">Neues Item</span>
               </Button>
             </>
           }
@@ -321,7 +321,7 @@ export default function ItemsPage() {
                 className="gap-2"
               >
                 <RefreshCw className="h-4 w-4" />
-                Erneut versuchen
+                <span className="hidden sm:inline">Erneut versuchen</span>
               </Button>
             </CardContent>
           </Card>
@@ -357,7 +357,7 @@ export default function ItemsPage() {
                     className="gap-2"
                   >
                     <Plus className="h-4 w-4" />
-                    Erstes Item erstellen
+                    <span className="hidden sm:inline">Erstes Item erstellen</span>
                   </Button>
                 </div>
               ) : (
