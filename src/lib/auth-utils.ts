@@ -47,7 +47,6 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
 
     if (error) {
       // If no role exists, user is not admin
-      console.log('No role found for user:', userId)
       return false
     }
 
@@ -75,7 +74,6 @@ export async function getUserRole(userId: string): Promise<UserRole | null> {
       .single()
 
     if (error) {
-      console.log('No role found for user:', userId)
       return null
     }
 

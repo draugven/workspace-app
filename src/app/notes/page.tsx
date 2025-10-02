@@ -156,7 +156,7 @@ export default function NotesPage() {
     toggleNoteLock,
     canEdit,
     isLocking
-  } = useRealtimeNotesV2({ enableLogs: true })
+  } = useRealtimeNotesV2({ enableLogs: false })
 
   // Load user and departments data
   useEffect(() => {

@@ -32,7 +32,7 @@ export default function TasksPage() {
     insert: createTask,
     update: updateTask,
     remove: deleteTask
-  } = useRealtimeTasks(true) // Enable logging
+  } = useRealtimeTasks(false) // Disable verbose logging
 
   const [viewMode, setViewMode] = useState<'board' | 'table'>('board')
   const [searchTerm, setSearchTerm] = useState('')

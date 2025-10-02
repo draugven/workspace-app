@@ -101,7 +101,7 @@ export default function ItemsPage() {
     insert: createItem,
     update: updateItem,
     remove: deleteItem
-  } = useRealtimeItems(true) // Enable logging for debugging
+  } = useRealtimeItems(false) // Disable verbose logging
 
   const [formOpen, setFormOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)

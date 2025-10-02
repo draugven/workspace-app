@@ -83,7 +83,6 @@ function DroppableColumn({ status, title, color, tasks, activeTask, onTaskClick,
     borderColor: isOver ? '#3b82f6' : 'transparent'
   }
 
-  console.log('Column', status, 'isOver:', isOver, 'activeTask:', !!activeTask)
 
   return (
     <div
@@ -302,7 +301,6 @@ export function TaskBoard({
 
     if (!activeTask) return
 
-    console.log('Drag end:', { activeId, overId })
 
     // Check if we're dropping over a status column or another task
     let targetStatus = activeTask.status
@@ -327,7 +325,6 @@ export function TaskBoard({
     // Handle status change
     if (activeTask.status !== targetStatus) {
       if (onTaskStatusChange) {
-        console.log('Updating task status:', activeId, 'to', targetStatus)
         onTaskStatusChange(activeId, targetStatus)
       }
       return
@@ -381,7 +378,6 @@ export function TaskBoard({
       }
 
       if (newRanking !== activeTask.ranking) {
-        console.log('Updating task ranking:', activeId, 'from', activeTask.ranking, 'to', newRanking)
         onTaskRankingUpdate(activeId, newRanking)
       }
     }
