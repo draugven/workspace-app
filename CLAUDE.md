@@ -45,7 +45,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Next.js Image warning**: Console warning about aspect ratio for main logo (functional, cosmetic only)
 
 ### 🔄 Current Development Status (Sept 2024)
-- **Version**: 0.8.0 (committed: bba112a)
+- **Version**: 0.8.1 (committed: 503b455)
 - **Active**: Typography & branding system fully implemented
 - **Dev Server**: Running on port 3001 (multiple background instances)
 - **Fonts**: Lexend + Roboto loading correctly via Next.js Google Fonts
@@ -61,7 +61,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **ALWAYS run `npm run lint`, `npm run typecheck`, and `npm run build` after implementing large functionality or refactoring** (build catches additional TypeScript errors that typecheck might miss)
 
 ## Version Management
-**Current Version**: `0.8.0`
+**Current Version**: `0.8.1`
 
 Follow semantic versioning (SemVer) when creating commits and updating package.json version:
 
@@ -154,7 +154,7 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 ### High Priority
 1. ~~**Real-time data synchronization** - Fix WebSocket connection issues preventing real-time updates. Critical for multi-user collaboration~~ ✅ **COMPLETED**
 2. **Clean up console output** - Remove excessive logging especially for tasks page to improve developer experience
-3. **Fix assignee removal bug** - Cannot select "Niemandem zugewiesen" to remove task assignee, last assignee persists
+3. ~~**Fix assignee removal bug** - Cannot select "Niemandem zugewiesen" to remove task assignee, last assignee persists~~ ✅ **COMPLETED**
 4. ~~**Task ranking within priority** - Add drag-and-drop ranking within status/priority columns for better task organization~~ ✅ **COMPLETED**
 5. **Debug task ranking drag-and-drop** - Fix remaining positioning bugs in Kanban view task reordering within priority groups
 6. **Mobile UI optimization** - Improve responsiveness across all views for mobile devices
@@ -172,6 +172,13 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 14. **Offline capabilities strategy** - Research offline data access options
 
 ## Recent Major Changes
+
+### v0.8.1 - Assignee Removal Bug Fix (Sept 2024)
+- **BUG FIX**: Fixed assignee removal functionality in task management
+- **BUG FIX**: Resolved Combobox toggle behavior preventing "Niemandem zugewiesen" selection
+- **IMPROVEMENT**: Enhanced data persistence layer to properly handle undefined values
+- **TECHNICAL**: Convert undefined values to null in useRealtimeData for proper Supabase field clearing
+- **IMPACT**: Users can now successfully remove task assignees by selecting "Niemandem zugewiesen"
 
 ### v0.8.0 - Typography & Branding System (Sept 2024)
 - **FEATURE**: Implemented comprehensive branding system with Lexend + Roboto font stack
