@@ -61,19 +61,19 @@ export function TiptapEditor({
         },
         blockquote: {
           HTMLAttributes: {
-            class: 'border-l-4 border-gray-300 pl-4 italic',
+            class: 'border-l-4 border-border pl-4 italic',
           },
         },
         codeBlock: {
           HTMLAttributes: {
-            class: 'bg-gray-100 p-2 rounded font-mono text-sm',
+            class: 'bg-muted p-2 rounded font-mono text-sm',
           },
         },
       }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-blue-600 underline hover:text-blue-800 cursor-pointer',
+          class: 'text-primary underline hover:text-primary/80 cursor-pointer',
         },
       }),
     ],
@@ -85,7 +85,7 @@ export function TiptapEditor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 border rounded-md [&_h1]:!text-2xl [&_h1]:!font-bold [&_h2]:!text-xl [&_h2]:!font-bold [&_h3]:!text-lg [&_h3]:!font-bold [&_h1]:!mt-4 [&_h1]:!mb-2 [&_h2]:!mt-4 [&_h2]:!mb-2 [&_h3]:!mt-4 [&_h3]:!mb-2',
+        class: 'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 border border-border bg-background text-foreground rounded-md [&_h1]:!text-2xl [&_h1]:!font-bold [&_h2]:!text-xl [&_h2]:!font-bold [&_h3]:!text-lg [&_h3]:!font-bold [&_h1]:!mt-4 [&_h1]:!mb-2 [&_h2]:!mt-4 [&_h2]:!mb-2 [&_h3]:!mt-4 [&_h3]:!mb-2',
       },
       handleKeyDown: (view, event) => {
         // Handle Cmd+K (Mac) or Ctrl+K (Windows/Linux) for link dialog
@@ -211,8 +211,8 @@ export function TiptapEditor({
     <div className="space-y-2">
       {/* Conflict Warning */}
       {isLocked && lockedBy && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
-          <div className="flex items-center gap-2 text-yellow-800 text-sm">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-3">
+          <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200 text-sm">
             <span className="font-medium">⚠️ Konflikt-Warnung:</span>
             <span>Wird gerade von {lockedBy} bearbeitet</span>
           </div>
@@ -220,7 +220,7 @@ export function TiptapEditor({
       )}
 
       {/* Toolbar */}
-      <div className="flex items-center gap-1 p-2 border rounded-md bg-gray-50">
+      <div className="flex items-center gap-1 p-2 border border-border rounded-md bg-muted/30">
         {toolbarButtons.map((button, index) => {
           const Icon = button.icon
           return (
@@ -238,7 +238,7 @@ export function TiptapEditor({
           )
         })}
 
-        <div className="w-px h-6 bg-gray-300 mx-2" />
+        <div className="w-px h-6 bg-border mx-2" />
 
         <Button
           variant="ghost"
@@ -283,7 +283,7 @@ export function TiptapEditor({
           className={isLocked ? 'opacity-60' : ''}
         />
         {editor.isEmpty && (
-          <div className="absolute top-4 left-4 text-gray-400 pointer-events-none">
+          <div className="absolute top-4 left-4 text-muted-foreground pointer-events-none">
             {placeholder}
           </div>
         )}
@@ -292,18 +292,18 @@ export function TiptapEditor({
       {/* Status Bar */}
       {isLocked && (
         <div className="flex justify-end text-xs text-muted-foreground">
-          <span className="text-yellow-600">Schreibgeschützt</span>
+          <span className="text-yellow-600 dark:text-yellow-400">Schreibgeschützt</span>
         </div>
       )}
 
       {/* Link Dialog */}
       {isLinkDialogOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96 max-w-[90vw]">
-            <h3 className="text-lg font-medium mb-4">Link bearbeiten</h3>
+          <div className="bg-background border border-border rounded-lg p-6 w-96 max-w-[90vw] shadow-lg">
+            <h3 className="text-lg font-medium mb-4 text-foreground">Link bearbeiten</h3>
             <div className="space-y-4">
               <div>
-                <label htmlFor="link-url" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="link-url" className="block text-sm font-medium text-foreground mb-1">
                   URL
                 </label>
                 <input
@@ -312,7 +312,7 @@ export function TiptapEditor({
                   value={linkUrl}
                   onChange={(e) => setLinkUrl(e.target.value)}
                   placeholder="https://example.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   autoFocus
                 />
               </div>

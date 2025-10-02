@@ -44,12 +44,13 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Next.js Image warning**: Console warning about aspect ratio for main logo (functional, cosmetic only)
 
 ### 🔄 Current Development Status (Oct 2024)
-- **Version**: 0.9.0
-- **Active**: Mobile responsiveness optimization completed
+- **Version**: 0.10.0
+- **Active**: Dark theme implementation completed
 - **Dev Server**: Running on port 3000
 - **Mobile UI**: Icon-only buttons, optimized layouts, single-line stats, burger menu navigation
 - **Desktop UI**: Restored original layout with enhanced mobile-first components
-- **Next Steps**: Assignee removal bug fix, console cleanup, deployment preparation
+- **Dark Theme**: Complete light/dark mode switching with theme toggle in navigation
+- **Next Steps**: Task ranking debug, deployment preparation
 
 ## Technical Preferences
 - kebab-case component names (my-component.tsx)
@@ -60,7 +61,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **ALWAYS run `npm run lint`, `npm run typecheck`, and `npm run build` after implementing large functionality or refactoring** (build catches additional TypeScript errors that typecheck might miss)
 
 ## Version Management
-**Current Version**: `0.9.0`
+**Current Version**: `0.10.0`
 
 Follow semantic versioning (SemVer) when creating commits and updating package.json version:
 
@@ -106,6 +107,7 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - `notes/` - Collaborative notes (NoteCard, NoteAddDialog, TiptapEditor + SSR wrapper)
 - `files/` - File handling (FileUpload)
 - `layout/` - Navigation, Footer (version display)
+- `theme/` - Theme management (ThemeProvider, ThemeToggle)
 - `ui/` - Shadcn/ui components (Button, Dialog, Select, Combobox, PageHeader, StatsBar, etc.)
 
 ### Core Services (`src/`)
@@ -147,6 +149,8 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - **Color scheme**: Blue primary (#3A4D7A), Red accent (#E74746), Light Gray background (#F7F7F7), Dark Gray text (#2C2C2E)
 - **Font loading**: Next.js Google Fonts with CSS variables, Tailwind config extended for custom fonts
 - **Branding consistency**: "Back2Stage" used throughout, informal German (du/dir) in auth forms
+- **Mobile responsiveness**: Icon-only buttons on mobile (`<span className="hidden sm:inline">Text</span>`), burger menu navigation, responsive layouts with `flex-col sm:flex-row` patterns
+- **Dark theme system**: React Context-based ThemeProvider with localStorage persistence. Tailwind "class" dark mode with manual theme switching. Theme toggle with animated sun/moon icons positioned in navigation
 
 ## TODO Backlog
 
@@ -154,10 +158,10 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 1. ~~**Clean up console output** - Remove excessive logging especially for tasks page to improve developer experience~~ ✅ **COMPLETED**
 2. **Debug task ranking drag-and-drop** - Fix remaining positioning bugs in Kanban view task reordering within priority groups
 3. ~~**Mobile UI optimization** - Improve responsiveness across all views for mobile devices~~ ✅ **COMPLETED**
+4. ~~**Dark theme implementation** - Add dark mode support~~ ✅ **COMPLETED**
 
 ### Medium Priority
-4. **Done task management** - Strategy for completed tasks (archive, hide after X days, etc.)
-5. **Dark theme implementation** - Add dark mode support
+5. **Done task management** - Strategy for completed tasks (archive, hide after X days, etc.)
 6. **Deployment setup** - Prepare and deploy application
 
 ### Low Priority
@@ -166,6 +170,16 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 9. **Offline capabilities strategy** - Research offline data access options
 
 ## Recent Major Changes
+
+### v0.10.0 - Dark Theme Implementation (Oct 2024)
+- **FEATURE**: Complete dark mode theme system with light/dark mode switching
+- **FEATURE**: Theme toggle component with animated sun/moon icons
+- **FEATURE**: Custom dark theme color palette matching brand colors (dark blue-gray backgrounds)
+- **FEATURE**: Theme toggle in navigation - desktop (left of username) and mobile (left of burger menu)
+- **FEATURE**: LocalStorage persistence for theme preference with "back2stage-theme" key
+- **IMPROVEMENT**: Enhanced ThemeProvider with React Context for global theme state
+- **IMPROVEMENT**: All components automatically support dark mode through Tailwind semantic tokens
+- **TECHNICAL**: Tailwind CSS configured with "class" dark mode strategy for manual control
 
 ### v0.9.0 - Mobile Responsiveness Optimization (Oct 2024)
 - **FEATURE**: Comprehensive mobile UI optimization across all pages and components
@@ -184,45 +198,27 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - **BUG FIX**: Resolved Combobox toggle behavior preventing "Niemandem zugewiesen" selection
 - **IMPROVEMENT**: Enhanced data persistence layer to properly handle undefined values
 - **TECHNICAL**: Convert undefined values to null in useRealtimeData for proper Supabase field clearing
-- **IMPACT**: Users can now successfully remove task assignees by selecting "Niemandem zugewiesen"
 
 ### v0.8.0 - Typography & Branding System (Sept 2024)
 - **FEATURE**: Implemented comprehensive branding system with Lexend + Roboto font stack
 - **FEATURE**: Updated color scheme with professional blue primary (#3A4D7A) and red accent (#E74746)
 - **FEATURE**: Created typography hierarchy with custom CSS classes (text-h1, text-h2, text-h3, text-body, etc.)
-- **IMPROVEMENT**: Updated all major components to use new typography system
 - **IMPROVEMENT**: Replaced "Theater Production App" branding with "Back2Stage" throughout
 - **IMPROVEMENT**: Converted login/signup forms to informal German language (du/dir)
-- **IMPROVEMENT**: Enhanced web manifest with new theme colors for PWA support
-
-### v0.7.0 - Task Ranking System & UI Enhancements (Sept 2024)
-- **FEATURE**: Implemented comprehensive drag-and-drop task ranking within priority groups
-- **FEATURE**: Added ranking field to database schema with proper indexing for performance
-- **FEATURE**: Enhanced Kanban view with within-priority column ranking using @dnd-kit SortableContext
-- **FEATURE**: Improved Table view default sorting: priority → status → ranking for logical task ordering
-- **IMPROVEMENT**: Better drag-and-drop animations with full-size card preview and smooth drop effects
-- **BUG FIX**: Fixed image aspect ratio warning for Back2Stage logo in navigation
-- **IMPROVEMENT**: Task creation now automatically assigns ranking for proper positioning within priority groups
-
-### v0.6.0 - Real-time Data Synchronization (Sept 2024)
-- **FEATURE**: Implemented comprehensive real-time data sync for all entities (items, tasks, notes)
-- **FEATURE**: Created generic `useRealtimeData` hook with retry logic and automatic reconnection
-- **FEATURE**: Added specialized real-time hooks: `useRealtimeItems`, `useRealtimeTasks`, `useRealtimeNotesV2`
-- **BUG FIX**: Resolved infinite subscription loop causing loading flicker in UI
-- **BUG FIX**: Fixed Supabase query syntax errors preventing task data loading
-- **IMPROVEMENT**: Task updates now reflect immediately without page refresh (privacy, assignee, status changes)
-
-### v0.5.0 - Simplified Admin System (Sept 2024)
-- **BREAKING CHANGE**: Removed RLS policies in favor of app-level security
-- Implemented admin delete functionality for all entity types
-- Added Authorization header authentication for API routes
-
-### v0.2.0 - Rich Text & Versioning (Sept 2024)
-- Added Tiptap rich text editor with hyperlink support for notes and tasks
-- Implemented semantic versioning workflow and deployment tracking
-- Added privacy toggles for creator-only content visibility
 
 ## Development Sessions
+
+### Oct 2024 - Mobile Responsiveness Optimization
+**Key Achievement**: Implemented comprehensive mobile UI optimization across all pages and components
+- Added icon-only button behavior on mobile screens with text labels on desktop
+- Implemented burger menu navigation system for mobile devices with collapsible menu
+- Created single-line stats display on mobile with horizontal scrolling support
+- Enhanced PageHeader component with responsive desktop/mobile layouts
+- Optimized dialog layouts for mobile with proper button positioning
+- Fixed TiptapEditor toolbar with hidden save button on mobile
+- Redesigned StatsBar component for compact mobile display
+- Restored original desktop layout while maintaining mobile improvements
+- Updated version to 0.9.0 and marked mobile optimization as completed
 
 ### Sept 2024 - Task Ranking System Implementation
 **Key Achievement**: Implemented comprehensive drag-and-drop ranking within priority groups for better task organization
@@ -233,7 +229,6 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - Improved Table view default sorting: priority → status → ranking for logical task ordering
 - Added ranking calculation logic for task creation (places new tasks at bottom of priority group)
 - Implemented drag-and-drop ranking updates with fractional ranking system for smooth reordering
-- All changes pass TypeScript checking and build successfully
 
 ### Sept 2024 - Real-time Data Synchronization Implementation
 **Key Achievement**: Fixed comprehensive real-time updates for all entities (items, tasks, notes)
@@ -243,7 +238,6 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - Fixed Supabase query syntax errors preventing task data from loading properly
 - Replaced manual database calls with real-time hook functions for immediate UI updates
 - Updated all CRUD operations to use real-time hooks enabling instant task changes
-- Added comprehensive documentation and version bump to 0.6.0
 
 ### Sept 2024 - Admin System Overhaul
 **Key Achievement**: Replaced complex RLS with simplified app-level admin security
@@ -252,9 +246,11 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - Added admin delete functionality with confirmation dialogs across all entities
 - Fixed authentication consistency and implemented manual refresh workarounds
 
-### Sept 2024 - Rich Text & Build Fixes
-**Key Achievement**: Enhanced editor functionality and resolved TypeScript issues
-- Added Tiptap Link extension with Cmd+K/Ctrl+K shortcuts to notes
-- Created TaskDescriptionEditor for rich text in task descriptions
-- Fixed comprehensive TypeScript build errors and ESLint warnings
-- Implemented privacy toggles for creator-only content visibility
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+
+
+      IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task.

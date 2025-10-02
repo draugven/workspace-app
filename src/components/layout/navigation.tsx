@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
+import { useTheme } from '@/components/theme/theme-provider'
 import { supabase } from '@/lib/supabase'
 import { Menu, X } from 'lucide-react'
 
@@ -18,6 +20,7 @@ import { useAuth } from '../auth/auth-provider'
 
 export function Navigation() {
   const { user } = useAuth()
+  const { theme } = useTheme()
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -35,7 +38,7 @@ export function Navigation() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center" onClick={closeMobileMenu}>
               <Image
-                src="/back2stage_logo.svg"
+                src={theme === 'dark' ? "/back2stage_logo_dark.svg" : "/back2stage_logo.svg"}
                 alt="Back2Stage"
                 width={150}
                 height={28}
@@ -66,6 +69,7 @@ export function Navigation() {
           {/* Desktop User Menu */}
           {user && (
             <div className="hidden md:flex items-center space-x-4">
+              <ThemeToggle />
               <span className="text-sm text-muted-foreground hidden lg:block">
                 {user.user_metadata?.full_name || user.email}
               </span>
@@ -77,7 +81,8 @@ export function Navigation() {
 
           {/* Mobile Menu Button */}
           {user && (
-            <div className="md:hidden">
+            <div className="md:hidden flex items-center space-x-2">
+              <ThemeToggle />
               <Button
                 variant="ghost"
                 size="sm"

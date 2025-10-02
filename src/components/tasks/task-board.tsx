@@ -52,10 +52,10 @@ interface TaskBoardProps {
 }
 
 const statusColumns = [
-  { status: 'not_started', title: 'Zu erledigen', color: 'bg-gray-50' },
-  { status: 'in_progress', title: 'In Bearbeitung', color: 'bg-blue-50' },
-  { status: 'done', title: 'Erledigt', color: 'bg-green-50' },
-  { status: 'blocked', title: 'Blockiert', color: 'bg-red-50' }
+  { status: 'not_started', title: 'Zu erledigen', color: 'bg-muted/30' },
+  { status: 'in_progress', title: 'In Bearbeitung', color: 'bg-blue-50 dark:bg-blue-950/20' },
+  { status: 'done', title: 'Erledigt', color: 'bg-green-50 dark:bg-green-950/20' },
+  { status: 'blocked', title: 'Blockiert', color: 'bg-red-50 dark:bg-red-950/20' }
 ] as const
 
 // Droppable Column Component
@@ -80,18 +80,18 @@ function DroppableColumn({ status, title, color, tasks, activeTask, onTaskClick,
 
   const columnStyle = {
     backgroundColor: isOver ? 'rgba(59, 130, 246, 0.1)' : undefined,
-    borderColor: isOver ? '#3b82f6' : 'transparent'
+    borderColor: isOver ? '#3b82f6' : undefined
   }
 
 
   return (
     <div
       ref={setNodeRef}
-      className={`rounded-lg p-4 ${color} min-h-[200px] border-2 transition-all`}
+      className={`rounded-lg p-4 ${color} min-h-[200px] border-2 border-transparent transition-all`}
       style={columnStyle}
     >
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-sm text-gray-700">{title}</h3>
+        <h3 className="font-semibold text-sm text-foreground">{title}</h3>
         <Badge variant="outline" className="text-xs">
           {tasks.length}
         </Badge>
@@ -108,7 +108,7 @@ function DroppableColumn({ status, title, color, tasks, activeTask, onTaskClick,
         ))}
 
         {tasks.length === 0 && (
-          <div className="text-center text-sm text-gray-400 py-6">
+          <div className="text-center text-sm text-muted-foreground py-6">
             {activeTask && isOver ? 'Hier ablegen' : 'Keine Aufgaben'}
           </div>
         )}
@@ -160,8 +160,8 @@ function DraggableTaskCard({ task, onClick, users = [], isOverlay = false }: Dra
       style={style}
       {...(isOverlay ? {} : attributes)}
       className={isOverlay
-        ? "bg-white shadow-xl border-2 border-blue-400 transform rotate-2 scale-105 relative"
-        : "bg-white shadow-sm hover:shadow-md transition-shadow relative"
+        ? "bg-card shadow-xl border-2 border-blue-400 transform rotate-2 scale-105 relative"
+        : "bg-card shadow-sm hover:shadow-md transition-shadow relative"
       }
     >
       {/* Drag Handle - only show for non-overlay cards */}
@@ -171,7 +171,7 @@ function DraggableTaskCard({ task, onClick, users = [], isOverlay = false }: Dra
           className="absolute top-2 left-2 p-1 opacity-30 hover:opacity-60 cursor-grab active:cursor-grabbing"
           onClick={(e) => e.stopPropagation()}
         >
-          <GripVertical className="h-3 w-3 text-gray-400" />
+          <GripVertical className="h-3 w-3 text-muted-foreground" />
         </div>
       )}
 

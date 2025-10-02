@@ -50,7 +50,7 @@ export function TaskDescriptionEditor({
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-blue-600 underline hover:text-blue-800 cursor-pointer',
+          class: 'text-primary underline hover:text-primary/80 cursor-pointer',
         },
       }),
     ],
@@ -61,7 +61,7 @@ export function TaskDescriptionEditor({
     },
     editorProps: {
       attributes: {
-        class: `prose prose-sm max-w-none focus:outline-none min-h-[60px] p-3 border rounded-md ${className}`,
+        class: `prose prose-sm max-w-none focus:outline-none min-h-[60px] p-3 border border-border bg-background text-foreground rounded-md ${className}`,
       },
       handleKeyDown: (view, event) => {
         // Handle Cmd+K (Mac) or Ctrl+K (Windows/Linux) for link dialog
@@ -91,8 +91,8 @@ export function TaskDescriptionEditor({
 
   if (!editor) {
     return (
-      <div className={`min-h-[60px] p-3 border rounded-md bg-gray-50 animate-pulse ${className}`}>
-        <div className="text-sm text-gray-500">Editor wird geladen...</div>
+      <div className={`min-h-[60px] p-3 border border-border rounded-md bg-muted animate-pulse ${className}`}>
+        <div className="text-sm text-muted-foreground">Editor wird geladen...</div>
       </div>
     )
   }
@@ -144,7 +144,7 @@ export function TaskDescriptionEditor({
   return (
     <div className="space-y-2">
       {/* Toolbar */}
-      <div className="flex items-center gap-1 p-2 border rounded-md bg-gray-50">
+      <div className="flex items-center gap-1 p-2 border border-border rounded-md bg-muted/30">
         {toolbarButtons.map((button, index) => {
           const Icon = button.icon
           return (
@@ -161,7 +161,7 @@ export function TaskDescriptionEditor({
           )
         })}
 
-        <div className="w-px h-5 bg-gray-300 mx-2" />
+        <div className="w-px h-5 bg-border mx-2" />
 
         <Button
           variant="ghost"
@@ -190,7 +190,7 @@ export function TaskDescriptionEditor({
       <div className="relative">
         <EditorContent editor={editor} />
         {editor.isEmpty && (
-          <div className="absolute top-3 left-3 text-gray-400 pointer-events-none">
+          <div className="absolute top-3 left-3 text-muted-foreground pointer-events-none">
             {placeholder}
           </div>
         )}

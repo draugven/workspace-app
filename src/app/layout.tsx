@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Lexend, Roboto } from 'next/font/google'
 import { AuthProvider } from '@/components/auth/auth-provider'
+import { ThemeProvider } from '@/components/theme/theme-provider'
 import { Footer } from '@/components/layout/footer'
 import './globals.css'
 
@@ -47,14 +48,16 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className={`${roboto.variable} ${lexend.variable} font-sans`}>
-        <AuthProvider>
-          <div className="min-h-screen bg-background flex flex-col">
-            <div className="flex-1">
-              {children}
+        <ThemeProvider>
+          <AuthProvider>
+            <div className="min-h-screen bg-background flex flex-col">
+              <div className="flex-1">
+                {children}
+              </div>
+              <Footer />
             </div>
-            <Footer />
-          </div>
-        </AuthProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
