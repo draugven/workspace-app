@@ -152,24 +152,19 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 ## TODO Backlog
 
 ### High Priority
-1. ~~**Real-time data synchronization** - Fix WebSocket connection issues preventing real-time updates. Critical for multi-user collaboration~~ ✅ **COMPLETED**
-2. **Clean up console output** - Remove excessive logging especially for tasks page to improve developer experience
-3. ~~**Fix assignee removal bug** - Cannot select "Niemandem zugewiesen" to remove task assignee, last assignee persists~~ ✅ **COMPLETED**
-4. ~~**Task ranking within priority** - Add drag-and-drop ranking within status/priority columns for better task organization~~ ✅ **COMPLETED**
-5. **Debug task ranking drag-and-drop** - Fix remaining positioning bugs in Kanban view task reordering within priority groups
-6. **Mobile UI optimization** - Improve responsiveness across all views for mobile devices
+1. **Clean up console output** - Remove excessive logging especially for tasks page to improve developer experience
+2. **Debug task ranking drag-and-drop** - Fix remaining positioning bugs in Kanban view task reordering within priority groups
+3. **Mobile UI optimization** - Improve responsiveness across all views for mobile devices
 
 ### Medium Priority
-7. **Done task management** - Strategy for completed tasks (archive, hide after X days, etc.)
-8. ~~**Typography and styling updates** - General design improvements~~ ✅ **COMPLETED**
-9. **Dark theme implementation** - Add dark mode support
-10. ~~**Branding updates** - Replace logo and add custom favicon~~ ✅ **COMPLETED**
-11. **Deployment setup** - Prepare and deploy application
+4. **Done task management** - Strategy for completed tasks (archive, hide after X days, etc.)
+5. **Dark theme implementation** - Add dark mode support
+6. **Deployment setup** - Prepare and deploy application
 
 ### Low Priority
-12. **Archive legacy scripts** - Clean up obsolete data import/processing scripts
-13. **Note versioning review** - Investigate current note version saving potential
-14. **Offline capabilities strategy** - Research offline data access options
+7. **Archive legacy scripts** - Clean up obsolete data import/processing scripts
+8. **Note versioning review** - Investigate current note version saving potential
+9. **Offline capabilities strategy** - Research offline data access options
 
 ## Recent Major Changes
 
