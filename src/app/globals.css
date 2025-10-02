@@ -17,8 +17,8 @@
     --secondary-foreground: 217 18% 17%;
     --muted: 0 0% 97%; /* Light Gray #F7F7F7 */
     --muted-foreground: 0 0% 34%; /* Medium Gray #565656 */
-    --accent: 359 71% 58%; /* Red Accent #E74746 */
-    --accent-foreground: 0 0% 100%;
+    --accent: 220 15% 94%; /* Blue Slate Accent with low opacity */
+    --accent-foreground: 220 36% 36%; /* Blue Primary for text on accent background */
     --destructive: 359 71% 58%; /* Red for destructive actions */
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 90%;
@@ -40,7 +40,7 @@
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 220 15% 25%; /* Blue Slate Accent for dark mode */
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
