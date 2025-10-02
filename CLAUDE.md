@@ -44,12 +44,13 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Next.js Image warning**: Console warning about aspect ratio for main logo (functional, cosmetic only)
 
 ### 🔄 Current Development Status (Oct 2024)
-- **Version**: 0.10.0
-- **Active**: Dark theme implementation completed
+- **Version**: 0.10.1
+- **Active**: Rich text editing enhancement completed
 - **Dev Server**: Running on port 3000
 - **Mobile UI**: Icon-only buttons, optimized layouts, single-line stats, burger menu navigation
 - **Desktop UI**: Restored original layout with enhanced mobile-first components
 - **Dark Theme**: Complete light/dark mode switching with theme toggle in navigation
+- **Rich Text**: Full Tiptap editor support in both note editing and creation dialogs
 - **Next Steps**: Task ranking debug, deployment preparation
 
 ## Technical Preferences
@@ -61,7 +62,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **ALWAYS run `npm run lint`, `npm run typecheck`, and `npm run build` after implementing large functionality or refactoring** (build catches additional TypeScript errors that typecheck might miss)
 
 ## Version Management
-**Current Version**: `0.10.0`
+**Current Version**: `0.10.1`
 
 Follow semantic versioning (SemVer) when creating commits and updating package.json version:
 
@@ -170,6 +171,14 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 9. **Offline capabilities strategy** - Research offline data access options
 
 ## Recent Major Changes
+
+### v0.10.1 - Rich Text Editor Enhancement (Oct 2024)
+- **IMPROVEMENT**: Enhanced note add dialog with full Tiptap rich text editor
+- **IMPROVEMENT**: Replaced simple textarea with comprehensive formatting toolbar
+- **FEATURE**: Rich text support in note creation including bold, italic, headings, lists, links, quotes, code blocks
+- **IMPROVEMENT**: Consistent WYSIWYG editing experience across note creation and editing
+- **IMPROVEMENT**: Dark theme compatibility for all rich text editor components
+- **UX**: Updated helper text to reflect rich text capabilities
 
 ### v0.10.0 - Dark Theme Implementation (Oct 2024)
 - **FEATURE**: Complete dark mode theme system with light/dark mode switching

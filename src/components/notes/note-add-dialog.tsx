@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { TiptapEditorWrapper } from './tiptap-editor-wrapper'
 import { Plus, X } from 'lucide-react'
 import type { Note, Department } from '@/types'
 
@@ -124,16 +124,16 @@ export function NoteAddDialog({
 
           {/* Initial Content */}
           <div className="grid gap-2">
-            <Label htmlFor="content">Anfangsinhalt (optional)</Label>
-            <Textarea
-              id="content"
-              value={newNote.content}
-              onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
+            <Label htmlFor="content">Inhalt (optional)</Label>
+            <TiptapEditorWrapper
+              content={newNote.content}
+              onChange={(content) => setNewNote({ ...newNote, content })}
               placeholder="Beginne mit dem Schreiben deiner Notiz..."
-              rows={6}
+              onSave={() => {}}
+              isLocked={false}
             />
             <p className="text-xs text-muted-foreground">
-              Du kannst die Notiz nach dem Erstellen mit dem Rich-Text-Editor weiter bearbeiten
+              Verwende die Toolbar für Rich-Text-Formatierung
             </p>
           </div>
 
