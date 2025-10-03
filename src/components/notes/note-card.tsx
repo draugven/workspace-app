@@ -8,7 +8,9 @@ import { Combobox } from "@/components/ui/combobox"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { TiptapEditorWrapper } from './tiptap-editor-wrapper'
-import type { Note, Department, User } from "@/types"
+import { VersionHistoryDialog } from './version-history-dialog'
+import { VersionViewerDialog } from './version-viewer-dialog'
+import type { Note, Department, User, NoteVersion } from "@/types"
 import { Edit, Lock, History, Save, Users, AlertTriangle, Eye, EyeOff, Trash2, X } from 'lucide-react'
 import { useAdminCheck } from '@/hooks/use-admin-check'
 
@@ -25,6 +27,7 @@ interface NoteCardProps {
   onSave: (noteId: string, content: string, title?: string, departmentId?: string | null, isPrivate?: boolean) => void
   onDelete?: (noteId: string) => void
   onLock?: (noteId: string, lock: boolean) => void
+  onRestoreVersion?: (noteId: string, versionId: string) => void
   departments?: Department[]
   isBeingEditedByOthers?: boolean
 }
@@ -35,6 +38,7 @@ export function NoteCard({
   onSave,
   onDelete,
   onLock,
+  onRestoreVersion,
   departments = [],
   isBeingEditedByOthers = false
 }: NoteCardProps) {
@@ -44,6 +48,9 @@ export function NoteCard({
   const [editDepartmentId, setEditDepartmentId] = useState<string | null>(note.department_id || null)
   const [editIsPrivate, setEditIsPrivate] = useState(note.is_private || false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showVersionHistory, setShowVersionHistory] = useState(false)
+  const [selectedVersion, setSelectedVersion] = useState<NoteVersion | null>(null)
+  const [showVersionViewer, setShowVersionViewer] = useState(false)
   const { isAdmin } = useAdminCheck()
 
   const isLocked = note.is_locked && note.locked_by !== currentUser?.id
@@ -88,6 +95,26 @@ export function NoteCard({
     if (onDelete && showDeleteConfirm) {
       await onDelete(note.id)
     }
+  }
+
+  const handleViewVersion = (version: NoteVersion) => {
+    setSelectedVersion(version)
+    setShowVersionHistory(false)
+    setShowVersionViewer(true)
+  }
+
+  const handleRestoreVersion = async (versionId: string) => {
+    if (onRestoreVersion) {
+      await onRestoreVersion(note.id, versionId)
+      setShowVersionViewer(false)
+      setShowVersionHistory(false)
+    }
+  }
+
+  const handleBackToHistory = () => {
+    setShowVersionViewer(false)
+    setShowVersionHistory(true)
+    setSelectedVersion(null)
   }
 
   return (
@@ -180,14 +207,16 @@ export function NoteCard({
               </Button>
             )}
 
-            {note.versions && note.versions.length > 1 && (
+            {note.versions && note.versions.length > 0 && (
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => setShowVersionHistory(true)}
                 className="gap-2"
+                title="Versionshistorie anzeigen"
               >
                 <History className="h-4 w-4" />
-                v{note.versions.length}
+                <span className="hidden sm:inline">v{note.versions.length}</span>
               </Button>
             )}
 
@@ -296,6 +325,25 @@ export function NoteCard({
           </div>
         )}
       </CardContent>
+
+      {/* Version History Dialog */}
+      <VersionHistoryDialog
+        open={showVersionHistory}
+        onOpenChange={setShowVersionHistory}
+        note={note}
+        onViewVersion={handleViewVersion}
+        onRestoreVersion={handleRestoreVersion}
+      />
+
+      {/* Version Viewer Dialog */}
+      <VersionViewerDialog
+        open={showVersionViewer}
+        onOpenChange={setShowVersionViewer}
+        version={selectedVersion}
+        onBack={handleBackToHistory}
+        onRestore={handleRestoreVersion}
+        isCurrentVersion={selectedVersion?.version_number === note.versions?.[0]?.version_number}
+      />
     </Card>
   )
 }

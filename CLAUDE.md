@@ -24,7 +24,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `task_tags` - Tagging system for task organization
 - `auth.users` - Supabase authentication with admin role system (no RLS, app-level security)
 
-## Current Status (v0.11.1)
+## Current Status (v0.12.0)
 - Authentication, Requisiten management, Task management (Kanban/table), Collaborative notes
 - Admin system (app-level security), German UI, mobile-responsive, colorful character/category system
 - Database schema updated with `is_used`, `is_changeable` fields, 105+ theater props imported
@@ -32,7 +32,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Dev Server**: Running on port 3000
 
 ## Development Guidelines
-- Current version: 0.11.1 (SemVer: MAJOR.MINOR.PATCH)
+- Current version: 0.12.0 (SemVer: MAJOR.MINOR.PATCH)
 - Update both `package.json` and CLAUDE.md version before committing
 - Use conventional commit messages (feat:, fix:, BREAKING CHANGE:)
 - Always run `npm run lint`, `npm run typecheck`, `npm run build` after major changes
@@ -127,17 +127,33 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Database schema versioning**: Items table updated from legacy fields (`needs_clarification`, `needed_for_rehearsal`) to new schema (`is_used`, `is_changeable`). Migration scripts provided for existing databases
 - **Visual organization**: Category colors provide subtle row backgrounds (5% opacity), character colors create distinct badge identification, thematic color assignments for intuitive categorization
 
+## Development Sessions
+
+### Oct 2025 - Note Versioning Implementation
+**Key Achievement**: Implemented full version history tracking with UI for notes
+
+- Added automatic version snapshot creation on every note save
+- Created version history dialog showing all versions with timestamps and previews
+- Built version viewer dialog for full content display of any version
+- Implemented version restore functionality (creates new version from old content)
+- Added `restoreVersion()` function to real-time notes hook
+- Updated select query to include versions relation in real-time data fetch
+- Made version dialogs mobile-responsive with icon-only buttons and adaptive layouts
+- History button shows version count and opens version management UI
+- Versions sorted by number (newest first), current version marked with badge
+- TypeScript typing fixed with `as any` workaround for Supabase inference issues
+
 ## TODO Backlog
 1. Debug task ranking drag-and-drop positioning bugs in Kanban view
 2. Enhance mobile drag-and-drop (lock scrolling, drag preview, drop animations)
 3. Done task management strategy (archive/hide completed tasks)
-4. **Note versioning review** - Investigate current note version saving potential
+4. Fix version history dialog mobile responsiveness
 5. **Offline capabilities strategy** - Research offline data access options
 
 ## Recent Changes
+- **v0.12.0**: Version history tracking with automatic snapshots, restore functionality, and version viewer UI
 - **v0.11.1**: Project cleanup - archived obsolete scripts, updated documentation, cleaned root directory
 - **v0.11.0**: Database schema update, colorful character/category system, complete theater dataset
 - **v0.10.1**: Rich text editor for note creation
 - **v0.10.0**: Dark theme system with animated toggle
-- **v0.9.0**: Mobile responsiveness with burger menu navigation
 

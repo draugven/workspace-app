@@ -155,7 +155,8 @@ export default function NotesPage() {
     deleteNote,
     toggleNoteLock,
     canEdit,
-    isLocking
+    isLocking,
+    restoreVersion
   } = useRealtimeNotesV2({ enableLogs: false })
 
   // Load user and departments data
@@ -238,6 +239,15 @@ export default function NotesPage() {
 
   const handleOpenAddDialog = () => {
     setShowAddDialog(true)
+  }
+
+  const handleRestoreVersion = async (noteId: string, versionId: string) => {
+    try {
+      await restoreVersion(noteId, versionId)
+    } catch (error) {
+      console.error('Failed to restore version:', error)
+      alert('Fehler beim Wiederherstellen der Version')
+    }
   }
 
   const statsData = {
@@ -406,6 +416,7 @@ export default function NotesPage() {
                 onSave={handleSaveNote}
                 onDelete={handleDeleteNote}
                 onLock={handleLockNote}
+                onRestoreVersion={handleRestoreVersion}
                 departments={departments}
                 isBeingEditedByOthers={false} // Simplified for now
               />

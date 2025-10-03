@@ -47,7 +47,8 @@ export function useRealtimeNotesV2({ enableLogs = false }: UseRealtimeNotesV2Pro
     tableName: 'notes',
     selectQuery: `
       *,
-      department:departments(*)
+      department:departments(*),
+      versions:note_versions(*)
     `,
     orderBy: { column: 'updated_at', ascending: false },
     filter: notesFilter,
@@ -74,7 +75,7 @@ export function useRealtimeNotesV2({ enableLogs = false }: UseRealtimeNotesV2Pro
     }
   }, [insert])
 
-  // Enhanced note saving with lock management
+  // Enhanced note saving with lock management and version creation
   const saveNote = useCallback(async (
     noteId: string,
     content: string,
@@ -92,12 +93,50 @@ export function useRealtimeNotesV2({ enableLogs = false }: UseRealtimeNotesV2Pro
       if (departmentId !== undefined) updateData.department_id = departmentId
       if (isPrivate !== undefined) updateData.is_private = isPrivate
 
-      return await update(noteId, updateData)
+      // Update the note
+      const result = await update(noteId, updateData)
+
+      // Create version snapshot (don't block on failure)
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          // Get current version count
+          const { data: existingVersions } = await supabase
+            .from('note_versions')
+            .select('version_number')
+            .eq('note_id', noteId)
+            .order('version_number', { ascending: false })
+            .limit(1)
+
+          const nextVersionNumber = (existingVersions && existingVersions.length > 0 && existingVersions[0] as any)
+            ? (existingVersions[0] as any).version_number + 1
+            : 1
+
+          // Insert new version
+          await (supabase as any)
+            .from('note_versions')
+            .insert({
+              note_id: noteId,
+              content,
+              content_html: content.replace(/\n/g, '<br>'),
+              version_number: nextVersionNumber,
+              created_by: user.id
+            })
+
+          if (enableLogs) {
+            console.log(`📝 Created version ${nextVersionNumber} for note ${noteId}`)
+          }
+        }
+      } catch (versionError) {
+        console.warn('Failed to create version (note saved successfully):', versionError)
+      }
+
+      return result
     } catch (error) {
       console.error('Failed to save note:', error)
       throw error
     }
-  }, [update])
+  }, [update, enableLogs])
 
   // Lock/unlock note functionality
   const toggleNoteLock = useCallback(async (noteId: string, shouldLock: boolean) => {
@@ -168,6 +207,38 @@ export function useRealtimeNotesV2({ enableLogs = false }: UseRealtimeNotesV2Pro
     return user && note.locked_by === user.id
   }, [])
 
+  // Restore a previous version
+  const restoreVersion = useCallback(async (noteId: string, versionId: string) => {
+    try {
+      // Fetch the version content
+      const { data: versionData, error: fetchError } = await supabase
+        .from('note_versions')
+        .select('content, content_html')
+        .eq('id', versionId)
+        .single()
+
+      if (fetchError || !versionData) {
+        throw new Error('Version nicht gefunden')
+      }
+
+      // Update the note with the old content (this will create a new version automatically)
+      await update(noteId, {
+        content: (versionData as any).content,
+        content_html: (versionData as any).content_html
+      })
+
+      if (enableLogs) {
+        console.log(`♻️ Restored version for note ${noteId}`)
+      }
+
+      // Refresh to get updated versions
+      await refresh()
+    } catch (error) {
+      console.error('Failed to restore version:', error)
+      throw error
+    }
+  }, [update, refresh, enableLogs])
+
   return {
     notes,
     loading,
@@ -179,6 +250,7 @@ export function useRealtimeNotesV2({ enableLogs = false }: UseRealtimeNotesV2Pro
     toggleNoteLock,
     cleanupOrphanedLocks,
     canEdit,
-    isLocking: (noteId: string) => lockingStates[noteId] || false
+    isLocking: (noteId: string) => lockingStates[noteId] || false,
+    restoreVersion
   }
 }
