@@ -3,8 +3,19 @@
 import { useRealtimeData } from './use-realtime-data'
 import type { Item } from '@/types'
 
+// Transform function to flatten the nested character structure
+function transformItemData(items: any[]): Item[] {
+  return items.map((item) => ({
+    ...item,
+    // Transform item_characters array to characters array
+    characters: item.item_characters?.map((ic: any) => ic.character) || [],
+    // Keep item_characters for reference if needed
+    // item_characters: undefined
+  }))
+}
+
 export function useRealtimeItems(enableLogs = false) {
-  return useRealtimeData<Item>({
+  const result = useRealtimeData<any>({
     tableName: 'items',
     selectQuery: `
       *,
@@ -30,4 +41,10 @@ export function useRealtimeItems(enableLogs = false) {
       }
     }
   })
+
+  // Transform the data before returning
+  return {
+    ...result,
+    data: transformItemData(result.data)
+  } as typeof result & { data: Item[] }
 }

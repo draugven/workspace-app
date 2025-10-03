@@ -97,18 +97,21 @@ export interface Database {
           id: string
           name: string
           type: 'prop' | 'costume' | 'both'
+          color: string
           created_at: string
         }
         Insert: {
           id?: string
           name: string
           type?: 'prop' | 'costume' | 'both'
+          color?: string
           created_at?: string
         }
         Update: {
           id?: string
           name?: string
           type?: 'prop' | 'costume' | 'both'
+          color?: string
           created_at?: string
         }
       }
@@ -118,11 +121,11 @@ export interface Database {
           name: string
           type: 'prop' | 'costume'
           scene: string | null
-          status: 'erhalten' | 'in progress' | 'bestellt' | 'verloren' | 'klären' | 'reparatur benötigt' | 'anpassung benötigt'
+          status: 'in progress' | 'klären' | 'bestellt' | 'erhalten' | 'fehlt' | 'reparatur' | 'anpassung'
           is_consumable: boolean
-          needs_clarification: boolean
-          needed_for_rehearsal: boolean
-          source: 'Staatstheater' | 'Gekauft' | 'Produziert' | 'Darsteller*in' | null
+          is_used: boolean
+          is_changeable: boolean
+          source: 'Staatstheater' | 'Gekauft' | 'Produziert' | 'Ausleihe' | 'Spende' | null
           notes: string | null
           category_id: string | null
           created_by: string | null
@@ -134,11 +137,11 @@ export interface Database {
           name: string
           type: 'prop' | 'costume'
           scene?: string | null
-          status?: 'erhalten' | 'in progress' | 'bestellt' | 'verloren' | 'klären' | 'reparatur benötigt' | 'anpassung benötigt'
+          status?: 'in progress' | 'klären' | 'bestellt' | 'erhalten' | 'fehlt' | 'reparatur' | 'anpassung'
           is_consumable?: boolean
-          needs_clarification?: boolean
-          needed_for_rehearsal?: boolean
-          source?: 'Staatstheater' | 'Gekauft' | 'Produziert' | 'Darsteller*in' | null
+          is_used?: boolean
+          is_changeable?: boolean
+          source?: 'Staatstheater' | 'Gekauft' | 'Produziert' | 'Ausleihe' | 'Spende' | null
           notes?: string | null
           category_id?: string | null
           created_by?: string | null
@@ -150,11 +153,11 @@ export interface Database {
           name?: string
           type?: 'prop' | 'costume'
           scene?: string | null
-          status?: 'erhalten' | 'in progress' | 'bestellt' | 'verloren' | 'klären' | 'reparatur benötigt' | 'anpassung benötigt'
+          status?: 'in progress' | 'klären' | 'bestellt' | 'erhalten' | 'fehlt' | 'reparatur' | 'anpassung'
           is_consumable?: boolean
-          needs_clarification?: boolean
-          needed_for_rehearsal?: boolean
-          source?: 'Staatstheater' | 'Gekauft' | 'Produziert' | 'Darsteller*in' | null
+          is_used?: boolean
+          is_changeable?: boolean
+          source?: 'Staatstheater' | 'Gekauft' | 'Produziert' | 'Ausleihe' | 'Spende' | null
           notes?: string | null
           category_id?: string | null
           created_by?: string | null

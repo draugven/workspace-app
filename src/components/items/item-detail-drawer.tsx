@@ -27,6 +27,7 @@ import {
   Trash2
 } from 'lucide-react'
 import { useAdminCheck } from '@/hooks/use-admin-check'
+import { getBadgeStyle } from '@/lib/color-utils'
 import type { Item, ItemFile } from '@/types'
 
 interface ItemDetailDrawerProps {
@@ -93,8 +94,14 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit, onDelete }: Item
         return <Clock className="h-4 w-4 text-yellow-600" />
       case 'klären':
         return <AlertCircle className="h-4 w-4 text-orange-600" />
-      case 'verloren':
+      case 'fehlt':
         return <AlertCircle className="h-4 w-4 text-red-600" />
+      case 'bestellt':
+        return <Clock className="h-4 w-4 text-blue-600" />
+      case 'reparatur':
+        return <AlertCircle className="h-4 w-4 text-purple-600" />
+      case 'anpassung':
+        return <AlertCircle className="h-4 w-4 text-indigo-600" />
       default:
         return <Package className="h-4 w-4 text-gray-600" />
     }
@@ -110,11 +117,11 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit, onDelete }: Item
         return 'bg-blue-100 text-blue-800 border-blue-200'
       case 'klären':
         return 'bg-orange-100 text-orange-800 border-orange-200'
-      case 'verloren':
+      case 'fehlt':
         return 'bg-red-100 text-red-800 border-red-200'
-      case 'reparatur benötigt':
+      case 'reparatur':
         return 'bg-purple-100 text-purple-800 border-purple-200'
-      case 'anpassung benötigt':
+      case 'anpassung':
         return 'bg-indigo-100 text-indigo-800 border-indigo-200'
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200'
@@ -235,14 +242,19 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit, onDelete }: Item
                   {item.is_consumable && (
                     <Badge variant="outline">Verbrauchsgegenstand</Badge>
                   )}
-                  {item.needs_clarification && (
-                    <Badge variant="outline" className="text-orange-600 border-orange-300">
-                      Klärung erforderlich
+                  {item.is_used && (
+                    <Badge variant="outline" className="text-gray-600 border-gray-300">
+                      Bereits benutzt
                     </Badge>
                   )}
-                  {item.needed_for_rehearsal && (
-                    <Badge variant="outline" className="text-blue-600 border-blue-300">
-                      Für Probe benötigt
+                  {item.is_changeable && (
+                    <Badge variant="outline" className="text-green-600 border-green-300">
+                      Änderbar
+                    </Badge>
+                  )}
+                  {!item.is_changeable && (
+                    <Badge variant="outline" className="text-red-600 border-red-300">
+                      Nicht änderbar
                     </Badge>
                   )}
                 </div>
@@ -253,11 +265,18 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit, onDelete }: Item
                 <div>
                   <label className="text-sm font-medium text-gray-700">Charaktere</label>
                   <div className="flex flex-wrap gap-2 mt-1">
-                    {item.characters.map((character) => (
-                      <Badge key={character.id} variant="secondary">
-                        {character.name}
-                      </Badge>
-                    ))}
+                    {item.characters.map((character) => {
+                      const badgeStyle = getBadgeStyle(character.color);
+                      return (
+                        <Badge
+                          key={character.id}
+                          variant="secondary"
+                          style={badgeStyle}
+                        >
+                          {character.name}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 </div>
               )}

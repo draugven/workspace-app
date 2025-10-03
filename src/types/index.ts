@@ -19,6 +19,7 @@ export interface Character {
   id: string
   name: string
   description?: string
+  color?: string
   created_at: string
 }
 
@@ -26,6 +27,7 @@ export interface Category {
   id: string
   name: string
   type: 'prop' | 'costume' | 'both'
+  color?: string
   created_at: string
 }
 
@@ -34,11 +36,11 @@ export interface Item {
   name: string
   type: 'prop' | 'costume'
   scene?: string
-  status: 'erhalten' | 'in progress' | 'bestellt' | 'verloren' | 'klären' | 'reparatur benötigt' | 'anpassung benötigt'
+  status: 'in progress' | 'klären' | 'bestellt' | 'erhalten' | 'fehlt' | 'reparatur' | 'anpassung'
   is_consumable: boolean
-  needs_clarification: boolean
-  needed_for_rehearsal: boolean
-  source?: 'Staatstheater' | 'Gekauft' | 'Produziert' | 'Darsteller*in'
+  is_used?: boolean
+  is_changeable?: boolean
+  source?: 'Staatstheater' | 'Gekauft' | 'Produziert' | 'Ausleihe' | 'Spende'
   notes?: string
   category_id?: string
   created_by?: string

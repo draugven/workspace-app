@@ -15,81 +15,6 @@ import { supabase } from '@/lib/supabase'
 import { Plus, RefreshCw, Wifi, WifiOff } from 'lucide-react'
 import type { Item } from '@/types'
 
-// Mock data for now - this will be replaced with actual Supabase queries
-const mockItems: Item[] = [
-  {
-    id: '1',
-    name: 'Gladstone-Koffer',
-    type: 'prop',
-    scene: '1',
-    status: 'erhalten',
-    is_consumable: false,
-    needs_clarification: false,
-    needed_for_rehearsal: true,
-    source: 'Staatstheater',
-    notes: '',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z',
-    category: { id: '1', name: 'Taschen & Koffer', type: 'both', created_at: '2024-01-01' },
-    characters: [{ id: '1', name: 'Jonathan Harker', created_at: '2024-01-01' }]
-  },
-  {
-    id: '2',
-    name: 'Sarg',
-    type: 'prop',
-    scene: '5',
-    status: 'klären',
-    is_consumable: false,
-    needs_clarification: true,
-    needed_for_rehearsal: false,
-    notes: 'Mechanismus zum verschwinden?',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z',
-    category: { id: '2', name: 'Möbel', type: 'prop', created_at: '2024-01-01' },
-    characters: [{ id: '2', name: 'Dracula', created_at: '2024-01-01' }]
-  },
-  {
-    id: '3',
-    name: 'Brautstrauß',
-    type: 'prop',
-    status: 'in progress',
-    is_consumable: false,
-    needs_clarification: false,
-    needed_for_rehearsal: true,
-    source: 'Gekauft',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z',
-    category: { id: '3', name: 'Floristik', type: 'prop', created_at: '2024-01-01' },
-    characters: [{ id: '3', name: 'Lucy Westenra', created_at: '2024-01-01' }]
-  },
-  {
-    id: '4',
-    name: 'Hochzeitsschleier',
-    type: 'costume',
-    status: 'in progress',
-    is_consumable: false,
-    needs_clarification: false,
-    needed_for_rehearsal: true,
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z',
-    category: { id: '4', name: 'Accessoires', type: 'both', created_at: '2024-01-01' },
-    characters: [{ id: '3', name: 'Lucy Westenra', created_at: '2024-01-01' }]
-  },
-  {
-    id: '5',
-    name: 'Zigarre',
-    type: 'prop',
-    status: 'verloren',
-    is_consumable: true,
-    needs_clarification: false,
-    needed_for_rehearsal: true,
-    source: 'Produziert',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z',
-    category: { id: '5', name: 'Essen & Trinken', type: 'prop', created_at: '2024-01-01' },
-    characters: [{ id: '4', name: 'Quincey Morris', created_at: '2024-01-01' }]
-  }
-]
 
 export default function ItemsPage() {
   // Use real-time hook instead of manual state management
@@ -118,10 +43,10 @@ export default function ItemsPage() {
           name: itemData.name!,
           type: itemData.type!,
           scene: itemData.scene,
-          status: itemData.status || 'klären',
+          status: itemData.status || 'in progress',
           is_consumable: itemData.is_consumable || false,
-          needs_clarification: itemData.needs_clarification || false,
-          needed_for_rehearsal: itemData.needed_for_rehearsal || false,
+          is_used: itemData.is_used || false,
+          is_changeable: itemData.is_changeable !== undefined ? itemData.is_changeable : true,
           source: itemData.source,
           notes: itemData.notes,
           category_id: itemData.category_id,
@@ -243,7 +168,7 @@ export default function ItemsPage() {
     (item.notes && item.notes.toLowerCase().includes(searchTerm.toLowerCase())) ||
     item.source?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.category?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.characters?.some(char => char.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    item.characters?.some((char: any) => char.name.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
   const totalItems = items.length

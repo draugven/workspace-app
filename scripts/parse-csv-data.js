@@ -2,16 +2,50 @@ const fs = require('fs');
 const path = require('path');
 
 // Read the CSV file
-const csvPath = path.join(__dirname, '../seed data/Requisiten_Master.csv');
+const csvPath = path.join(__dirname, '../seed data/Requisiten_Master_latest.csv');
 const csvContent = fs.readFileSync(csvPath, 'utf-8');
 
-// Parse CSV (simple parser for this specific format)
-const lines = csvContent.split('\n');
-const headers = lines[0].split(';');
-const items = lines.slice(1).filter(line => line.trim()).map(line => {
-  const values = line.split(';');
+// Parse CSV properly handling quoted fields
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  let i = 0;
+
+  while (i < line.length) {
+    const char = line[i];
+
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        // Escaped quote
+        current += '"';
+        i += 2;
+      } else {
+        // Toggle quote state
+        inQuotes = !inQuotes;
+        i++;
+      }
+    } else if (char === ',' && !inQuotes) {
+      // Field separator
+      result.push(current.trim());
+      current = '';
+      i++;
+    } else {
+      current += char;
+      i++;
+    }
+  }
+
+  result.push(current.trim());
+  return result;
+}
+
+const lines = csvContent.split('\n').filter(line => line.trim());
+const headers = parseCSVLine(lines[0]).map(h => h.replace(/^\uFEFF/, '').trim()); // Remove BOM
+const items = lines.slice(1).map(line => {
+  const values = parseCSVLine(line);
   return headers.reduce((obj, header, index) => {
-    obj[header.trim()] = values[index] ? values[index].trim() : null;
+    obj[header] = values[index] && values[index] !== '' ? values[index] : null;
     return obj;
   }, {});
 });
@@ -40,26 +74,23 @@ const categoryMapping = {
 // Generate item inserts
 items.forEach((item, index) => {
   const name = item.Requisit ? item.Requisit.replace(/'/g, "''") : `Item ${index + 1}`;
-  const scene = item.Szene && item.Szene !== '' ? `'${item.Szene.replace(/'/g, "''")}'` : 'NULL';
-  const status = item.Status || 'klären';
-  const isConsumable = item.Consumable === 'Yes' ? 'true' : 'false';
-  const needsClarification = item.Klären === 'Yes' ? 'true' : 'false';
-  const neededForRehearsal = item.Probe === 'Yes' ? 'true' : 'false';
+  const scene = item['Seite(n)'] && item['Seite(n)'] !== '' ? `'${item['Seite(n)'].replace(/'/g, "''")}'` : 'NULL';
+  const status = item.Status || 'in progress';
+  const isConsumable = item.C === 'Yes' ? 'true' : 'false';
+  const isUsed = item.Benutzt === 'Yes' ? 'true' : 'false';
+  const isChangeable = item['Änderbar'] === 'Yes' ? 'true' : 'false';
   const source = item.Quelle && item.Quelle !== '' ? `'${item.Quelle.replace(/'/g, "''")}'` : 'NULL';
   const notes = item.Notizen && item.Notizen !== '' ? `'${item.Notizen.replace(/'/g, "''")}'` : 'NULL';
   const category = item.Tag && categoryMapping[item.Tag] ? item.Tag : 'Diverse';
 
-  // Determine if it's a prop or costume based on category and name
-  const type = ['Schmuck', 'Accessoires', 'Textilien'].includes(category) &&
-               (name.toLowerCase().includes('kostüm') || name.toLowerCase().includes('kleid') ||
-                name.toLowerCase().includes('schleier') || name.toLowerCase().includes('schuhe'))
-               ? 'costume' : 'prop';
+  // All items are props by default (no costume differentiation needed)
+  const type = 'prop';
 
-  sql += `INSERT INTO items (name, type, scene, status, is_consumable, needs_clarification, needed_for_rehearsal, source, notes, category_id, created_by)
-SELECT '${name}', '${type}', ${scene}, '${status}', ${isConsumable}, ${needsClarification}, ${neededForRehearsal}, ${source}, ${notes},
-       c.id, u.id
-FROM categories c, users u
-WHERE c.name = '${category}' AND u.full_name = 'Liza';\n\n`;
+  sql += `INSERT INTO items (name, type, scene, status, is_consumable, is_used, is_changeable, source, notes, category_id, created_by)
+SELECT '${name}', '${type}', ${scene}, '${status}', ${isConsumable}, ${isUsed}, ${isChangeable}, ${source}, ${notes},
+       c.id, '900f55da-5f72-432b-b42f-c206fe2c758a'
+FROM categories c
+WHERE c.name = '${category}';\n\n`;
 
   // Add character relationships if specified
   if (item.Charakter && item.Charakter !== '') {
@@ -68,7 +99,8 @@ WHERE c.name = '${category}' AND u.full_name = 'Liza';\n\n`;
       sql += `INSERT INTO item_characters (item_id, character_id)
 SELECT i.id, c.id
 FROM items i, characters c
-WHERE i.name = '${name}' AND c.name = '${character.replace(/'/g, "''")}';\n`;
+WHERE i.name = '${name}' AND c.name = '${character.replace(/'/g, "''")}'
+ON CONFLICT DO NOTHING;\n`;
     });
     sql += '\n';
   }

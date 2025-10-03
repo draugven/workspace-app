@@ -35,11 +35,11 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
     name: '',
     type: 'prop' as 'prop' | 'costume',
     scene: '',
-    status: 'klären' as Item['status'],
+    status: 'in progress' as Item['status'],
     is_consumable: false,
-    needs_clarification: false,
-    needed_for_rehearsal: false,
-    source: 'none' as Item['source'],
+    is_used: false,
+    is_changeable: true,
+    source: undefined as Item['source'],
     notes: '',
     category_id: 'none',
     character_ids: [] as string[]
@@ -66,8 +66,8 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
         scene: editingItem.scene || '',
         status: editingItem.status,
         is_consumable: editingItem.is_consumable,
-        needs_clarification: editingItem.needs_clarification,
-        needed_for_rehearsal: editingItem.needed_for_rehearsal,
+        is_used: editingItem.is_used || false,
+        is_changeable: editingItem.is_changeable || true,
         source: editingItem.source,
         notes: editingItem.notes || '',
         category_id: editingItem.category_id || 'none',
@@ -79,10 +79,10 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
         name: '',
         type: 'prop',
         scene: '',
-        status: 'klären',
+        status: 'in progress',
         is_consumable: false,
-        needs_clarification: false,
-        needed_for_rehearsal: false,
+        is_used: false,
+        is_changeable: true,
         source: undefined,
         notes: '',
         category_id: 'none',
@@ -142,20 +142,21 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
   }
 
   const statusOptions = [
-    { value: 'erhalten', label: 'Erhalten' },
     { value: 'in progress', label: 'In Progress' },
-    { value: 'bestellt', label: 'Bestellt' },
-    { value: 'verloren', label: 'Verloren' },
     { value: 'klären', label: 'Klären' },
-    { value: 'reparatur benötigt', label: 'Reparatur benötigt' },
-    { value: 'anpassung benötigt', label: 'Anpassung benötigt' }
+    { value: 'bestellt', label: 'Bestellt' },
+    { value: 'erhalten', label: 'Erhalten' },
+    { value: 'fehlt', label: 'Fehlt' },
+    { value: 'reparatur', label: 'Reparatur' },
+    { value: 'anpassung', label: 'Anpassung' }
   ]
 
   const sourceOptions = [
     { value: 'Staatstheater', label: 'Staatstheater' },
     { value: 'Gekauft', label: 'Gekauft' },
     { value: 'Produziert', label: 'Produziert' },
-    { value: 'Darsteller*in', label: 'Darsteller*in' }
+    { value: 'Ausleihe', label: 'Ausleihe' },
+    { value: 'Spende', label: 'Spende' }
   ]
 
   return (
@@ -292,23 +293,23 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
 
                 <div className="flex items-center space-x-2">
                   <Switch
-                    id="clarification"
-                    checked={formData.needs_clarification}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, needs_clarification: checked }))}
+                    id="used"
+                    checked={formData.is_used}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_used: checked }))}
                   />
-                  <Label htmlFor="clarification" className="text-sm">
-                    Klärung erforderlich
+                  <Label htmlFor="used" className="text-sm">
+                    Bereits benutzt
                   </Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
                   <Switch
-                    id="rehearsal"
-                    checked={formData.needed_for_rehearsal}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, needed_for_rehearsal: checked }))}
+                    id="changeable"
+                    checked={formData.is_changeable}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_changeable: checked }))}
                   />
-                  <Label htmlFor="rehearsal" className="text-sm">
-                    Für Probe benötigt
+                  <Label htmlFor="changeable" className="text-sm">
+                    Änderbar
                   </Label>
                 </div>
               </div>

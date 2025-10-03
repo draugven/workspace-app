@@ -21,6 +21,7 @@ CREATE TABLE characters (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   name TEXT UNIQUE NOT NULL,
   description TEXT,
+  color TEXT DEFAULT '#6b7280',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -29,6 +30,7 @@ CREATE TABLE categories (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   name TEXT UNIQUE NOT NULL,
   type TEXT CHECK (type IN ('prop', 'costume', 'both')) DEFAULT 'both',
+  color TEXT DEFAULT '#6b7280',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -38,11 +40,11 @@ CREATE TABLE items (
   name TEXT NOT NULL,
   type TEXT CHECK (type IN ('prop', 'costume')) NOT NULL,
   scene TEXT,
-  status TEXT CHECK (status IN ('erhalten', 'in progress', 'bestellt', 'verloren', 'klären', 'reparatur benötigt', 'anpassung benötigt')) DEFAULT 'klären',
+  status TEXT CHECK (status IN ('in progress', 'klären', 'bestellt', 'erhalten', 'fehlt', 'reparatur', 'anpassung')) DEFAULT 'in progress',
   is_consumable BOOLEAN DEFAULT FALSE,
-  needs_clarification BOOLEAN DEFAULT FALSE,
-  needed_for_rehearsal BOOLEAN DEFAULT FALSE,
-  source TEXT CHECK (source IN ('Staatstheater', 'Gekauft', 'Produziert', 'Darsteller*in')),
+  is_used BOOLEAN DEFAULT FALSE,
+  is_changeable BOOLEAN DEFAULT TRUE,
+  source TEXT CHECK (source IN ('Staatstheater', 'Gekauft', 'Produziert', 'Ausleihe', 'Spende')),
   notes TEXT,
   category_id UUID REFERENCES categories(id),
   created_by UUID REFERENCES auth.users(id),
@@ -238,19 +240,19 @@ INSERT INTO departments (name, description, color) VALUES
 ('Tech', 'Technical production including lighting and sound', '#10b981');
 
 -- Insert characters
-INSERT INTO characters (name, description) VALUES
-('Dracula', 'The main antagonist'),
-('Jonathan Harker', 'Young lawyer'),
-('Mina Murray', 'Jonathan''s fiancée, later wife'),
-('Lucy Westenra', 'Mina''s best friend'),
-('Arthur Holmwood', 'Lucy''s fiancé'),
-('Jack Seward', 'Doctor and Lucy''s suitor'),
-('Quincey Morris', 'American cowboy and Lucy''s suitor'),
-('Van Helsing', 'Dutch professor and vampire hunter'),
-('Renfield', 'Dracula''s devoted servant'),
-('Wirtin', 'Innkeeper'),
-('Vampirellas', 'Dracula''s vampire brides'),
-('Ensemble', 'Chorus members');
+INSERT INTO characters (name, description, color) VALUES
+('Dracula', 'The main antagonist', '#ef4444'),
+('Jonathan Harker', 'Young lawyer', '#3b82f6'),
+('Mina Murray', 'Jonathan''s fiancée, later wife', '#10b981'),
+('Lucy Westenra', 'Mina''s best friend', '#f59e0b'),
+('Arthur Holmwood', 'Lucy''s fiancé', '#8b5cf6'),
+('Jack Seward', 'Doctor and Lucy''s suitor', '#06b6d4'),
+('Quincey Morris', 'American cowboy and Lucy''s suitor', '#84cc16'),
+('Van Helsing', 'Dutch professor and vampire hunter', '#f97316'),
+('Renfield', 'Dracula''s devoted servant', '#ec4899'),
+('Wirtin', 'Innkeeper', '#64748b'),
+('Vampirellas', 'Dracula''s vampire brides', '#7c3aed'),
+('Ensemble', 'Chorus members', '#059669');
 
 -- Insert categories
 INSERT INTO categories (name, type) VALUES

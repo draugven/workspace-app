@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { StatusBadge } from './status-badge'
 import { ItemDetailDrawer } from './item-detail-drawer'
 import { Eye, Paperclip } from 'lucide-react'
+import { getLightBackgroundColor, getBadgeStyle } from '@/lib/color-utils'
 import type { Item } from "@/types"
 
 interface ItemsTableProps {
@@ -94,6 +95,9 @@ export function ItemsTable({ items, onEditItem, onDeleteItem }: ItemsTableProps)
             <TableRow
               key={item.id}
               className="hover:bg-muted/50 cursor-pointer"
+              style={{
+                backgroundColor: getLightBackgroundColor(item.category?.color, 0.05)
+              }}
               onClick={() => handleRowClick(item)}
             >
               <TableCell className="font-medium">
@@ -122,11 +126,19 @@ export function ItemsTable({ items, onEditItem, onDeleteItem }: ItemsTableProps)
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
-                  {item.characters?.map((character) => (
-                    <Badge key={character.id} variant="outline" className="text-xs">
-                      {character.name}
-                    </Badge>
-                  )) || '—'}
+                  {item.characters?.map((character) => {
+                    const badgeStyle = getBadgeStyle(character.color);
+                    return (
+                      <Badge
+                        key={character.id}
+                        variant="outline"
+                        className="text-xs"
+                        style={badgeStyle}
+                      >
+                        {character.name}
+                      </Badge>
+                    );
+                  }) || '—'}
                 </div>
               </TableCell>
               <TableCell className="text-sm">
@@ -142,14 +154,14 @@ export function ItemsTable({ items, onEditItem, onDeleteItem }: ItemsTableProps)
                       Verbrauchbar
                     </Badge>
                   )}
-                  {item.needs_clarification && (
-                    <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700">
-                      Klären
+                  {item.is_used && (
+                    <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700">
+                      Benutzt
                     </Badge>
                   )}
-                  {item.needed_for_rehearsal && (
-                    <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
-                      Probe
+                  {item.is_changeable && (
+                    <Badge variant="outline" className="text-xs bg-green-50 text-green-700">
+                      Änderbar
                     </Badge>
                   )}
                 </div>

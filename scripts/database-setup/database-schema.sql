@@ -18,6 +18,7 @@ CREATE TABLE characters (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   name TEXT UNIQUE NOT NULL,
   description TEXT,
+  color TEXT DEFAULT '#6b7280',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -26,20 +27,21 @@ CREATE TABLE categories (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   name TEXT UNIQUE NOT NULL,
   type TEXT CHECK (type IN ('prop', 'costume', 'both')) DEFAULT 'both',
+  color TEXT DEFAULT '#6b7280',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Props/Items table (combines props and costumes)
+-- Props/Items table
 CREATE TABLE items (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   name TEXT NOT NULL,
   type TEXT CHECK (type IN ('prop', 'costume')) NOT NULL,
   scene TEXT,
-  status TEXT CHECK (status IN ('erhalten', 'in progress', 'bestellt', 'verloren', 'klären', 'reparatur benötigt', 'anpassung benötigt')) DEFAULT 'klären',
+  status TEXT CHECK (status IN ('in progress', 'klären', 'bestellt', 'erhalten', 'fehlt', 'reparatur', 'anpassung')) DEFAULT 'in progress',
   is_consumable BOOLEAN DEFAULT FALSE,
-  needs_clarification BOOLEAN DEFAULT FALSE,
-  needed_for_rehearsal BOOLEAN DEFAULT FALSE,
-  source TEXT CHECK (source IN ('Staatstheater', 'Gekauft', 'Produziert', 'Darsteller*in')),
+  is_used BOOLEAN DEFAULT FALSE,
+  is_changeable BOOLEAN DEFAULT TRUE,
+  source TEXT CHECK (source IN ('Staatstheater', 'Gekauft', 'Produziert', 'Ausleihe', 'Spende')),
   notes TEXT,
   category_id UUID REFERENCES categories(id),
   created_by UUID REFERENCES auth.users(id),

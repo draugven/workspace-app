@@ -30,6 +30,17 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - Tailwind CSS + Shadcn/ui
 - Tiptap editor, @dnd-kit, Tanstack Table
 
+## Database Schema
+**Core Entities:**
+- `items` - Requisiten/props management with new schema (`is_used`, `is_changeable`), file uploads, character relationships
+- `tasks` - Task management with priority, status, assignees, rich descriptions, ranking for drag-and-drop
+- `notes` - Collaborative notes with real-time editing, departments, privacy settings
+- `departments` - Organization units for categorizing items/tasks/notes
+- `categories` - Item categorization with thematic colors for visual organization
+- `characters` - Theater characters with distinct colors for badge visualization
+- `task_tags` - Tagging system for task organization
+- `auth.users` - Supabase authentication with admin role system (no RLS, app-level security)
+
 ## Implementation Status
 
 ### ✅ Core System Complete
@@ -39,18 +50,21 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Collaborative Notes**: Rich text editor with hyperlink support and department assignment
 - **Admin System**: App-level security with delete permissions (no RLS complexity)
 - **UI/UX**: German localization, compact design, fully mobile-responsive
+- **Visual Enhancement**: Colorful character badges and category-based row backgrounds for better organization
+- **Data Integration**: Updated schema with CSV import support (105+ theater props), character relationships display
 
 ### ⚠️ Known Issues
 - **Next.js Image warning**: Console warning about aspect ratio for main logo (functional, cosmetic only)
 
 ### 🔄 Current Development Status (Oct 2024)
-- **Version**: 0.10.1
-- **Active**: Rich text editing enhancement completed
+- **Version**: 0.11.0
+- **Active**: Database schema modernization and colorful UI enhancement completed
 - **Dev Server**: Running on port 3000
 - **Mobile UI**: Icon-only buttons, optimized layouts, single-line stats, burger menu navigation
 - **Desktop UI**: Restored original layout with enhanced mobile-first components
 - **Dark Theme**: Complete light/dark mode switching with theme toggle in navigation
 - **Rich Text**: Full Tiptap editor support in both note editing and creation dialogs
+- **Data Visualization**: Character badges with distinct colors, category-based row backgrounds
 - **Next Steps**: Task ranking debug, deployment preparation
 
 ## Technical Preferences
@@ -62,7 +76,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **ALWAYS run `npm run lint`, `npm run typecheck`, and `npm run build` after implementing large functionality or refactoring** (build catches additional TypeScript errors that typecheck might miss)
 
 ## Version Management
-**Current Version**: `0.10.1`
+**Current Version**: `0.11.0`
 
 Follow semantic versioning (SemVer) when creating commits and updating package.json version:
 
@@ -130,7 +144,8 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - `scripts/` - Processing utilities (parse-todos.js, parse-csv-data.js, run-import.mjs)
 
 ### Static Assets (`public/`)
-- `back2stage_logo.svg` - Main logo with converted text outlines
+- `back2stage_logo.svg` - Main logo for light theme (dark text #38383a)
+- `back2stage_logo_dark.svg` - Logo for dark theme (light text #f2f2f3)
 - `b2s_curtain_logo.svg` - Curtain logo/favicon
 - `site.webmanifest` - Web app manifest for PWA support
 - Favicon files (favicon.ico, favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png)
@@ -151,109 +166,60 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - **Font loading**: Next.js Google Fonts with CSS variables, Tailwind config extended for custom fonts
 - **Branding consistency**: "Back2Stage" used throughout, informal German (du/dir) in auth forms
 - **Mobile responsiveness**: Icon-only buttons on mobile (`<span className="hidden sm:inline">Text</span>`), burger menu navigation, responsive layouts with `flex-col sm:flex-row` patterns
-- **Dark theme system**: React Context-based ThemeProvider with localStorage persistence. Tailwind "class" dark mode with manual theme switching. Theme toggle with animated sun/moon icons positioned in navigation
+- **Dark theme system**: React Context-based ThemeProvider with localStorage persistence ("back2stage-theme" key). Tailwind "class" dark mode with manual theme switching. Theme toggle with animated sun/moon icons positioned in navigation. Logo switching: `theme === 'dark' ? logo_dark.svg : logo.svg`
+- **Rich text editor architecture**: Three components - `TiptapEditor` (full-featured for note editing), `TiptapEditorWrapper` (SSR wrapper for note creation/editing), `TaskDescriptionEditor` (simplified for task descriptions). Use wrapper for SSR compatibility with `ssr: false` and `immediatelyRender: false`
+- **Component dialog patterns**: Add vs Edit dialogs follow consistent structure - Add dialogs use controlled state, Edit dialogs receive existing data. Both use same validation and save patterns
+- **Development workflow**: `npm run dev` (development), `npm run build` (production build), `npm run lint` (ESLint), `npm run typecheck` (TypeScript validation). Always run all three after major changes
 
 ## TODO Backlog
 
 ### High Priority
-1. ~~**Clean up console output** - Remove excessive logging especially for tasks page to improve developer experience~~ ✅ **COMPLETED**
-2. **Debug task ranking drag-and-drop** - Fix remaining positioning bugs in Kanban view task reordering within priority groups
-3. ~~**Mobile UI optimization** - Improve responsiveness across all views for mobile devices~~ ✅ **COMPLETED**
-4. ~~**Dark theme implementation** - Add dark mode support~~ ✅ **COMPLETED**
+1. **Debug task ranking drag-and-drop** - Fix remaining positioning bugs in Kanban view task reordering within priority groups
+2. **Enhance drag-and-drop on mobile** - Lock scrolling on drag, add drag preview, add drop animations
 
 ### Medium Priority
-5. **Done task management** - Strategy for completed tasks (archive, hide after X days, etc.)
-6. **Deployment setup** - Prepare and deploy application
+3. **Done task management** - Strategy for completed tasks (archive, hide after X days, etc.)
+4. **Deployment setup** - Prepare and deploy application
 
 ### Low Priority
-7. **Archive legacy scripts** - Clean up obsolete data import/processing scripts
-8. **Note versioning review** - Investigate current note version saving potential
-9. **Offline capabilities strategy** - Research offline data access options
+5. **Archive legacy scripts** - Clean up obsolete data import/processing scripts
+6. **Note versioning review** - Investigate current note version saving potential
+7. **Offline capabilities strategy** - Research offline data access options
 
 ## Recent Major Changes
 
+### v0.11.0 - Database Schema & Colorful UI Enhancement (Oct 2024)
+- **FEATURE**: Updated database schema with new item fields (`is_used`, `is_changeable`) replacing legacy fields
+- **FEATURE**: Colorful character badges with distinct colors for better visual identification
+- **FEATURE**: Category-based row background tinting for improved visual organization
+- **FEATURE**: CSV data import system with 105+ theater props from Notion export
+- **IMPROVEMENT**: Character relationships properly displayed in UI with data transformation
+- **IMPROVEMENT**: Enhanced color utilities for consistent badge styling and accessibility
+- **DATA**: Complete theater production dataset with all Dracula characters and prop categories
+
 ### v0.10.1 - Rich Text Editor Enhancement (Oct 2024)
-- **IMPROVEMENT**: Enhanced note add dialog with full Tiptap rich text editor
-- **IMPROVEMENT**: Replaced simple textarea with comprehensive formatting toolbar
-- **FEATURE**: Rich text support in note creation including bold, italic, headings, lists, links, quotes, code blocks
+- **FEATURE**: Added full Tiptap rich text editor to note creation dialog
 - **IMPROVEMENT**: Consistent WYSIWYG editing experience across note creation and editing
-- **IMPROVEMENT**: Dark theme compatibility for all rich text editor components
-- **UX**: Updated helper text to reflect rich text capabilities
 
 ### v0.10.0 - Dark Theme Implementation (Oct 2024)
-- **FEATURE**: Complete dark mode theme system with light/dark mode switching
-- **FEATURE**: Theme toggle component with animated sun/moon icons
-- **FEATURE**: Custom dark theme color palette matching brand colors (dark blue-gray backgrounds)
-- **FEATURE**: Theme toggle in navigation - desktop (left of username) and mobile (left of burger menu)
-- **FEATURE**: LocalStorage persistence for theme preference with "back2stage-theme" key
-- **IMPROVEMENT**: Enhanced ThemeProvider with React Context for global theme state
-- **IMPROVEMENT**: All components automatically support dark mode through Tailwind semantic tokens
-- **TECHNICAL**: Tailwind CSS configured with "class" dark mode strategy for manual control
+- **FEATURE**: Complete dark mode system with animated theme toggle in navigation
+- **FEATURE**: Theme-aware logo switching and custom dark color palette
+- **IMPROVEMENT**: All components support dark mode with localStorage persistence
 
 ### v0.9.0 - Mobile Responsiveness Optimization (Oct 2024)
-- **FEATURE**: Comprehensive mobile UI optimization across all pages and components
-- **FEATURE**: Icon-only button behavior on mobile screens with text labels on desktop
-- **FEATURE**: Burger menu navigation system for mobile devices with collapsible menu
-- **FEATURE**: Single-line stats display on mobile with horizontal scrolling support
-- **IMPROVEMENT**: Mobile-first note card layout with stacked title and badge sections
-- **IMPROVEMENT**: Optimized dialog layouts for mobile with proper button positioning
-- **IMPROVEMENT**: Enhanced PageHeader component with responsive desktop/mobile layouts
-- **IMPROVEMENT**: TiptapEditor toolbar optimization with hidden save button on mobile
-- **IMPROVEMENT**: StatsBar component redesigned for compact mobile display
-- **BUG FIX**: Restored original desktop layout behavior while maintaining mobile improvements
+- **FEATURE**: Comprehensive mobile UI with icon-only buttons and burger menu navigation
+- **IMPROVEMENT**: Optimized layouts for all components across mobile and desktop
+- **BUG FIX**: Restored original desktop behavior while maintaining mobile improvements
 
 ### v0.8.1 - Assignee Removal Bug Fix (Sept 2024)
 - **BUG FIX**: Fixed assignee removal functionality in task management
-- **BUG FIX**: Resolved Combobox toggle behavior preventing "Niemandem zugewiesen" selection
 - **IMPROVEMENT**: Enhanced data persistence layer to properly handle undefined values
-- **TECHNICAL**: Convert undefined values to null in useRealtimeData for proper Supabase field clearing
 
 ### v0.8.0 - Typography & Branding System (Sept 2024)
-- **FEATURE**: Implemented comprehensive branding system with Lexend + Roboto font stack
-- **FEATURE**: Updated color scheme with professional blue primary (#3A4D7A) and red accent (#E74746)
-- **FEATURE**: Created typography hierarchy with custom CSS classes (text-h1, text-h2, text-h3, text-body, etc.)
-- **IMPROVEMENT**: Replaced "Theater Production App" branding with "Back2Stage" throughout
-- **IMPROVEMENT**: Converted login/signup forms to informal German language (du/dir)
+- **FEATURE**: Comprehensive branding system with Lexend + Roboto fonts and Back2Stage identity
+- **FEATURE**: Professional blue/red color scheme and typography hierarchy
+- **IMPROVEMENT**: Converted interface to informal German language (du/dir)
 
-## Development Sessions
-
-### Oct 2024 - Mobile Responsiveness Optimization
-**Key Achievement**: Implemented comprehensive mobile UI optimization across all pages and components
-- Added icon-only button behavior on mobile screens with text labels on desktop
-- Implemented burger menu navigation system for mobile devices with collapsible menu
-- Created single-line stats display on mobile with horizontal scrolling support
-- Enhanced PageHeader component with responsive desktop/mobile layouts
-- Optimized dialog layouts for mobile with proper button positioning
-- Fixed TiptapEditor toolbar with hidden save button on mobile
-- Redesigned StatsBar component for compact mobile display
-- Restored original desktop layout while maintaining mobile improvements
-- Updated version to 0.9.0 and marked mobile optimization as completed
-
-### Sept 2024 - Task Ranking System Implementation
-**Key Achievement**: Implemented comprehensive drag-and-drop ranking within priority groups for better task organization
-- Added `ranking` field to database schema with proper indexing for performance
-- Updated TypeScript types and database schema files (database-schema.sql, database-setup-complete.sql)
-- Created ranking migration script (add-task-ranking.sql) with automatic ranking initialization
-- Enhanced Kanban view with within-priority column ranking using @dnd-kit SortableContext
-- Improved Table view default sorting: priority → status → ranking for logical task ordering
-- Added ranking calculation logic for task creation (places new tasks at bottom of priority group)
-- Implemented drag-and-drop ranking updates with fractional ranking system for smooth reordering
-
-### Sept 2024 - Real-time Data Synchronization Implementation
-**Key Achievement**: Fixed comprehensive real-time updates for all entities (items, tasks, notes)
-- Created generic `useRealtimeData` hook with retry logic and automatic reconnection
-- Built specialized hooks: `useRealtimeItems`, `useRealtimeTasks`, `useRealtimeNotesV2`
-- Resolved infinite subscription loop causing UI loading flicker issues
-- Fixed Supabase query syntax errors preventing task data from loading properly
-- Replaced manual database calls with real-time hook functions for immediate UI updates
-- Updated all CRUD operations to use real-time hooks enabling instant task changes
-
-### Sept 2024 - Admin System Overhaul
-**Key Achievement**: Replaced complex RLS with simplified app-level admin security
-- Resolved infinite recursion in authentication policies
-- Created admin-only API routes with Authorization header validation
-- Added admin delete functionality with confirmation dialogs across all entities
-- Fixed authentication consistency and implemented manual refresh workarounds
 
 # important-instruction-reminders
 Do what has been asked; nothing more, nothing less.
