@@ -24,7 +24,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `task_tags` - Tagging system for task organization
 - `auth.users` - Supabase authentication with admin role system (no RLS, app-level security)
 
-## Current Status (v0.12.0)
+## Current Status (v0.12.1)
 - Authentication, Requisiten management, Task management (Kanban/table), Collaborative notes
 - Admin system (app-level security), German UI, mobile-responsive, colorful character/category system
 - Database schema updated with `is_used`, `is_changeable` fields, 105+ theater props imported
@@ -32,7 +32,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Dev Server**: Running on port 3000
 
 ## Development Guidelines
-- Current version: 0.12.0 (SemVer: MAJOR.MINOR.PATCH)
+- Current version: 0.12.1 (SemVer: MAJOR.MINOR.PATCH)
 - Update both `package.json` and CLAUDE.md version before committing
 - Use conventional commit messages (feat:, fix:, BREAKING CHANGE:)
 - Always run `npm run lint`, `npm run typecheck`, `npm run build` after major changes
@@ -129,28 +129,35 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ## Development Sessions
 
-### Oct 2025 - Note Versioning Implementation
-**Key Achievement**: Implemented full version history tracking with UI for notes
+### Oct 2025 - Note Versioning & Task Management Improvements
+**Key Achievements**: Version history tracking for notes, completed task filtering
 
-- Added automatic version snapshot creation on every note save
-- Created version history dialog showing all versions with timestamps and previews
-- Built version viewer dialog for full content display of any version
-- Implemented version restore functionality (creates new version from old content)
-- Added `restoreVersion()` function to real-time notes hook
-- Updated select query to include versions relation in real-time data fetch
-- Made version dialogs mobile-responsive with icon-only buttons and adaptive layouts
-- History button shows version count and opens version management UI
-- Versions sorted by number (newest first), current version marked with badge
-- TypeScript typing fixed with `as any` workaround for Supabase inference issues
+**Note Versioning (v0.12.0):**
+- Automatic version snapshot creation on every note save
+- Version history dialog with timestamps and content previews
+- Version viewer dialog for full content display
+- Version restore functionality (creates new version from old content)
+- `restoreVersion()` function in real-time notes hook
+- Mobile-responsive dialogs with icon-only buttons
+- Known issue: Dialog overflow on mobile (non-critical)
+
+**Task Management (v0.12.1):**
+- Added "Show completed tasks" checkbox toggle in filters section
+- Hides tasks with status "done" when unchecked (defaults to showing all)
+- Works in both Kanban board and table views
+- Stats bar includes all tasks regardless of filter
+- First iteration of completed task management strategy
 
 ## TODO Backlog
 1. Debug task ranking drag-and-drop positioning bugs in Kanban view
 2. Enhance mobile drag-and-drop (lock scrolling, drag preview, drop animations)
-3. Done task management strategy (archive/hide completed tasks)
-4. Fix version history dialog mobile responsiveness
-5. **Offline capabilities strategy** - Research offline data access options
+3. Persist task filter settings (showCompleted, selectedDepartment, etc.) to localStorage
+4. **Auto-archive completed tasks**: Add `completed_at` timestamp and `archived` boolean to tasks table. When task status changes to "done", set `completed_at`. Automatically archive tasks where `completed_at` is older than 14 days. Add "Show archived" toggle and Archive page/view for browsing archived tasks.
+5. Fix version history dialog mobile responsiveness
+6. **Offline capabilities strategy** - Research offline data access options
 
 ## Recent Changes
+- **v0.12.1**: Added "Show completed tasks" toggle filter for cleaner task views
 - **v0.12.0**: Version history tracking with automatic snapshots, restore functionality, and version viewer UI
 - **v0.11.1**: Project cleanup - archived obsolete scripts, updated documentation, cleaned root directory
 - **v0.11.0**: Database schema update, colorful character/category system, complete theater dataset

@@ -41,6 +41,7 @@ export default function TasksPage() {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
   const [selectedPriority, setSelectedPriority] = useState<string | null>(null)
   const [selectedAssignee, setSelectedAssignee] = useState<string | null>(null)
+  const [showCompleted, setShowCompleted] = useState(true)
   const [filtersExpanded, setFiltersExpanded] = useState(false)
   const [departments, setDepartments] = useState<Department[]>([])
   const [tags, setTags] = useState<TaskTag[]>([])
@@ -229,7 +230,7 @@ export default function TasksPage() {
     }
   }, [hasActiveFilters, filtersExpanded])
 
-  // Filter tasks based on search term, department, tags, status, priority, and assignee
+  // Filter tasks based on search term, department, tags, status, priority, assignee, and completion
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = searchTerm === '' ||
       task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -242,7 +243,8 @@ export default function TasksPage() {
     const matchesPriority = !selectedPriority || task.priority === selectedPriority
     const matchesAssignee = !selectedAssignee ||
       (selectedAssignee === 'unassigned' ? !task.assigned_to : task.assigned_to === selectedAssignee)
-    return matchesSearch && matchesDepartment && matchesTags && matchesStatus && matchesPriority && matchesAssignee
+    const matchesCompletion = showCompleted || task.status !== 'done'
+    return matchesSearch && matchesDepartment && matchesTags && matchesStatus && matchesPriority && matchesAssignee && matchesCompletion
   })
 
   const totalTasks = tasks.length
@@ -482,6 +484,23 @@ export default function TasksPage() {
                     emptyText="Keine Person gefunden."
                   />
                 </div>
+              </div>
+
+              {/* Show Completed Toggle */}
+              <div className="flex items-center space-x-2 pt-2">
+                <input
+                  type="checkbox"
+                  id="show-completed"
+                  checked={showCompleted}
+                  onChange={(e) => setShowCompleted(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                <label
+                  htmlFor="show-completed"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  Erledigte Aufgaben anzeigen
+                </label>
               </div>
 
               {/* Active Filters and Clear Button */}
