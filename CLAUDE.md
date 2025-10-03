@@ -56,6 +56,14 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 ### ⚠️ Known Issues
 - **Next.js Image warning**: Console warning about aspect ratio for main logo (functional, cosmetic only)
 
+### 📊 Current Data Status (v0.11.0)
+- **Database Schema**: Updated to new format with `is_used`, `is_changeable` fields
+- **CSV Data**: 105 theater props from `Requisiten_Master_latest.csv` ready for import
+- **Generated SQL**: `items-seed-data.sql` contains all prop data with character relationships
+- **Migration Required**: Run `scripts/database-setup/add-colors-complete.sql` to add colors to existing databases
+- **Character Colors**: 12 distinct colors assigned to Dracula characters for visual identification
+- **Category Colors**: 14 thematic colors for prop categories (weapons=red, medical=blue, etc.)
+
 ### 🔄 Current Development Status (Oct 2024)
 - **Version**: 0.11.0
 - **Active**: Database schema modernization and colorful UI enhancement completed
@@ -129,19 +137,24 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - `lib/supabase.ts` - Supabase client configuration
 - `lib/auth-utils.ts` - Server-side admin utilities and role checking
 - `lib/utils.ts` - Utility functions
+- `lib/color-utils.ts` - Color utilities for badges and backgrounds (hex to RGB, contrast, styling)
 - `hooks/use-admin-check.tsx` - Client-side admin role checking hook
 - `hooks/use-realtime-data.tsx` - Generic real-time hook for all entities with retry logic
-- `hooks/use-realtime-items.tsx` - Real-time items hook
+- `hooks/use-realtime-items.tsx` - Real-time items hook with character data transformation
 - `hooks/use-realtime-tasks.tsx` - Real-time tasks hook
 - `hooks/use-realtime-notes.tsx` - Legacy real-time notes hook
 - `hooks/use-realtime-notes-v2.tsx` - Improved real-time notes hook
-- `types/` - TypeScript definitions (database.ts, index.ts)
+- `types/` - TypeScript definitions (database.ts with updated schema, index.ts with color fields)
 
 ### Database & Scripts
 - `scripts/database-setup/` - Core schema and setup (database-schema.sql, database-setup-complete.sql, supabase-storage-setup.sql, disable-rls-simplify.sql, assign-admin-role.sql, add-task-ranking.sql, SETUP-SIMPLIFIED-ADMIN.md)
+- `scripts/database-setup/` - **NEW v0.11.0**: Color enhancements (add-character-colors.sql, populate-category-colors.sql, add-colors-complete.sql)
+- `scripts/database-setup/` - **NEW v0.11.0**: Schema migration (migrate-items-schema.sql for updating existing databases)
 - `scripts/data-import/` - Active data utilities (populate-task-tags.sql, cleanup-tasks.sql)
 - `scripts/archive/` - Archived/obsolete scripts (add-privacy-fields.sql, add-user-roles.sql, fix-rls-policies.sql, populate-created-by-fields.sql, setup-default-user-roles.sql, cleanup-migration.sql, update-departments.sql, legacy-seed-data/)
-- `scripts/` - Processing utilities (parse-todos.js, parse-csv-data.js, run-import.mjs)
+- `scripts/` - Processing utilities (parse-todos.js, parse-csv-data.js with enhanced CSV parsing, run-import.mjs)
+- **NEW v0.11.0**: `items-seed-data.sql` - Generated theater props data (105+ items from CSV)
+- **NEW v0.11.0**: `seed data/Requisiten_Master_latest.csv` - Source CSV from Notion export
 
 ### Static Assets (`public/`)
 - `back2stage_logo.svg` - Main logo for light theme (dark text #38383a)
@@ -170,12 +183,19 @@ Follow semantic versioning (SemVer) when creating commits and updating package.j
 - **Rich text editor architecture**: Three components - `TiptapEditor` (full-featured for note editing), `TiptapEditorWrapper` (SSR wrapper for note creation/editing), `TaskDescriptionEditor` (simplified for task descriptions). Use wrapper for SSR compatibility with `ssr: false` and `immediatelyRender: false`
 - **Component dialog patterns**: Add vs Edit dialogs follow consistent structure - Add dialogs use controlled state, Edit dialogs receive existing data. Both use same validation and save patterns
 - **Development workflow**: `npm run dev` (development), `npm run build` (production build), `npm run lint` (ESLint), `npm run typecheck` (TypeScript validation). Always run all three after major changes
+- **Character data transformation**: Real-time items hook transforms nested `item_characters.character` to flat `characters` array for UI compatibility using `transformItemData()` function
+- **Color system architecture**: Hex colors stored in database, converted to RGBA with utilities for badges (`getBadgeStyle()`), backgrounds (`getLightBackgroundColor()`), and contrast (`getContrastingTextColor()`)
+- **CSV import system**: Robust CSV parser handles quoted fields with commas, generates SQL with conflict resolution (`ON CONFLICT DO NOTHING`), maps character relationships automatically
+- **Database schema versioning**: Items table updated from legacy fields (`needs_clarification`, `needed_for_rehearsal`) to new schema (`is_used`, `is_changeable`). Migration scripts provided for existing databases
+- **Visual organization**: Category colors provide subtle row backgrounds (5% opacity), character colors create distinct badge identification, thematic color assignments for intuitive categorization
 
 ## TODO Backlog
 
 ### High Priority
-1. **Debug task ranking drag-and-drop** - Fix remaining positioning bugs in Kanban view task reordering within priority groups
-2. **Enhance drag-and-drop on mobile** - Lock scrolling on drag, add drag preview, add drop animations
+1. **Database Migration Deployment** - Apply schema changes and color enhancements to production database
+2. **CSV Data Import** - Import 105 theater props using generated SQL file
+3. **Debug task ranking drag-and-drop** - Fix remaining positioning bugs in Kanban view task reordering within priority groups
+4. **Enhance drag-and-drop on mobile** - Lock scrolling on drag, add drag preview, add drop animations
 
 ### Medium Priority
 3. **Done task management** - Strategy for completed tasks (archive, hide after X days, etc.)
