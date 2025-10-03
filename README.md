@@ -1,23 +1,28 @@
-# Theater Production Collaboration Tool
+# Back2Stage - Theater Production Collaboration Tool
 
-A Next.js web application for small theater production teams to manage requisiten, tasks, and collaborative notes.
+A Next.js web application for small theater production teams to manage props, costumes, tasks, and collaborative notes.
 
 ## Features
 
-- **Requisiten Management**: Track items with customizable properties, status tracking, and character assignments
-- **Task Management**: Multi-status workflow (Not Started → In Progress → Done/Blocked) with department grouping and assignments
-- **Collaborative Notes**: Rich text editing with conflict warnings and version history
-- **Real-time Collaboration**: Live updates for concurrent editing
-- **Mobile Responsive**: Optimized for theater venue use
+- **Requisiten Management**: Track items with customizable properties, status tracking, character assignments, and category colors
+- **Task Management**: Kanban board and table views with drag-and-drop, rich text descriptions, priority levels, and tag system
+- **Collaborative Notes**: Real-time rich text editing with Tiptap editor and department organization
+- **Admin System**: App-level security with admin-only deletion and management features
+- **Dark Theme**: Complete dark mode support with manual theme toggle
+- **Mobile Responsive**: Optimized UI with burger menu navigation and responsive layouts
+- **Real-time Updates**: Live data synchronization across all users
+- **Colorful Organization**: Character and category badges with thematic color assignments
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14, React, TypeScript
+- **Frontend**: Next.js 14 (App Router), React, TypeScript
 - **Styling**: Tailwind CSS, Shadcn/ui components
-- **Database**: Supabase (PostgreSQL)
-- **Real-time**: Supabase Realtime
-- **Rich Text**: Tiptap editor
-- **Tables**: TanStack Table
+- **Database**: Supabase (PostgreSQL, Auth, Storage, Real-time)
+- **Rich Text**: Tiptap editor with SSR support
+- **Tables**: TanStack Table v8
+- **Drag & Drop**: @dnd-kit library
+- **Typography**: Lexend (headings), Roboto (body)
+- **Deployment**: Docker + GitHub Actions + Kubernetes
 
 ## Getting Started
 
@@ -31,14 +36,14 @@ A Next.js web application for small theater production teams to manage requisite
 1. **Clone and install dependencies**:
    ```bash
    git clone <repository-url>
-   cd theater-production-app
+   cd workspace-app
    npm install
    ```
 
 2. **Set up Supabase**:
    - Create a new Supabase project at [supabase.com](https://supabase.com)
-   - Copy your project URL and anon key
-   - Update `.env.local`:
+   - Copy your project URL and keys
+   - Copy `.env.local.example` to `.env.local` and update:
      ```env
      NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
      NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
@@ -47,93 +52,123 @@ A Next.js web application for small theater production teams to manage requisite
 
 3. **Initialize the database**:
    - In your Supabase SQL editor, run:
-     - `scripts/database-setup/database-schema.sql` (creates tables)
-     - `scripts/data-import/seed-data.sql` (creates departments, users, etc.)
-     - `scripts/data-import/items-seed-data.sql` (imports props/costumes data)
-     - `scripts/data-import/tasks-seed-data.sql` (imports tasks data)
+     - `scripts/database-setup/database-setup-complete.sql` (complete setup with seed data)
+     - `scripts/database-setup/supabase-storage-setup.sql` (file storage configuration)
+   - Assign admin role to your user:
+     - Update user ID in `scripts/database-setup/assign-admin-role.sql`
+     - Run the script in Supabase SQL editor
 
 4. **Run the development server**:
    ```bash
    npm run dev
    ```
-
-5. **Open your browser**:
-   - Navigate to [http://localhost:3000](http://localhost:3000)
+   The app will be available at [http://localhost:3000](http://localhost:3000)
 
 ## Project Structure
 
 ```
 ├── src/
-│   ├── app/                 # Next.js 14 app directory
-│   ├── components/          # React components
-│   │   └── ui/             # Shadcn/ui components
-│   ├── lib/                # Utilities and configurations
-│   └── types/              # TypeScript type definitions
+│   ├── app/                    # Next.js 14 app directory
+│   │   ├── page.tsx           # Dashboard
+│   │   ├── items/             # Requisiten management
+│   │   ├── tasks/             # Task management
+│   │   ├── notes/             # Collaborative notes
+│   │   └── api/               # API routes (users, admin endpoints)
+│   ├── components/
+│   │   ├── auth/              # Authentication components
+│   │   ├── items/             # Requisiten components
+│   │   ├── tasks/             # Task management components
+│   │   ├── notes/             # Note components with Tiptap
+│   │   ├── theme/             # Theme provider and toggle
+│   │   ├── layout/            # Navigation, footer
+│   │   └── ui/                # Shadcn/ui components
+│   ├── lib/                   # Utilities and configurations
+│   │   ├── supabase.ts        # Supabase client
+│   │   ├── auth-utils.ts      # Server-side admin utilities
+│   │   └── color-utils.ts     # Color utilities for badges
+│   ├── hooks/                 # React hooks
+│   │   ├── use-admin-check.tsx        # Client-side admin checking
+│   │   ├── use-realtime-data.tsx      # Generic real-time hook
+│   │   ├── use-realtime-items.tsx     # Real-time items hook
+│   │   └── use-realtime-tasks.tsx     # Real-time tasks hook
+│   └── types/                 # TypeScript definitions
+│       ├── database.ts        # Database schema types
+│       └── index.ts           # Extended types with colors
 ├── scripts/
-│   ├── database-setup/      # SQL schema and setup scripts
-│   ├── data-import/         # SQL seed data and import scripts
-│   └── *.js                # Data processing utilities
-├── seed data/             # Original CSV and markdown files
+│   └── database-setup/        # SQL schema and setup scripts
+├── docker/                    # Docker configuration
+├── .github/workflows/         # GitHub Actions CI/CD
+├── public/                    # Static assets (logos, favicons)
 └── README.md
 ```
 
 ## Database Schema
 
-The app uses a PostgreSQL database with the following main tables:
+The app uses Supabase (PostgreSQL) with the following main tables:
 
-- `users` - User authentication and profiles
-- `departments` - Theater production departments
-- `characters` - Characters in the production
-- `categories` - Item categories (props/costumes)
-- `items` - Requisiten with status tracking
-- `tasks` - Task management with workflow states
-- `notes` - Collaborative notes with version history
+- `auth.users` - Supabase authentication (no custom users table)
+- `user_roles` - Admin role system (app-level security, no RLS)
+- `departments` - Theater production departments with colors
+- `characters` - Characters in the production with colors
+- `categories` - Item categories with thematic colors
+- `items` - Props/costumes with status tracking, character relationships
+- `tasks` - Task management with priority, status, ranking, rich descriptions
+- `task_tags` - Categorized tags (Bereich, Typ)
+- `notes` - Collaborative notes with real-time editing
+- `note_versions` - Version history for notes
+- `item_files` - File attachments for items
 
 ## Development
 
 ### Scripts
 
-- `npm run dev` - Start development server
+- `npm run dev` - Start development server (port 3000)
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
 - `npm run typecheck` - Run TypeScript checks
 
-### Data Import
+**Always run lint, typecheck, and build after major changes.**
 
-The project includes organized scripts for database management and data import:
+### Key Technical Solutions
 
-**Database Setup:**
-- `scripts/database-setup/database-schema.sql` - Main database schema
-- `scripts/database-setup/supabase-storage-setup.sql` - File storage configuration
-- `scripts/database-setup/cleanup-migration.sql` - Schema cleanup utilities
+- **Tiptap SSR**: Dynamic imports with `ssr: false` and `immediatelyRender: false`
+- **Task Ranking**: INTEGER field with 1000-unit spacing for drag-and-drop
+- **Admin System**: App-level security without RLS complexity
+- **Real-time**: Robust hooks with retry logic and automatic reconnection
+- **Color System**: Hex colors in database, converted to RGBA for styling
+- **Dark Theme**: React Context with localStorage persistence
 
-**Data Import:**
-- `scripts/data-import/seed-data.sql` - Basic departments and categories
-- `scripts/data-import/items-seed-data.sql` - Requisiten data
-- `scripts/data-import/tasks-seed-data.sql` - Production tasks data
-
-**Processing Utilities:**
-- `scripts/parse-csv-data.js` - Converts props CSV to SQL inserts
-- `scripts/parse-todos.js` - Converts todo markdown to task SQL inserts
+See `CLAUDE.md` for complete technical documentation.
 
 ## Deployment
 
-The app is designed to deploy easily on Vercel with Supabase as the backend:
+The app uses Docker + GitHub Actions for deployment:
 
-1. Push your code to GitHub
-2. Connect your GitHub repo to Vercel
-3. Add your environment variables in Vercel dashboard
-4. Deploy!
+1. **Docker**: Multi-stage build with environment variables
+2. **GitHub Actions**: Automatic build and push to Docker Hub on every push to main
+3. **Kubernetes**: Automatic deployment trigger via k8s manifest updates
+
+**Deployment secrets required:**
+- `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- `TUM_DRAUG_K8S_PRIVATE_KEY`
+
+## Current Version
+
+**v0.11.0** - Complete theater dataset with colorful character/category system
+
+Recent updates:
+- Database schema modernization (`is_used`, `is_changeable` fields)
+- Character and category color system
+- 105+ theater props imported
+- Dark theme with animated toggle
+- Mobile responsiveness optimization
+- Rich text editor for notes and task descriptions
 
 ## Contributing
 
-This tool is specifically designed for the "Dracula the Musical" production but can be adapted for other theater productions by:
-
-1. Updating the character list in `seed-data.sql`
-2. Modifying department structures as needed
-3. Adjusting item categories and statuses
-4. Customizing task workflows
+This tool is specifically designed for the "Dracula the Musical" production at TUM but can be adapted for other theater productions.
 
 ## License
 
