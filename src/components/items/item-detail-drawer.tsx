@@ -140,12 +140,12 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit, onDelete }: Item
                 {getStatusIcon(item.status)}
                 {item.name}
               </SheetTitle>
-              <SheetDescription>
+              <SheetDescription className="text-left">
                 {item.type === 'prop' ? 'Requisite' : 'Kostüm'} •
                 {item.category?.name && ` ${item.category.name}`}
               </SheetDescription>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mr-4">
               {onEdit && (
                 <Button
                   variant="outline"
@@ -154,7 +154,7 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit, onDelete }: Item
                   className="gap-2"
                 >
                   <Edit className="h-4 w-4" />
-                  Bearbeiten
+                  <span className="hidden sm:inline">Bearbeiten</span>
                 </Button>
               )}
 
@@ -188,7 +188,7 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit, onDelete }: Item
                     title="Als Admin löschen"
                   >
                     <Trash2 className="h-4 w-4" />
-                    Löschen
+                    <span className="hidden sm:inline">Löschen</span>
                   </Button>
                 )
               )}
@@ -196,16 +196,16 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit, onDelete }: Item
           </div>
         </SheetHeader>
 
-        <div className="mt-4 space-y-4">
+        <div className="mt-6 space-y-6">
           {/* Status and Basic Info */}
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-2">
               <CardTitle className="text-lg">Details</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Status</label>
+                  <label className="text-sm font-medium text-foreground/70 dark:text-foreground/80">Status</label>
                   <div className="mt-1">
                     <Badge className={getStatusColor(item.status)}>
                       {item.status}
@@ -213,105 +213,97 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit, onDelete }: Item
                   </div>
                 </div>
 
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Typ</label>
-                  <p className="text-sm text-gray-900 mt-1">
-                    {item.type === 'prop' ? 'Requisite' : 'Kostüm'}
-                  </p>
-                </div>
+                {item.source && (
+                  <div>
+                    <label className="text-sm font-medium text-foreground/70 dark:text-foreground/80">Quelle</label>
+                    <p className="text-sm mt-1">{item.source}</p>
+                  </div>
+                )}
 
                 {item.scene && (
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Szene</label>
-                    <p className="text-sm text-gray-900 mt-1">{item.scene}</p>
+                    <label className="text-sm font-medium text-foreground/70 dark:text-foreground/80">Szene</label>
+                    <p className="text-sm mt-1">{item.scene}</p>
                   </div>
                 )}
 
-                {item.source && (
+                {/* Characters */}
+                {item.characters && item.characters.length > 0 && (
                   <div>
-                    <label className="text-sm font-medium text-gray-700">Quelle</label>
-                    <p className="text-sm text-gray-900 mt-1">{item.source}</p>
+                    <label className="text-sm font-medium text-foreground/70 dark:text-foreground/80">Charaktere</label>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {item.characters.map((character) => {
+                        const badgeStyle = getBadgeStyle(character.color);
+                        return (
+                          <Badge
+                            key={character.id}
+                            variant="secondary"
+                            style={badgeStyle}
+                          >
+                            {character.name}
+                          </Badge>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
-              </div>
 
-              {/* Flags */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Eigenschaften</label>
-                <div className="flex flex-wrap gap-2">
-                  {item.is_consumable && (
-                    <Badge variant="outline">Verbrauchsgegenstand</Badge>
-                  )}
-                  {item.is_used && (
-                    <Badge variant="outline" className="text-gray-600 border-gray-300">
-                      Bereits benutzt
-                    </Badge>
-                  )}
-                  {item.is_changeable && (
-                    <Badge variant="outline" className="text-green-600 border-green-300">
-                      Änderbar
-                    </Badge>
-                  )}
-                  {!item.is_changeable && (
-                    <Badge variant="outline" className="text-red-600 border-red-300">
-                      Nicht änderbar
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              {/* Characters */}
-              {item.characters && item.characters.length > 0 && (
+                {/* Flags */}
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Charaktere</label>
+                  <label className="text-sm font-medium text-foreground/70 dark:text-foreground/80">Eigenschaften</label>
                   <div className="flex flex-wrap gap-2 mt-1">
-                    {item.characters.map((character) => {
-                      const badgeStyle = getBadgeStyle(character.color);
-                      return (
-                        <Badge
-                          key={character.id}
-                          variant="secondary"
-                          style={badgeStyle}
-                        >
-                          {character.name}
-                        </Badge>
-                      );
-                    })}
+                    {item.is_consumable && (
+                      <Badge variant="outline">Verbrauchsgegenstand</Badge>
+                    )}
+                    {item.is_used && (
+                      <Badge variant="outline" className="text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600">
+                        Benutzt
+                      </Badge>
+                    )}
+                    {(item.source === 'Staatstheater' || item.source === 'Ausleihe') && (
+                      <>
+                        {item.is_changeable && (
+                          <Badge variant="outline" className="text-green-600 dark:text-green-400 border-green-300 dark:border-green-600">
+                            Änderbar
+                          </Badge>
+                        )}
+                        {!item.is_changeable && (
+                          <Badge variant="outline" className="text-red-600 dark:text-red-400 border-red-300 dark:border-red-600">
+                            Nicht änderbar
+                          </Badge>
+                        )}
+                      </>
+                    )}
                   </div>
                 </div>
-              )}
+              </div>
 
               {/* Notes */}
               {item.notes && (
                 <div>
-                  <label className="text-sm font-medium text-gray-700">Notizen</label>
-                  <p className="text-sm text-gray-900 mt-1 p-3 bg-gray-50 rounded-md">
+                  <label className="text-sm font-medium text-foreground/70 dark:text-foreground/80">Notizen</label>
+                  <p className="text-sm mt-1 p-2.5 bg-muted/50 rounded-md">
                     {item.notes}
                   </p>
                 </div>
               )}
-            </CardContent>
-          </Card>
 
-          {/* Metadata */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Metadaten</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-gray-400" />
-                  <div>
-                    <span className="text-gray-700">Erstellt:</span>{' '}
-                    {new Date(item.created_at).toLocaleDateString('de-DE')}
+              {/* Metadata */}
+              <div className="pt-2 border-t">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <span className="text-foreground/70 dark:text-foreground/80">Erstellt:</span>{' '}
+                      {new Date(item.created_at).toLocaleDateString('de-DE')}
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-gray-400" />
-                  <div>
-                    <span className="text-gray-700">Geändert:</span>{' '}
-                    {new Date(item.updated_at).toLocaleDateString('de-DE')}
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <span className="text-foreground/70 dark:text-foreground/80">Geändert:</span>{' '}
+                      {new Date(item.updated_at).toLocaleDateString('de-DE')}
+                    </div>
                   </div>
                 </div>
               </div>
