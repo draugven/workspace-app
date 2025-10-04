@@ -11,7 +11,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - Next.js 14+ (App Router, TypeScript)
 - Supabase (PostgreSQL, Auth, Storage, real-time)
 - Tailwind CSS + Shadcn/ui
-- Tiptap editor, @dnd-kit, Tanstack Table
+- Tiptap editor, @dnd-kit, Tanstack Table, cmdk
 
 ## Database Schema
 **Core Entities:**
@@ -24,15 +24,16 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `task_tags` - Tagging system for task organization
 - `auth.users` - Supabase authentication with admin role system (no RLS, app-level security)
 
-## Current Status (v0.12.1)
+## Current Status (v0.12.2)
 - Authentication, Requisiten management, Task management (Kanban/table), Collaborative notes
 - Admin system (app-level security), German UI, mobile-responsive, colorful character/category system
 - Database schema updated with `is_used`, `is_changeable` fields, 105+ theater props imported
+- Multi-select component for characters and tags with grid layout
 - Known issue: Next.js Image aspect ratio warning (cosmetic only)
 - **Dev Server**: Running on port 3000
 
 ## Development Guidelines
-- Current version: 0.12.1 (SemVer: MAJOR.MINOR.PATCH)
+- Current version: 0.12.2 (SemVer: MAJOR.MINOR.PATCH)
 - Update both `package.json` and CLAUDE.md version before committing
 - Use conventional commit messages (feat:, fix:, BREAKING CHANGE:)
 - Always run `npm run lint`, `npm run typecheck`, `npm run build` after major changes
@@ -71,7 +72,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `files/` - File handling (FileUpload)
 - `layout/` - Navigation, Footer (version display)
 - `theme/` - Theme management (ThemeProvider, ThemeToggle)
-- `ui/` - Shadcn/ui components (Button, Dialog, Select, Combobox, PageHeader, StatsBar, etc.)
+- `ui/` - Shadcn/ui components (Button, Dialog, Select, Combobox, MultiSelect, Command, PageHeader, StatsBar, etc.)
 
 ### Core Services (`src/`)
 - `lib/supabase.ts` - Supabase client configuration
@@ -126,6 +127,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **CSV import system**: Robust CSV parser handles quoted fields with commas, generates SQL with conflict resolution (`ON CONFLICT DO NOTHING`), maps character relationships automatically
 - **Database schema versioning**: Items table updated from legacy fields (`needs_clarification`, `needed_for_rehearsal`) to new schema (`is_used`, `is_changeable`). Migration scripts provided for existing databases
 - **Visual organization**: Category colors provide subtle row backgrounds (5% opacity), character colors create distinct badge identification, thematic color assignments for intuitive categorization
+- **Multi-select component**: Built with cmdk/Command component. Multi-column grid layout (2 cols mobile, 3 cols desktop) to avoid scrolling issues. Search works via `value={label}` and `keywords={[label]}` props while selection uses actual ID values. Used for character selection (items) and tag selection (tasks)
 
 ## Development Sessions
 
@@ -148,6 +150,15 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - Stats bar includes all tasks regardless of filter
 - First iteration of completed task management strategy
 
+**Multi-Select Component (v0.12.2):**
+- Implemented new MultiSelect component using cmdk/Command
+- Multi-column grid layout (2 columns mobile, 3 columns tablet/desktop)
+- No scrolling required - all options visible in grid
+- Search functionality working correctly with label-based matching
+- Color badge support for visual identification
+- Used for character selection (items) and tag selection (tasks)
+- Replaced old broken multi-combobox implementation
+
 ## TODO Backlog
 1. Debug task ranking drag-and-drop positioning bugs in Kanban view
 2. Enhance mobile drag-and-drop (lock scrolling, drag preview, drop animations)
@@ -157,10 +168,10 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 6. **Offline capabilities strategy** - Research offline data access options
 
 ## Recent Changes
+- **v0.12.2**: Implemented multi-select component with grid layout for characters and tags
 - **v0.12.1**: Added "Show completed tasks" toggle filter for cleaner task views
 - **v0.12.0**: Version history tracking with automatic snapshots, restore functionality, and version viewer UI
 - **v0.11.1**: Project cleanup - archived obsolete scripts, updated documentation, cleaned root directory
 - **v0.11.0**: Database schema update, colorful character/category system, complete theater dataset
 - **v0.10.1**: Rich text editor for note creation
-- **v0.10.0**: Dark theme system with animated toggle
 

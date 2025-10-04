@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
+import { MultiSelect } from '@/components/ui/multi-select'
 import { supabase } from '@/lib/supabase'
 import type { Item, Category, Character } from '@/types'
 
@@ -318,34 +319,19 @@ export function ItemForm({ open, onClose, onSave, editingItem }: ItemFormProps) 
             {/* Characters */}
             <div className="space-y-2">
               <Label>Charaktere</Label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-32 overflow-y-auto border rounded p-2">
-                {characters.map((character) => (
-                  <div key={character.id} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      id={`char-${character.id}`}
-                      checked={formData.character_ids.includes(character.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setFormData(prev => ({
-                            ...prev,
-                            character_ids: [...prev.character_ids, character.id]
-                          }))
-                        } else {
-                          setFormData(prev => ({
-                            ...prev,
-                            character_ids: prev.character_ids.filter(id => id !== character.id)
-                          }))
-                        }
-                      }}
-                      className="rounded"
-                    />
-                    <Label htmlFor={`char-${character.id}`} className="text-sm">
-                      {character.name}
-                    </Label>
-                  </div>
-                ))}
-              </div>
+              <MultiSelect
+                options={characters.map((char) => ({
+                  label: char.name,
+                  value: char.id,
+                  color: char.color,
+                }))}
+                selected={formData.character_ids}
+                onChange={(values) =>
+                  setFormData((prev) => ({ ...prev, character_ids: values }))
+                }
+                placeholder="Charaktere auswählen..."
+                emptyText="Keine Charaktere gefunden."
+              />
             </div>
 
             {/* Notes */}

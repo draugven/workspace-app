@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { TaskDescriptionEditorWrapper } from './task-description-editor-wrapper'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
-import { MultiCombobox } from '@/components/ui/multi-combobox'
+import { MultiSelect } from '@/components/ui/multi-select'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -217,16 +217,15 @@ export function TaskEditDialog({
           {/* Tags Selection */}
           <div className="grid gap-2">
             <Label>Tags</Label>
-            <MultiCombobox
+            <MultiSelect
               options={tags.map(tag => ({
                 value: tag.id,
                 label: tag.name,
                 color: tag.color
               }))}
-              values={selectedTagIds}
-              onValuesChange={setSelectedTagIds}
+              selected={selectedTagIds}
+              onChange={setSelectedTagIds}
               placeholder="Tags auswählen..."
-              searchPlaceholder="Tags suchen..."
               emptyText="Keine Tags gefunden."
             />
           </div>
