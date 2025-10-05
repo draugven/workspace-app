@@ -24,16 +24,17 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `task_tags` - Tagging system for task organization
 - `auth.users` - Supabase authentication with admin role system (no RLS, app-level security)
 
-## Current Status (v0.12.2)
+## Current Status (v0.12.3)
 - Authentication, Requisiten management, Task management (Kanban/table), Collaborative notes
 - Admin system (app-level security), German UI, mobile-responsive, colorful character/category system
 - Database schema updated with `is_used`, `is_changeable` fields, 105+ theater props imported
 - Multi-select component for characters and tags with grid layout
+- Advanced filtering and sorting for items table (category, source, status, characters)
 - Known issue: Next.js Image aspect ratio warning (cosmetic only)
 - **Dev Server**: Running on port 3000
 
 ## Development Guidelines
-- Current version: 0.12.2 (SemVer: MAJOR.MINOR.PATCH)
+- Current version: 0.12.3 (SemVer: MAJOR.MINOR.PATCH)
 - Update both `package.json` and CLAUDE.md version before committing
 - Use conventional commit messages (feat:, fix:, BREAKING CHANGE:)
 - Always run `npm run lint`, `npm run typecheck`, `npm run build` after major changes
@@ -159,6 +160,15 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - Used for character selection (items) and tag selection (tasks)
 - Replaced old broken multi-combobox implementation
 
+**Items Table Enhancements (v0.12.3):**
+- Added sortable columns: Charaktere, Quelle, Kategorie (clicks to sort ascending/descending)
+- Implemented comprehensive filter system matching tasks page pattern
+- Filter button in header when collapsed, full filter card when expanded
+- Filters: Kategorie, Quelle, Status, Charaktere (multi-select)
+- Active filters summary with removable badges when collapsed
+- Auto-expand filters when filters become active
+- 4-column grid layout on desktop (1 col mobile, 2 cols tablet)
+
 ## TODO Backlog
 1. Debug task ranking drag-and-drop positioning bugs in Kanban view
 2. Enhance mobile drag-and-drop (lock scrolling, drag preview, drop animations)
@@ -168,10 +178,10 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 6. **Offline capabilities strategy** - Research offline data access options
 
 ## Recent Changes
+- **v0.12.3**: Added sortable columns and comprehensive filtering to items table
 - **v0.12.2**: Implemented multi-select component with grid layout for characters and tags
 - **v0.12.1**: Added "Show completed tasks" toggle filter for cleaner task views
 - **v0.12.0**: Version history tracking with automatic snapshots, restore functionality, and version viewer UI
 - **v0.11.1**: Project cleanup - archived obsolete scripts, updated documentation, cleaned root directory
-- **v0.11.0**: Database schema update, colorful character/category system, complete theater dataset
 - **v0.10.1**: Rich text editor for note creation
 

@@ -29,13 +29,29 @@ export function ItemsTable({ items, onEditItem, onDeleteItem }: ItemsTableProps)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const sortedItems = [...items].sort((a, b) => {
-    const aVal = a[sortField] || ''
-    const bVal = b[sortField] || ''
+    let aVal: string
+    let bVal: string
+
+    // Handle nested fields for sorting
+    if (sortField === 'source') {
+      aVal = a.source || ''
+      bVal = b.source || ''
+    } else if (sortField === 'category') {
+      aVal = a.category?.name || ''
+      bVal = b.category?.name || ''
+    } else if (sortField === 'characters') {
+      // Sort by first character name
+      aVal = a.characters?.[0]?.name || ''
+      bVal = b.characters?.[0]?.name || ''
+    } else {
+      aVal = (a[sortField] || '').toString()
+      bVal = (b[sortField] || '').toString()
+    }
 
     if (sortDirection === 'asc') {
-      return aVal.toString().localeCompare(bVal.toString())
+      return aVal.localeCompare(bVal)
     } else {
-      return bVal.toString().localeCompare(aVal.toString())
+      return bVal.localeCompare(aVal)
     }
   })
 
@@ -82,9 +98,24 @@ export function ItemsTable({ items, onEditItem, onDeleteItem }: ItemsTableProps)
               Status {sortField === 'status' && (sortDirection === 'asc' ? '↑' : '↓')}
             </TableHead>
             <TableHead>Szene</TableHead>
-            <TableHead>Charaktere</TableHead>
-            <TableHead>Quelle</TableHead>
-            <TableHead>Kategorie</TableHead>
+            <TableHead
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => handleSort('characters' as keyof Item)}
+            >
+              Charaktere {sortField === 'characters' && (sortDirection === 'asc' ? '↑' : '↓')}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => handleSort('source')}
+            >
+              Quelle {sortField === 'source' && (sortDirection === 'asc' ? '↑' : '↓')}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer hover:bg-muted/50"
+              onClick={() => handleSort('category' as keyof Item)}
+            >
+              Kategorie {sortField === 'category' && (sortDirection === 'asc' ? '↑' : '↓')}
+            </TableHead>
             <TableHead>Flags</TableHead>
             <TableHead>Notizen</TableHead>
             <TableHead className="w-12"></TableHead>

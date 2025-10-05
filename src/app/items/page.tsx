@@ -10,10 +10,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatsBar } from '@/components/ui/stats-bar'
+import { Combobox } from '@/components/ui/combobox'
+import { MultiSelect } from '@/components/ui/multi-select'
 import { useRealtimeItems } from '@/hooks/use-realtime-items'
 import { supabase } from '@/lib/supabase'
-import { Plus, RefreshCw, Wifi, WifiOff } from 'lucide-react'
-import type { Item } from '@/types'
+import { Plus, RefreshCw, Filter, X, ChevronDown, ChevronUp } from 'lucide-react'
+import type { Item, Category, Character } from '@/types'
 
 
 export default function ItemsPage() {
@@ -32,6 +34,39 @@ export default function ItemsPage() {
   const [editingItem, setEditingItem] = useState<Item | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
 
+  // Filter states
+  const [categories, setCategories] = useState<Category[]>([])
+  const [characters, setCharacters] = useState<Character[]>([])
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedSource, setSelectedSource] = useState<string | null>(null)
+  const [selectedCharacters, setSelectedCharacters] = useState<string[]>([])
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
+  const [filtersExpanded, setFiltersExpanded] = useState(false)
+
+  // Fetch categories and characters for filters
+  useEffect(() => {
+    const fetchFilterData = async () => {
+      const [categoriesResult, charactersResult] = await Promise.all([
+        supabase.from('categories').select('*').order('name'),
+        supabase.from('characters').select('*').order('name')
+      ])
+
+      if (categoriesResult.data) setCategories(categoriesResult.data)
+      if (charactersResult.data) setCharacters(charactersResult.data)
+    }
+
+    fetchFilterData()
+  }, [])
+
+  // Check if any filters are active
+  const hasActiveFilters = searchTerm || selectedCategory || selectedSource || selectedCharacters.length > 0 || selectedStatus
+
+  // Auto-expand filters when filters become active
+  useEffect(() => {
+    if (hasActiveFilters && !filtersExpanded) {
+      setFiltersExpanded(true)
+    }
+  }, [hasActiveFilters, filtersExpanded])
 
   const handleCreateItem = async (itemData: Partial<Item> & { character_ids?: string[] }) => {
     try {
@@ -161,15 +196,23 @@ export default function ItemsPage() {
     }
   }
 
-  // Filter items based on search term
-  const filteredItems = items.filter(item =>
-    searchTerm === '' ||
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (item.notes && item.notes.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    item.source?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.category?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.characters?.some((char: any) => char.name.toLowerCase().includes(searchTerm.toLowerCase()))
-  )
+  // Filter items based on search term and filters
+  const filteredItems = items.filter(item => {
+    const matchesSearch = searchTerm === '' ||
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.notes && item.notes.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      item.source?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.characters?.some((char: any) => char.name.toLowerCase().includes(searchTerm.toLowerCase()))
+
+    const matchesCategory = !selectedCategory || item.category_id === selectedCategory
+    const matchesSource = !selectedSource || item.source === selectedSource
+    const matchesCharacters = selectedCharacters.length === 0 ||
+      (item.characters && item.characters.some((char: any) => selectedCharacters.includes(char.id)))
+    const matchesStatus = !selectedStatus || item.status === selectedStatus
+
+    return matchesSearch && matchesCategory && matchesSource && matchesCharacters && matchesStatus
+  })
 
   const totalItems = items.length
   const propCount = items.filter(item => item.type === 'prop').length
@@ -191,6 +234,24 @@ export default function ItemsPage() {
           searchPlaceholder="Items durchsuchen..."
           actions={
             <>
+              {!filtersExpanded && (
+                <Button
+                  variant="outline"
+                  onClick={() => setFiltersExpanded(true)}
+                  className="gap-2"
+                  title="Filter"
+                >
+                  <Filter className="h-4 w-4" />
+                  <span className="hidden sm:inline">Filter</span>
+                  {hasActiveFilters && (
+                    <Badge variant="secondary" className="ml-1">
+                      {[selectedCategory && 'Kategorie', selectedSource && 'Quelle',
+                        selectedCharacters.length && 'Charaktere', selectedStatus && 'Status']
+                        .filter(Boolean).length}
+                    </Badge>
+                  )}
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -226,6 +287,236 @@ export default function ItemsPage() {
             text: `${status}: ${count}`
           }))}
         />
+
+        {/* Filter Controls - only show when expanded */}
+        {filtersExpanded && (
+          <Card>
+            <CardHeader>
+              <CardTitle
+                className="flex items-center justify-between cursor-pointer"
+                onClick={() => setFiltersExpanded(!filtersExpanded)}
+              >
+                <div className="flex items-center gap-2 text-lg">
+                  <Filter className="h-5 w-5" />
+                  Filter
+                  {hasActiveFilters && (
+                    <Badge variant="secondary" className="ml-2">
+                      {[selectedCategory && 'Kategorie', selectedSource && 'Quelle',
+                        selectedCharacters.length && 'Charaktere', selectedStatus && 'Status']
+                        .filter(Boolean).length} aktiv
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {hasActiveFilters && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSearchTerm('')
+                        setSelectedCategory(null)
+                        setSelectedSource(null)
+                        setSelectedCharacters([])
+                        setSelectedStatus(null)
+                      }}
+                      className="gap-2 text-muted-foreground hover:text-foreground"
+                    >
+                      <X className="h-4 w-4" />
+                      Alle zurücksetzen
+                    </Button>
+                  )}
+                  <ChevronUp className="h-5 w-5" />
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Category Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Kategorie</label>
+                  <Combobox
+                    options={[
+                      { value: 'all', label: 'Alle Kategorien' },
+                      ...categories.map(cat => ({ value: cat.id, label: cat.name }))
+                    ]}
+                    value={selectedCategory || 'all'}
+                    onValueChange={(value) => setSelectedCategory(value === 'all' ? null : value)}
+                    placeholder="Alle Kategorien"
+                    searchPlaceholder="Kategorie suchen..."
+                    emptyText="Keine Kategorie gefunden."
+                  />
+                </div>
+
+                {/* Source Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Quelle</label>
+                  <Combobox
+                    options={[
+                      { value: 'all', label: 'Alle Quellen' },
+                      ...Array.from(new Set(items.map(i => i.source).filter(Boolean)))
+                        .map(source => ({ value: source!, label: source! }))
+                    ]}
+                    value={selectedSource || 'all'}
+                    onValueChange={(value) => setSelectedSource(value === 'all' ? null : value)}
+                    placeholder="Alle Quellen"
+                    searchPlaceholder="Quelle suchen..."
+                    emptyText="Keine Quelle gefunden."
+                  />
+                </div>
+
+                {/* Status Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Status</label>
+                  <Combobox
+                    options={[
+                      { value: 'all', label: 'Alle Status' },
+                      ...Array.from(new Set(items.map(i => i.status)))
+                        .map(status => ({ value: status, label: status }))
+                    ]}
+                    value={selectedStatus || 'all'}
+                    onValueChange={(value) => setSelectedStatus(value === 'all' ? null : value)}
+                    placeholder="Alle Status"
+                    searchPlaceholder="Status suchen..."
+                    emptyText="Kein Status gefunden."
+                  />
+                </div>
+
+                {/* Characters Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Charaktere</label>
+                  <MultiSelect
+                    options={characters.map(char => ({
+                      value: char.id,
+                      label: char.name,
+                      color: char.color
+                    }))}
+                    selected={selectedCharacters}
+                    onChange={setSelectedCharacters}
+                    placeholder="Alle Charaktere"
+                    emptyText="Keine Charaktere gefunden."
+                  />
+                </div>
+              </div>
+
+              {/* Active Filters Display */}
+              {hasActiveFilters && (
+                <div className="flex flex-wrap gap-2 pt-2 border-t">
+                  <span className="text-sm text-muted-foreground">Aktive Filter:</span>
+                  {selectedCategory && (
+                    <Badge variant="secondary" className="gap-1">
+                      {categories.find(c => c.id === selectedCategory)?.name}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => setSelectedCategory(null)}
+                      />
+                    </Badge>
+                  )}
+                  {selectedSource && (
+                    <Badge variant="secondary" className="gap-1">
+                      {selectedSource}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => setSelectedSource(null)}
+                      />
+                    </Badge>
+                  )}
+                  {selectedType && (
+                    <Badge variant="secondary" className="gap-1">
+                      {selectedType === 'prop' ? 'Requisite' : 'Kostüm'}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => setSelectedType(null)}
+                      />
+                    </Badge>
+                  )}
+                  {selectedStatus && (
+                    <Badge variant="secondary" className="gap-1">
+                      {selectedStatus}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => setSelectedStatus(null)}
+                      />
+                    </Badge>
+                  )}
+                  {selectedCharacters.map(charId => {
+                    const char = characters.find(c => c.id === charId)
+                    return char ? (
+                      <Badge key={charId} variant="secondary" className="gap-1">
+                        {char.name}
+                        <X
+                          className="h-3 w-3 cursor-pointer"
+                          onClick={() => setSelectedCharacters(prev => prev.filter(id => id !== charId))}
+                        />
+                      </Badge>
+                    ) : null
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Active Filters Summary (shown when collapsed) */}
+        {!filtersExpanded && hasActiveFilters && (
+          <div className="flex flex-wrap items-center gap-2 py-1">
+            <span className="text-sm text-muted-foreground">Aktive Filter:</span>
+            {selectedCategory && (
+              <Badge variant="secondary" className="gap-1">
+                {categories.find(c => c.id === selectedCategory)?.name}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setSelectedCategory(null)}
+                />
+              </Badge>
+            )}
+            {selectedSource && (
+              <Badge variant="secondary" className="gap-1">
+                {selectedSource}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setSelectedSource(null)}
+                />
+              </Badge>
+            )}
+            {selectedStatus && (
+              <Badge variant="secondary" className="gap-1">
+                {selectedStatus}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setSelectedStatus(null)}
+                />
+              </Badge>
+            )}
+            {selectedCharacters.map(charId => {
+              const char = characters.find(c => c.id === charId)
+              return char ? (
+                <Badge key={charId} variant="secondary" className="gap-1">
+                  {char.name}
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={() => setSelectedCharacters(prev => prev.filter(id => id !== charId))}
+                  />
+                </Badge>
+              ) : null
+            })}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSearchTerm('')
+                setSelectedCategory(null)
+                setSelectedSource(null)
+                setSelectedCharacters([])
+                setSelectedStatus(null)
+              }}
+              className="gap-2 h-6 text-xs"
+            >
+              <X className="h-3 w-3" />
+              Alle zurücksetzen
+            </Button>
+          </div>
+        )}
 
         {/* Loading and Error States */}
         {loading && (
