@@ -91,7 +91,8 @@ A Next.js web application for small theater production teams to manage props, co
 │   │   ├── use-admin-check.tsx        # Client-side admin checking
 │   │   ├── use-realtime-data.tsx      # Generic real-time hook
 │   │   ├── use-realtime-items.tsx     # Real-time items hook
-│   │   └── use-realtime-tasks.tsx     # Real-time tasks hook
+│   │   ├── use-realtime-tasks.tsx     # Real-time tasks hook
+│   │   └── use-realtime-notes-v2.tsx  # Real-time notes hook
 │   └── types/                 # TypeScript definitions
 │       ├── database.ts        # Database schema types
 │       └── index.ts           # Extended types with colors

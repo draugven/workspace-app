@@ -75,7 +75,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ### Core Services (`src/`)
 - `lib/supabase.ts`, `lib/auth-utils.ts`, `lib/utils.ts`, `lib/color-utils.ts`
-- `hooks/use-admin-check.tsx`, `hooks/use-realtime-*.tsx` (items, tasks, notes, generic)
+- `hooks/use-admin-check.tsx`, `hooks/use-realtime-*.tsx` (items, tasks, notes-v2, generic)
 - `types/database.ts`, `types/index.ts`
 
 ### Database Scripts (`scripts/database-setup/`)
@@ -106,4 +106,3 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **v0.12.2**: Multi-select component with grid layout for characters and tags
 - **v0.12.1**: "Show completed tasks" toggle filter
 - **v0.12.0**: Version history tracking with snapshots and restore
-
