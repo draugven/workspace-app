@@ -28,7 +28,12 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(() => {
     // Only access localStorage on client side
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem(storageKey) as Theme) || defaultTheme
+      try {
+        return (localStorage.getItem(storageKey) as Theme) || defaultTheme
+      } catch (error) {
+        console.warn('Failed to read theme from localStorage:', error)
+        return defaultTheme
+      }
     }
     return defaultTheme
   })
@@ -39,7 +44,12 @@ export function ThemeProvider({
     root.classList.remove('light', 'dark')
     root.classList.add(theme)
 
-    localStorage.setItem(storageKey, theme)
+    try {
+      localStorage.setItem(storageKey, theme)
+    } catch (error) {
+      console.warn('Failed to save theme preference:', error)
+      // Theme will still work for current session, just won't persist
+    }
   }, [theme, storageKey])
 
   const toggleTheme = () => {

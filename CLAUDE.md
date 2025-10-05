@@ -24,7 +24,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `task_tags` - Tagging system for task organization
 - `auth.users` - Supabase authentication with admin role system (no RLS, app-level security)
 
-## Current Status (v0.12.4)
+## Current Status (v0.12.5)
 - **Routes**: /props (Requisiten), /tasks (Kanban + table), /notes (collaborative editing)
 - **Features**: Authentication, admin system (app-level), German UI, mobile-responsive
 - **Data**: 105+ theater props imported, character/category color system
@@ -32,7 +32,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Dev Server**: Port 3000
 
 ## Development Guidelines
-- Current version: 0.12.4 (SemVer: MAJOR.MINOR.PATCH)
+- Current version: 0.12.5 (SemVer: MAJOR.MINOR.PATCH)
 - Update both `package.json` and CLAUDE.md version before committing
 - Use conventional commit messages (feat:, fix:, BREAKING CHANGE:)
 - Always run `npm run lint`, `npm run typecheck`, `npm run build`, `npm test` after major changes
@@ -120,6 +120,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 5. Offline capabilities research
 
 ## Recent Changes
+- **v0.12.5**: Code quality improvements - enhanced error logging for version save failures, added localStorage error handling in theme provider, removed unused exports (~50 lines) from utility files
 - **v0.12.4**: UI refinements - moved Requisiten to /props route, improved table views with subtitles, updated search placeholders, fixed dark mode badge brightness, reordered items table columns
 - **v0.12.3**: Sortable columns and comprehensive filtering for items table
 - **v0.12.2**: Multi-select component with grid layout for characters and tags

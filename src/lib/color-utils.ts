@@ -25,22 +25,6 @@ export function getLightBackgroundColor(hexColor?: string, opacity = 0.1): strin
 }
 
 /**
- * Get text color (dark or light) that contrasts well with the background
- */
-export function getContrastingTextColor(hexColor?: string): string {
-  if (!hexColor) return '#374151'; // Default gray text
-
-  const rgb = hexToRgb(hexColor);
-  if (!rgb) return '#374151';
-
-  // Calculate relative luminance
-  const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
-
-  // Return white text for dark backgrounds, dark text for light backgrounds
-  return luminance > 0.5 ? '#1f2937' : '#f9fafb';
-}
-
-/**
  * Get a medium opacity version of the color for badges
  */
 export function getBadgeStyle(hexColor?: string) {

@@ -128,7 +128,9 @@ export function useRealtimeNotesV2({ enableLogs = false }: UseRealtimeNotesV2Pro
           }
         }
       } catch (versionError) {
-        console.warn('Failed to create version (note saved successfully):', versionError)
+        console.error('⚠️ Version history creation failed (note was saved):', versionError)
+        // Note: A proper user notification would require a toast system
+        // For now, we log the error clearly so it's visible in the console
       }
 
       return result

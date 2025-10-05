@@ -21,6 +21,7 @@ function getSupabaseAdmin() {
   )
 }
 
+// Internal interface for user roles (used only within this module)
 export interface UserRole {
   id: string
   user_id: string
