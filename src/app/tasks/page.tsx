@@ -267,7 +267,7 @@ export default function TasksPage() {
           description="Verwalte Aufgaben nach Abteilungen und Status"
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
-          searchPlaceholder="Suche in Titel, Beschreibung oder Tags..."
+          searchPlaceholder="Aufgaben durchsuchen..."
           actions={
             <>
               {!filtersExpanded && (
@@ -757,14 +757,20 @@ export default function TasksPage() {
                     />
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-xl font-semibold">Alle Aufgaben</h2>
-                      <span className="text-sm text-muted-foreground">
-                        {filteredTasks.length} Tasks
-                      </span>
-                    </div>
-                    <TasksTable
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span>Alle Aufgaben</span>
+                        <span className="text-sm font-normal text-muted-foreground">
+                          {filteredTasks.length} Tasks
+                        </span>
+                      </CardTitle>
+                      <CardDescription>
+                        Klicke auf die Spaltenüberschriften zum Sortieren oder auf eine Zeile für Details
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <TasksTable
                       tasks={filteredTasks}
                       onTaskUpdate={handleTaskUpdate}
                       onTaskDelete={handleTaskDelete}
@@ -773,7 +779,8 @@ export default function TasksPage() {
                       users={users}
                       currentUser={currentUser}
                     />
-                  </div>
+                    </CardContent>
+                  </Card>
                 )}
               </>
             )}

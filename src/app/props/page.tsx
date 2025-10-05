@@ -215,12 +215,19 @@ export default function ItemsPage() {
   })
 
   const totalItems = items.length
-  const propCount = items.filter(item => item.type === 'prop').length
-  const costumeCount = items.filter(item => item.type === 'costume').length
   const statusCounts = items.reduce((acc, item) => {
     acc[item.status] = (acc[item.status] || 0) + 1
     return acc
   }, {} as Record<string, number>)
+
+  // Calculate specific status counts
+  const erhaltenCount = statusCounts['erhalten'] || 0
+  const fehltCount = statusCounts['fehlt'] || 0
+
+  // Calculate "In Arbeit" - sum of all statuses except 'erhalten' and 'fehlt'
+  const inArbeitCount = Object.entries(statusCounts)
+    .filter(([status]) => status !== 'erhalten' && status !== 'fehlt')
+    .reduce((sum, [, count]) => sum + (count as number), 0)
 
   return (
     <ProtectedRoute>
@@ -231,7 +238,7 @@ export default function ItemsPage() {
           description="Verwalte Requisiten für die Produktion"
           searchValue={searchTerm}
           onSearchChange={setSearchTerm}
-          searchPlaceholder="Items durchsuchen..."
+          searchPlaceholder="Requisiten durchsuchen..."
           actions={
             <>
               {!filtersExpanded && (
@@ -279,9 +286,9 @@ export default function ItemsPage() {
         <StatsBar
           stats={[
             { label: 'Gesamt:', value: totalItems },
-            { label: 'Requisiten:', value: propCount },
-            { label: 'Kostüme:', value: costumeCount },
-            { label: 'Erhalten:', value: statusCounts['erhalten'] || 0, className: 'text-green-600' }
+            { label: 'Erhalten:', value: erhaltenCount, className: 'text-green-600' },
+            { label: 'Fehlt:', value: fehltCount, className: 'text-red-600' },
+            { label: 'In Arbeit:', value: inArbeitCount, className: 'text-blue-600' }
           ]}
           badges={Object.entries(statusCounts).map(([status, count]) => ({
             text: `${status}: ${count}`
@@ -539,9 +546,9 @@ export default function ItemsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>Alle Items</span>
+                <span>Alle Requisiten</span>
                 <span className="text-sm font-normal text-muted-foreground">
-                  {searchTerm ? `${filteredItems.length} von ${totalItems}` : totalItems} Items
+                  {searchTerm ? `${filteredItems.length} von ${totalItems}` : totalItems} Requisiten
                 </span>
               </CardTitle>
               <CardDescription>

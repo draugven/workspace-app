@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { StatusBadge } from './status-badge'
 import { ItemDetailDrawer } from './item-detail-drawer'
-import { Eye, Paperclip } from 'lucide-react'
+import { Paperclip } from 'lucide-react'
 import { getLightBackgroundColor, getBadgeStyle } from '@/lib/color-utils'
 import type { Item } from "@/types"
 
@@ -79,6 +79,7 @@ export function ItemsTable({ items, onEditItem, onDeleteItem }: ItemsTableProps)
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Seite(n)</TableHead>
             <TableHead
               className="cursor-pointer hover:bg-muted/50"
               onClick={() => handleSort('name')}
@@ -87,9 +88,9 @@ export function ItemsTable({ items, onEditItem, onDeleteItem }: ItemsTableProps)
             </TableHead>
             <TableHead
               className="cursor-pointer hover:bg-muted/50"
-              onClick={() => handleSort('type')}
+              onClick={() => handleSort('characters' as keyof Item)}
             >
-              Typ {sortField === 'type' && (sortDirection === 'asc' ? '↑' : '↓')}
+              Charaktere {sortField === 'characters' && (sortDirection === 'asc' ? '↑' : '↓')}
             </TableHead>
             <TableHead
               className="cursor-pointer hover:bg-muted/50"
@@ -97,13 +98,7 @@ export function ItemsTable({ items, onEditItem, onDeleteItem }: ItemsTableProps)
             >
               Status {sortField === 'status' && (sortDirection === 'asc' ? '↑' : '↓')}
             </TableHead>
-            <TableHead>Szene</TableHead>
-            <TableHead
-              className="cursor-pointer hover:bg-muted/50"
-              onClick={() => handleSort('characters' as keyof Item)}
-            >
-              Charaktere {sortField === 'characters' && (sortDirection === 'asc' ? '↑' : '↓')}
-            </TableHead>
+            <TableHead className="max-w-md">Notizen</TableHead>
             <TableHead
               className="cursor-pointer hover:bg-muted/50"
               onClick={() => handleSort('source')}
@@ -116,9 +111,7 @@ export function ItemsTable({ items, onEditItem, onDeleteItem }: ItemsTableProps)
             >
               Kategorie {sortField === 'category' && (sortDirection === 'asc' ? '↑' : '↓')}
             </TableHead>
-            <TableHead>Flags</TableHead>
-            <TableHead>Notizen</TableHead>
-            <TableHead className="w-12"></TableHead>
+            <TableHead className="w-24">Flags</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -131,6 +124,9 @@ export function ItemsTable({ items, onEditItem, onDeleteItem }: ItemsTableProps)
               }}
               onClick={() => handleRowClick(item)}
             >
+              <TableCell className="text-sm text-muted-foreground">
+                {item.scene || '—'}
+              </TableCell>
               <TableCell className="font-medium">
                 <div className="flex items-center gap-2">
                   {item.name}
@@ -143,17 +139,6 @@ export function ItemsTable({ items, onEditItem, onDeleteItem }: ItemsTableProps)
                     </div>
                   )}
                 </div>
-              </TableCell>
-              <TableCell>
-                <Badge variant={item.type === 'prop' ? 'default' : 'secondary'}>
-                  {item.type === 'prop' ? 'Requisit' : 'Kostüm'}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <StatusBadge status={item.status} />
-              </TableCell>
-              <TableCell className="text-sm text-muted-foreground">
-                {item.scene || '—'}
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
@@ -172,38 +157,38 @@ export function ItemsTable({ items, onEditItem, onDeleteItem }: ItemsTableProps)
                   }) || '—'}
                 </div>
               </TableCell>
+              <TableCell>
+                <StatusBadge status={item.status} />
+              </TableCell>
+              <TableCell className="max-w-md">
+                <div className="text-sm text-muted-foreground truncate">
+                  {item.notes || '—'}
+                </div>
+              </TableCell>
               <TableCell className="text-sm">
                 {item.source || '—'}
               </TableCell>
               <TableCell>
                 {item.category?.name || '—'}
               </TableCell>
-              <TableCell>
+              <TableCell className="w-24">
                 <div className="flex flex-col gap-1 text-xs">
                   {item.is_consumable && (
-                    <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700">
+                    <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400">
                       Verbrauchbar
                     </Badge>
                   )}
                   {item.is_used && (
-                    <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700">
+                    <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 dark:bg-gray-800/30 dark:text-gray-400">
                       Benutzt
                     </Badge>
                   )}
                   {item.is_changeable && (
-                    <Badge variant="outline" className="text-xs bg-green-50 text-green-700">
+                    <Badge variant="outline" className="text-xs bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400">
                       Änderbar
                     </Badge>
                   )}
                 </div>
-              </TableCell>
-              <TableCell className="max-w-xs">
-                <div className="text-sm text-muted-foreground truncate">
-                  {item.notes || '—'}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Eye className="h-4 w-4 text-muted-foreground" />
               </TableCell>
             </TableRow>
           ))}

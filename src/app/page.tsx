@@ -25,7 +25,7 @@ export default function HomePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Link href="/items">
+                <Link href="/props">
                   <Button variant="outline" className="w-full">
                     Requisiten verwalten
                   </Button>

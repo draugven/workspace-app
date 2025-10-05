@@ -24,7 +24,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `task_tags` - Tagging system for task organization
 - `auth.users` - Supabase authentication with admin role system (no RLS, app-level security)
 
-## Current Status (v0.12.3)
+## Current Status (v0.12.4)
 - Authentication, Requisiten management, Task management (Kanban/table), Collaborative notes
 - Admin system (app-level security), German UI, mobile-responsive, colorful character/category system
 - Database schema updated with `is_used`, `is_changeable` fields, 105+ theater props imported
@@ -34,7 +34,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Dev Server**: Running on port 3000
 
 ## Development Guidelines
-- Current version: 0.12.3 (SemVer: MAJOR.MINOR.PATCH)
+- Current version: 0.12.4 (SemVer: MAJOR.MINOR.PATCH)
 - Update both `package.json` and CLAUDE.md version before committing
 - Use conventional commit messages (feat:, fix:, BREAKING CHANGE:)
 - Always run `npm run lint`, `npm run typecheck`, `npm run build` after major changes
@@ -56,7 +56,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ### Core App Routes (`src/app/`)
 - `page.tsx` - Dashboard/home page
-- `items/page.tsx` - Requisiten management
+- `props/page.tsx` - Requisiten management (props, will support costumes via type filter in future)
 - `tasks/page.tsx` - Task management (Kanban + table)
 - `notes/page.tsx` - Collaborative notes
 - `login/page.tsx` - Authentication
@@ -139,9 +139,9 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 6. **Offline capabilities strategy** - Research offline data access options
 
 ## Recent Changes
+- **v0.12.4**: UI refinements - moved Requisiten to /props route, improved table views with subtitles, updated search placeholders, fixed dark mode badge brightness, reordered items table columns
 - **v0.12.3**: Sortable columns and comprehensive filtering for items table
 - **v0.12.2**: Multi-select component with grid layout for characters and tags
 - **v0.12.1**: "Show completed tasks" toggle filter
 - **v0.12.0**: Version history tracking with snapshots and restore
-- **v0.11.1**: Project cleanup and documentation updates
 

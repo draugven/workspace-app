@@ -11,7 +11,7 @@ import { supabase } from '@/lib/supabase'
 import { Menu, X } from 'lucide-react'
 
 const navItems = [
-  { name: 'Requisiten', href: '/items' },
+  { name: 'Requisiten', href: '/props' },
   { name: 'Aufgaben', href: '/tasks' },
   { name: 'Notizen', href: '/notes' },
 ]
