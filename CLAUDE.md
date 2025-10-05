@@ -168,6 +168,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - Active filters summary with removable badges when collapsed
 - Auto-expand filters when filters become active
 - 4-column grid layout on desktop (1 col mobile, 2 cols tablet)
+- Bug fix: Removed stray `selectedType` references causing search errors
 
 ## TODO Backlog
 1. Debug task ranking drag-and-drop positioning bugs in Kanban view

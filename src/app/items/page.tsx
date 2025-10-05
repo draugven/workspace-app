@@ -421,15 +421,6 @@ export default function ItemsPage() {
                       />
                     </Badge>
                   )}
-                  {selectedType && (
-                    <Badge variant="secondary" className="gap-1">
-                      {selectedType === 'prop' ? 'Requisite' : 'Kostüm'}
-                      <X
-                        className="h-3 w-3 cursor-pointer"
-                        onClick={() => setSelectedType(null)}
-                      />
-                    </Badge>
-                  )}
                   {selectedStatus && (
                     <Badge variant="secondary" className="gap-1">
                       {selectedStatus}
