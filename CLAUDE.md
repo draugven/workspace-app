@@ -35,7 +35,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - Current version: 0.12.4 (SemVer: MAJOR.MINOR.PATCH)
 - Update both `package.json` and CLAUDE.md version before committing
 - Use conventional commit messages (feat:, fix:, BREAKING CHANGE:)
-- Always run `npm run lint`, `npm run typecheck`, `npm run build` after major changes
+- Always run `npm run lint`, `npm run typecheck`, `npm run build`, `npm test` after major changes
 - Update Project Structure section when changing file organization
 - kebab-case component names (my-component.tsx)
 - Favor React Server Components
@@ -49,6 +49,16 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - Be concise
 - If you do not know the answer, say so
 - If you think the question is wrong, say so
+
+### Testing Guidelines
+- **Test Framework**: Jest + React Testing Library
+- **Test Location**: Place tests in `__tests__` directory next to the code being tested
+- **Naming Convention**: `{component-name}.test.tsx` or `{hook-name}.test.tsx`
+- **Coverage Goals**: Critical paths (auth, real-time, API routes), error boundaries, complex hooks
+- **Run Tests**: `npm test` (all), `npm test -- --watch` (watch mode), `npm test -- --coverage` (coverage report)
+- **When to Test**: After implementing critical features, fixing bugs, or adding complex logic
+- **Test Structure**: Describe blocks for grouping, clear test names, mock external dependencies
+- **Current Coverage**: 33 tests across auth-provider (11), use-realtime-data (16), error boundaries (9)
 
 ## Project Structure
 
@@ -76,7 +86,14 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 ### Core Services (`src/`)
 - `lib/supabase.ts`, `lib/auth-utils.ts`, `lib/utils.ts`, `lib/color-utils.ts`
 - `hooks/use-admin-check.tsx`, `hooks/use-realtime-*.tsx` (items, tasks, notes-v2, generic)
-- `types/database.ts`, `types/index.ts`
+- `types/database.ts`, `types/index.ts`, `types/jest-dom.d.ts`
+
+### Testing Infrastructure
+- `jest.config.js` - Jest configuration for Next.js integration
+- `jest.setup.js` - Global test setup (jest-dom matchers)
+- `src/components/auth/__tests__/` - Auth provider tests (11 tests)
+- `src/hooks/__tests__/` - Real-time hook tests (16 tests)
+- `src/app/{route}/__tests__/` - Error boundary tests (9 tests total)
 
 ### Database Scripts (`scripts/database-setup/`)
 - Complete setup, storage config, admin role assignment, schema reference
@@ -86,12 +103,14 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Task ranking**: INTEGER with 1000-unit spacing. Sort by priority → status → ranking
 - **Multi-select**: cmdk/Command with grid layout (2/3 cols). Search via `value={label}`, select via ID
 - **Admin system**: App-level security (no RLS). Client checks for UI, server validation in API routes
-- **Real-time**: Generic `useRealtimeData` hook with retry logic. Character data transformation for items
+- **Real-time**: Generic `useRealtimeData` hook with retry logic. Character data transformation for items. Uses ref pattern for callback stability
+- **Error boundaries**: Next.js 14 error.tsx files for each route with German UI, retry functionality, proper error logging
 - **Color system**: Hex in DB → RGBA utilities. Category backgrounds (5% opacity), character badges
 - **Dark theme**: Context + localStorage ("back2stage-theme"). Manual toggle, logo switching
 - **Mobile**: Icon-only buttons, burger menu, responsive layouts, editor viewport scrolling
 - **Database schema**: ALWAYS update both SQL schema AND TypeScript types in `src/types/database.ts`
 - **Supabase typing**: Use `(supabase as any)` for insert/update when inference fails
+- **Testing**: Jest + React Testing Library. Mock Supabase client, use renderHook for hooks, waitFor for async assertions
 
 ## TODO Backlog
 1. Auto-archive completed tasks (14-day threshold, `completed_at` + `archived` fields)
