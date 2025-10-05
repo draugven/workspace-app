@@ -71,7 +71,7 @@ A Next.js web application for small theater production teams to manage props, co
 ├── src/
 │   ├── app/                    # Next.js 14 app directory
 │   │   ├── page.tsx           # Dashboard
-│   │   ├── items/             # Requisiten management
+│   │   ├── props/             # Requisiten management
 │   │   ├── tasks/             # Task management
 │   │   ├── notes/             # Collaborative notes
 │   │   └── api/               # API routes (users, admin endpoints)
@@ -133,14 +133,14 @@ The app uses Supabase (PostgreSQL) with the following main tables:
 
 ### Key Technical Solutions
 
-- **Tiptap SSR**: Dynamic imports with `ssr: false` and `immediatelyRender: false`
+- **Tiptap SSR**: Dynamic imports with mobile viewport fix (`scrollIntoView()` on focus)
 - **Task Ranking**: INTEGER field with 1000-unit spacing for drag-and-drop
-- **Multi-select**: cmdk/Command with grid layout (2-3 columns) for character/tag selection
+- **Multi-select**: cmdk/Command with grid layout (2-3 columns)
 - **Admin System**: App-level security without RLS complexity
-- **Real-time**: Robust hooks with retry logic and automatic reconnection
-- **Color System**: Hex colors in database, converted to RGBA for styling
-- **Dark Theme**: React Context with localStorage persistence
-- **Filtering**: Collapsible filter UI with active filter badges
+- **Real-time**: Generic hook with retry logic and automatic reconnection
+- **Color System**: Hex → RGBA utilities for badges and backgrounds
+- **Dark Theme**: Context + localStorage with logo switching
+- **Mobile**: Responsive layouts, burger menu, editor viewport handling
 
 See `CLAUDE.md` for complete technical documentation.
 
@@ -159,15 +159,14 @@ The app uses Docker + GitHub Actions for deployment:
 
 ## Current Version
 
-**v0.12.3** - Advanced filtering and sorting for items table
+**v0.12.4** - UI refinements and mobile improvements
 
 Recent updates:
+- **v0.12.4**: Moved Requisiten to /props route, improved table views, mobile editor viewport fix, dark mode badge improvements
 - **v0.12.3**: Sortable columns and comprehensive filtering for items table
 - **v0.12.2**: Multi-select component with grid layout for characters and tags
 - **v0.12.1**: Completed tasks toggle filter
 - **v0.12.0**: Version history tracking with snapshots and restore
-- **v0.11.1**: Project cleanup and documentation updates
-- **v0.11.0**: Complete theater dataset with colorful character/category system
 
 ## Contributing
 

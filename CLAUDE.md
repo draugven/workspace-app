@@ -25,13 +25,11 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `auth.users` - Supabase authentication with admin role system (no RLS, app-level security)
 
 ## Current Status (v0.12.4)
-- Authentication, Requisiten management, Task management (Kanban/table), Collaborative notes
-- Admin system (app-level security), German UI, mobile-responsive, colorful character/category system
-- Database schema updated with `is_used`, `is_changeable` fields, 105+ theater props imported
-- Multi-select component for characters and tags with grid layout
-- Advanced filtering and sorting for items table (category, source, status, characters)
-- Known issue: Next.js Image aspect ratio warning (cosmetic only)
-- **Dev Server**: Running on port 3000
+- **Routes**: /props (Requisiten), /tasks (Kanban + table), /notes (collaborative editing)
+- **Features**: Authentication, admin system (app-level), German UI, mobile-responsive
+- **Data**: 105+ theater props imported, character/category color system
+- **UI**: Advanced filtering/sorting, multi-select components, dark mode support, mobile editor viewport fix
+- **Dev Server**: Port 3000
 
 ## Development Guidelines
 - Current version: 0.12.4 (SemVer: MAJOR.MINOR.PATCH)
@@ -76,67 +74,31 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `ui/` - Shadcn/ui components (Button, Dialog, Select, Combobox, MultiSelect, Command, PageHeader, StatsBar, etc.)
 
 ### Core Services (`src/`)
-- `lib/supabase.ts` - Supabase client configuration
-- `lib/auth-utils.ts` - Server-side admin utilities and role checking
-- `lib/utils.ts` - Utility functions
-- `lib/color-utils.ts` - Color utilities for badges and backgrounds (hex to RGB, contrast, styling)
-- `hooks/use-admin-check.tsx` - Client-side admin role checking hook
-- `hooks/use-realtime-data.tsx` - Generic real-time hook for all entities with retry logic
-- `hooks/use-realtime-items.tsx` - Real-time items hook with character data transformation
-- `hooks/use-realtime-tasks.tsx` - Real-time tasks hook
-- `hooks/use-realtime-notes.tsx` - Legacy real-time notes hook
-- `hooks/use-realtime-notes-v2.tsx` - Improved real-time notes hook
-- `types/` - TypeScript definitions (database.ts with updated schema, index.ts with color fields)
+- `lib/supabase.ts`, `lib/auth-utils.ts`, `lib/utils.ts`, `lib/color-utils.ts`
+- `hooks/use-admin-check.tsx`, `hooks/use-realtime-*.tsx` (items, tasks, notes, generic)
+- `types/database.ts`, `types/index.ts`
 
-### Database & Scripts
-- `scripts/database-setup/` - Core schema and setup scripts
-  - `database-schema.sql` - Core database schema reference
-  - `database-setup-complete.sql` - Complete setup with seed data
-  - `supabase-storage-setup.sql` - Storage bucket configuration
-  - `assign-admin-role.sql` - Admin role assignment utility
-  - `SETUP-SIMPLIFIED-ADMIN.md` - Admin system setup guide
+### Database Scripts (`scripts/database-setup/`)
+- Complete setup, storage config, admin role assignment, schema reference
 
-### Static Assets (`public/`)
-- `back2stage_logo.svg` - Main logo for light theme (dark text #38383a)
-- `back2stage_logo_dark.svg` - Logo for dark theme (light text #f2f2f3)
-- `b2s_curtain_logo.svg` - Curtain logo/favicon
-- `site.webmanifest` - Web app manifest for PWA support
-- Favicon files (favicon.ico, favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png)
-
-## Known Technical Solutions
-- **Tiptap SSR**: Use dynamic imports with `ssr: false` and `immediatelyRender: false`
-- **Drag-and-drop**: Use @dnd-kit with rectIntersection collision detection
-- **Select validation**: Use 'none' placeholder values, convert for database
-- **Real-time cleanup**: Avoid `channel.off()` - Supabase channels don't support it
-- **Database schema changes**: When adding/removing table columns, ALWAYS update both database schema AND TypeScript types in `src/types/database.ts`
-- **Supabase typing workaround**: Use `(supabase as any)` for insert/update operations when TypeScript inference fails (temporary solution until better typing)
-- **Admin system architecture**: App-level security without RLS complexity. Client-side admin checks for UI, server-side validation in API routes using Authorization headers. No RLS policies needed for single-app use cases
-- **Real-time data sync**: Implemented robust real-time hooks with retry logic for all entities (items, tasks, notes). Uses generic `useRealtimeData` hook with automatic reconnection and error handling
-- **Task ranking system**: Use INTEGER field with 1000-unit spacing for drag-and-drop ranking. Avoid fractional values that cause PostgreSQL errors. Sort by priority → status → ranking for logical ordering
-- **Drag-and-drop animations**: Use DragOverlay with full-size card preview, custom drop animations, and proper isOverlay prop handling for better UX
-- **Typography system**: Lexend for headings, Roboto for body text. Custom CSS classes: .text-h1, .text-h2, .text-h3, .text-body, .text-button, .text-caption
-- **Color scheme**: Blue primary (#3A4D7A), Red accent (#E74746), Light Gray background (#F7F7F7), Dark Gray text (#2C2C2E)
-- **Font loading**: Next.js Google Fonts with CSS variables, Tailwind config extended for custom fonts
-- **Branding consistency**: "Back2Stage" used throughout, informal German (du/dir) in auth forms
-- **Mobile responsiveness**: Icon-only buttons on mobile (`<span className="hidden sm:inline">Text</span>`), burger menu navigation, responsive layouts with `flex-col sm:flex-row` patterns
-- **Dark theme system**: React Context-based ThemeProvider with localStorage persistence ("back2stage-theme" key). Tailwind "class" dark mode with manual theme switching. Theme toggle with animated sun/moon icons positioned in navigation. Logo switching: `theme === 'dark' ? logo_dark.svg : logo.svg`
-- **Rich text editor architecture**: Three components - `TiptapEditor` (full-featured for note editing), `TiptapEditorWrapper` (SSR wrapper for note creation/editing), `TaskDescriptionEditor` (simplified for task descriptions). Use wrapper for SSR compatibility with `ssr: false` and `immediatelyRender: false`
-- **Component dialog patterns**: Add vs Edit dialogs follow consistent structure - Add dialogs use controlled state, Edit dialogs receive existing data. Both use same validation and save patterns
-- **Development workflow**: `npm run dev` (development), `npm run build` (production build), `npm run lint` (ESLint), `npm run typecheck` (TypeScript validation). Always run all three after major changes
-- **Character data transformation**: Real-time items hook transforms nested `item_characters.character` to flat `characters` array for UI compatibility using `transformItemData()` function
-- **Color system architecture**: Hex colors stored in database, converted to RGBA with utilities for badges (`getBadgeStyle()`), backgrounds (`getLightBackgroundColor()`), and contrast (`getContrastingTextColor()`)
-- **CSV import system**: Robust CSV parser handles quoted fields with commas, generates SQL with conflict resolution (`ON CONFLICT DO NOTHING`), maps character relationships automatically
-- **Database schema versioning**: Items table updated from legacy fields (`needs_clarification`, `needed_for_rehearsal`) to new schema (`is_used`, `is_changeable`). Migration scripts provided for existing databases
-- **Visual organization**: Category colors provide subtle row backgrounds (5% opacity), character colors create distinct badge identification, thematic color assignments for intuitive categorization
-- **Multi-select component**: Built with cmdk/Command component. Multi-column grid layout (2 cols mobile, 3 cols desktop) to avoid scrolling issues. Search works via `value={label}` and `keywords={[label]}` props while selection uses actual ID values. Used for character selection (items) and tag selection (tasks)
+## Key Technical Solutions
+- **Tiptap SSR**: Dynamic imports with `ssr: false` and `immediatelyRender: false`. Mobile viewport fix: `scrollIntoView()` on focus/click
+- **Task ranking**: INTEGER with 1000-unit spacing. Sort by priority → status → ranking
+- **Multi-select**: cmdk/Command with grid layout (2/3 cols). Search via `value={label}`, select via ID
+- **Admin system**: App-level security (no RLS). Client checks for UI, server validation in API routes
+- **Real-time**: Generic `useRealtimeData` hook with retry logic. Character data transformation for items
+- **Color system**: Hex in DB → RGBA utilities. Category backgrounds (5% opacity), character badges
+- **Dark theme**: Context + localStorage ("back2stage-theme"). Manual toggle, logo switching
+- **Mobile**: Icon-only buttons, burger menu, responsive layouts, editor viewport scrolling
+- **Database schema**: ALWAYS update both SQL schema AND TypeScript types in `src/types/database.ts`
+- **Supabase typing**: Use `(supabase as any)` for insert/update when inference fails
 
 ## TODO Backlog
-1. Debug task ranking drag-and-drop positioning bugs in Kanban view
-2. Enhance mobile drag-and-drop (lock scrolling, drag preview, drop animations)
-3. Persist task/item filter settings to localStorage
-4. **Auto-archive completed tasks**: Add `completed_at` timestamp and `archived` boolean to tasks table. When task status changes to "done", set `completed_at`. Automatically archive tasks where `completed_at` is older than 14 days. Add "Show archived" toggle and Archive page/view for browsing archived tasks.
-5. Fix version history dialog mobile responsiveness
-6. **Offline capabilities strategy** - Research offline data access options
+1. Auto-archive completed tasks (14-day threshold, `completed_at` + `archived` fields)
+2. Persist filter settings to localStorage
+3. Fix version history dialog mobile responsiveness
+4. Enhance mobile drag-and-drop UX
+5. Offline capabilities research
 
 ## Recent Changes
 - **v0.12.4**: UI refinements - moved Requisiten to /props route, improved table views with subtitles, updated search placeholders, fixed dark mode badge brightness, reordered items table columns
