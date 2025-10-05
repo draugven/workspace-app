@@ -4,9 +4,9 @@ A Next.js web application for small theater production teams to manage props, co
 
 ## Features
 
-- **Requisiten Management**: Track items with customizable properties, status tracking, character assignments, and category colors
-- **Task Management**: Kanban board and table views with drag-and-drop, rich text descriptions, priority levels, and tag system
-- **Collaborative Notes**: Real-time rich text editing with Tiptap editor and department organization
+- **Requisiten Management**: Track props/costumes with sortable columns, advanced filtering (category, source, status, characters), character assignments, and category colors
+- **Task Management**: Kanban board and table views with drag-and-drop, rich text descriptions, priority levels, tag system, and completed task filtering
+- **Collaborative Notes**: Real-time rich text editing with Tiptap editor, version history tracking, and restore functionality
 - **Admin System**: App-level security with admin-only deletion and management features
 - **Dark Theme**: Complete dark mode support with manual theme toggle
 - **Mobile Responsive**: Optimized UI with burger menu navigation and responsive layouts
@@ -21,6 +21,7 @@ A Next.js web application for small theater production teams to manage props, co
 - **Rich Text**: Tiptap editor with SSR support
 - **Tables**: TanStack Table v8
 - **Drag & Drop**: @dnd-kit library
+- **Command Menu**: cmdk (multi-select component)
 - **Typography**: Lexend (headings), Roboto (body)
 - **Deployment**: Docker + GitHub Actions + Kubernetes
 
@@ -134,10 +135,12 @@ The app uses Supabase (PostgreSQL) with the following main tables:
 
 - **Tiptap SSR**: Dynamic imports with `ssr: false` and `immediatelyRender: false`
 - **Task Ranking**: INTEGER field with 1000-unit spacing for drag-and-drop
+- **Multi-select**: cmdk/Command with grid layout (2-3 columns) for character/tag selection
 - **Admin System**: App-level security without RLS complexity
 - **Real-time**: Robust hooks with retry logic and automatic reconnection
 - **Color System**: Hex colors in database, converted to RGBA for styling
 - **Dark Theme**: React Context with localStorage persistence
+- **Filtering**: Collapsible filter UI with active filter badges
 
 See `CLAUDE.md` for complete technical documentation.
 
@@ -156,15 +159,15 @@ The app uses Docker + GitHub Actions for deployment:
 
 ## Current Version
 
-**v0.11.0** - Complete theater dataset with colorful character/category system
+**v0.12.3** - Advanced filtering and sorting for items table
 
 Recent updates:
-- Database schema modernization (`is_used`, `is_changeable` fields)
-- Character and category color system
-- 105+ theater props imported
-- Dark theme with animated toggle
-- Mobile responsiveness optimization
-- Rich text editor for notes and task descriptions
+- **v0.12.3**: Sortable columns and comprehensive filtering for items table
+- **v0.12.2**: Multi-select component with grid layout for characters and tags
+- **v0.12.1**: Completed tasks toggle filter
+- **v0.12.0**: Version history tracking with snapshots and restore
+- **v0.11.1**: Project cleanup and documentation updates
+- **v0.11.0**: Complete theater dataset with colorful character/category system
 
 ## Contributing
 

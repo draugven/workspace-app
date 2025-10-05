@@ -130,59 +130,18 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Visual organization**: Category colors provide subtle row backgrounds (5% opacity), character colors create distinct badge identification, thematic color assignments for intuitive categorization
 - **Multi-select component**: Built with cmdk/Command component. Multi-column grid layout (2 cols mobile, 3 cols desktop) to avoid scrolling issues. Search works via `value={label}` and `keywords={[label]}` props while selection uses actual ID values. Used for character selection (items) and tag selection (tasks)
 
-## Development Sessions
-
-### Oct 2025 - Note Versioning & Task Management Improvements
-**Key Achievements**: Version history tracking for notes, completed task filtering
-
-**Note Versioning (v0.12.0):**
-- Automatic version snapshot creation on every note save
-- Version history dialog with timestamps and content previews
-- Version viewer dialog for full content display
-- Version restore functionality (creates new version from old content)
-- `restoreVersion()` function in real-time notes hook
-- Mobile-responsive dialogs with icon-only buttons
-- Known issue: Dialog overflow on mobile (non-critical)
-
-**Task Management (v0.12.1):**
-- Added "Show completed tasks" checkbox toggle in filters section
-- Hides tasks with status "done" when unchecked (defaults to showing all)
-- Works in both Kanban board and table views
-- Stats bar includes all tasks regardless of filter
-- First iteration of completed task management strategy
-
-**Multi-Select Component (v0.12.2):**
-- Implemented new MultiSelect component using cmdk/Command
-- Multi-column grid layout (2 columns mobile, 3 columns tablet/desktop)
-- No scrolling required - all options visible in grid
-- Search functionality working correctly with label-based matching
-- Color badge support for visual identification
-- Used for character selection (items) and tag selection (tasks)
-- Replaced old broken multi-combobox implementation
-
-**Items Table Enhancements (v0.12.3):**
-- Added sortable columns: Charaktere, Quelle, Kategorie (clicks to sort ascending/descending)
-- Implemented comprehensive filter system matching tasks page pattern
-- Filter button in header when collapsed, full filter card when expanded
-- Filters: Kategorie, Quelle, Status, Charaktere (multi-select)
-- Active filters summary with removable badges when collapsed
-- Auto-expand filters when filters become active
-- 4-column grid layout on desktop (1 col mobile, 2 cols tablet)
-- Bug fix: Removed stray `selectedType` references causing search errors
-
 ## TODO Backlog
 1. Debug task ranking drag-and-drop positioning bugs in Kanban view
 2. Enhance mobile drag-and-drop (lock scrolling, drag preview, drop animations)
-3. Persist task filter settings (showCompleted, selectedDepartment, etc.) to localStorage
+3. Persist task/item filter settings to localStorage
 4. **Auto-archive completed tasks**: Add `completed_at` timestamp and `archived` boolean to tasks table. When task status changes to "done", set `completed_at`. Automatically archive tasks where `completed_at` is older than 14 days. Add "Show archived" toggle and Archive page/view for browsing archived tasks.
 5. Fix version history dialog mobile responsiveness
 6. **Offline capabilities strategy** - Research offline data access options
 
 ## Recent Changes
-- **v0.12.3**: Added sortable columns and comprehensive filtering to items table
-- **v0.12.2**: Implemented multi-select component with grid layout for characters and tags
-- **v0.12.1**: Added "Show completed tasks" toggle filter for cleaner task views
-- **v0.12.0**: Version history tracking with automatic snapshots, restore functionality, and version viewer UI
-- **v0.11.1**: Project cleanup - archived obsolete scripts, updated documentation, cleaned root directory
-- **v0.10.1**: Rich text editor for note creation
+- **v0.12.3**: Sortable columns and comprehensive filtering for items table
+- **v0.12.2**: Multi-select component with grid layout for characters and tags
+- **v0.12.1**: "Show completed tasks" toggle filter
+- **v0.12.0**: Version history tracking with snapshots and restore
+- **v0.11.1**: Project cleanup and documentation updates
 
