@@ -38,6 +38,10 @@ export function useRealtimeData<T extends { id: string }>({
   const configRef = useRef({ tableName, selectQuery, orderBy, filter })
   configRef.current = { tableName, selectQuery, orderBy, filter }
 
+  // Store callbacks in refs to avoid stale closures
+  const callbacksRef = useRef({ onInsert, onUpdate, onDelete, enableLogs })
+  callbacksRef.current = { onInsert, onUpdate, onDelete, enableLogs }
+
   // Stable logging function
   const log = useCallback((message: string, ...args: any[]) => {
     if (enableLogs) {
@@ -92,6 +96,7 @@ export function useRealtimeData<T extends { id: string }>({
       if (!mounted) return
 
       const { tableName, selectQuery, orderBy, filter } = configRef.current
+      const { enableLogs: logsEnabled } = callbacksRef.current
 
       setLoading(true)
       setError(null)
@@ -120,7 +125,7 @@ export function useRealtimeData<T extends { id: string }>({
 
         if (mounted) {
           setData(result || [])
-          if (enableLogs) {
+          if (logsEnabled) {
             console.log(`[${tableName} realtime] Data loaded successfully`, result?.length, 'items')
           }
         }
@@ -128,7 +133,7 @@ export function useRealtimeData<T extends { id: string }>({
         if (mounted) {
           const message = err instanceof Error ? err.message : `Failed to load ${tableName} data`
           setError(message)
-          if (enableLogs) {
+          if (logsEnabled) {
             console.log(`[${tableName} realtime] Error loading data:`, err)
           }
         }
@@ -149,8 +154,9 @@ export function useRealtimeData<T extends { id: string }>({
 
     // Create new channel with unique name
     const { tableName: currentTableName } = configRef.current
+    const { enableLogs: logsEnabled } = callbacksRef.current
     const channelName = `${currentTableName}-changes-${Date.now()}`
-    if (enableLogs) {
+    if (logsEnabled) {
       console.log(`[${currentTableName} realtime] Creating subscription:`, channelName)
     }
 
@@ -166,7 +172,9 @@ export function useRealtimeData<T extends { id: string }>({
         async (payload) => {
           if (!mounted) return
 
-          if (enableLogs) {
+          const { enableLogs: logsEnabled, onInsert: insertCb, onUpdate: updateCb, onDelete: deleteCb } = callbacksRef.current
+
+          if (logsEnabled) {
             console.log(`[${currentTableName} realtime] Received real-time event:`, payload.eventType, payload)
           }
 
@@ -181,7 +189,7 @@ export function useRealtimeData<T extends { id: string }>({
                 // Add to beginning for newest-first ordering
                 return [newItem, ...prev]
               })
-              onInsert?.(newItem)
+              insertCb?.(newItem)
               break
 
             case 'UPDATE':
@@ -191,13 +199,13 @@ export function useRealtimeData<T extends { id: string }>({
                   item.id === updatedItem.id ? updatedItem : item
                 )
               )
-              onUpdate?.(updatedItem)
+              updateCb?.(updatedItem)
               break
 
             case 'DELETE':
               const deletedId = payload.old.id
               setData(prev => prev.filter(item => item.id !== deletedId))
-              onDelete?.(deletedId)
+              deleteCb?.(deletedId)
               break
           }
         }
@@ -205,17 +213,19 @@ export function useRealtimeData<T extends { id: string }>({
       .subscribe((status, err) => {
         if (!mounted) return
 
-        if (enableLogs) {
+        const { enableLogs: logsEnabled } = callbacksRef.current
+
+        if (logsEnabled) {
           console.log(`[${currentTableName} realtime] Subscription status:`, status, err)
         }
 
         if (status === 'SUBSCRIBED') {
           connectionAttempts.current = 0
-          if (enableLogs) {
+          if (logsEnabled) {
             console.log(`[${currentTableName} realtime] Successfully subscribed to real-time updates`)
           }
         } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          if (enableLogs) {
+          if (logsEnabled) {
             console.log(`[${currentTableName} realtime] Subscription error, will retry...`, status, err)
           }
           if (mounted) {
