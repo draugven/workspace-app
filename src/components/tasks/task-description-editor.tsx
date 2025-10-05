@@ -59,6 +59,17 @@ export function TaskDescriptionEditor({
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML())
     },
+    onCreate: ({ editor }) => {
+      // Scroll editor into view when focused on mobile
+      editor.on('focus', () => {
+        setTimeout(() => {
+          const editorElement = editor.view.dom
+          if (editorElement && typeof window !== 'undefined') {
+            editorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        }, 100)
+      })
+    },
     editorProps: {
       attributes: {
         class: `prose prose-sm max-w-none focus:outline-none min-h-[60px] p-3 border border-border bg-background text-foreground rounded-md ${className}`,
@@ -187,7 +198,20 @@ export function TaskDescriptionEditor({
       </div>
 
       {/* Editor */}
-      <div className="relative">
+      <div
+        className="relative"
+        onClick={() => {
+          // Ensure editor scrolls into view on mobile when clicked
+          if (editor && typeof window !== 'undefined' && window.innerWidth < 768) {
+            setTimeout(() => {
+              const editorElement = editor.view.dom
+              if (editorElement) {
+                editorElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              }
+            }, 300)
+          }
+        }}
+      >
         <EditorContent editor={editor} />
         {editor.isEmpty && (
           <div className="absolute top-3 left-3 text-muted-foreground pointer-events-none">
