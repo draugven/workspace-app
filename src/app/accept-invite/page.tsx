@@ -143,8 +143,8 @@ function AcceptInviteContent() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
-      <div className="max-w-md w-full bg-card border rounded-lg p-6 space-y-6">
-        <div className="text-center space-y-4">
+      <div className="w-full max-w-md space-y-4">
+        <div className="text-center space-y-2">
           <div className="flex justify-center">
             <Image
               src="/back2stage_logo.svg"
@@ -156,13 +156,14 @@ function AcceptInviteContent() {
               style={{ width: 'auto' }}
             />
           </div>
-          <div className="space-y-1">
+        </div>
+        <div className="bg-card border rounded-lg p-6 space-y-6">
+          <div className="text-center space-y-1">
             <h1 className="text-2xl font-bold">Konto erstellen</h1>
             <p className="text-muted-foreground">
               Du wurdest eingeladen, der Plattform beizutreten
             </p>
           </div>
-        </div>
 
         <form onSubmit={handleAccept} className="space-y-4">
           <div className="space-y-2">
@@ -235,9 +236,10 @@ function AcceptInviteContent() {
           </div>
         )}
 
-        <p className="text-xs text-center text-muted-foreground">
-          Mit der Kontoerstellung stimmst du den Nutzungsbedingungen zu
-        </p>
+          <p className="text-xs text-center text-muted-foreground">
+            Mit der Kontoerstellung stimmst du den Nutzungsbedingungen zu
+          </p>
+        </div>
       </div>
     </div>
   )
