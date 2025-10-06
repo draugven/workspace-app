@@ -2,11 +2,12 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { XCircle, Loader2 } from 'lucide-react'
 
 function AcceptInviteContent() {
   const router = useRouter()
@@ -143,16 +144,24 @@ function AcceptInviteContent() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
       <div className="max-w-md w-full bg-card border rounded-lg p-6 space-y-6">
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-4">
           <div className="flex justify-center">
-            <div className="bg-primary/10 p-3 rounded-full">
-              <CheckCircle className="h-8 w-8 text-primary" />
-            </div>
+            <Image
+              src="/back2stage_logo.svg"
+              alt="Back2Stage"
+              width={200}
+              height={37}
+              priority
+              className="h-10 w-auto"
+              style={{ width: 'auto' }}
+            />
           </div>
-          <h1 className="text-2xl font-bold">Konto erstellen</h1>
-          <p className="text-muted-foreground">
-            Du wurdest eingeladen, der Plattform beizutreten
-          </p>
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold">Konto erstellen</h1>
+            <p className="text-muted-foreground">
+              Du wurdest eingeladen, der Plattform beizutreten
+            </p>
+          </div>
         </div>
 
         <form onSubmit={handleAccept} className="space-y-4">
