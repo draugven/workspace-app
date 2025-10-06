@@ -22,17 +22,19 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `categories` - Item categorization with thematic colors for visual organization
 - `characters` - Theater characters with distinct colors for badge visualization
 - `task_tags` - Tagging system for task organization
+- `invitations` - Invite-only authentication system with token-based user registration
 - `auth.users` - Supabase authentication with admin role system (no RLS, app-level security)
 
-## Current Status (v0.12.5)
-- **Routes**: /props (Requisiten), /tasks (Kanban + table), /notes (collaborative editing)
-- **Features**: Authentication, admin system (app-level), German UI, mobile-responsive
+## Current Status (v0.13.0)
+- **Routes**: /props (Requisiten), /tasks (Kanban + table), /notes (collaborative editing), /admin/invitations (admin-only), /accept-invite (public)
+- **Features**: Invite-only authentication, admin system (app-level), German UI, mobile-responsive
+- **Authentication**: Token-based invitation system with 7-day expiry, single-use tokens, admin-controlled user creation
 - **Data**: 105+ theater props imported, character/category color system
 - **UI**: Advanced filtering/sorting, multi-select components, dark mode support, mobile editor viewport fix
 - **Dev Server**: Port 3000
 
 ## Development Guidelines
-- Current version: 0.12.5 (SemVer: MAJOR.MINOR.PATCH)
+- Current version: 0.13.0 (SemVer: MAJOR.MINOR.PATCH)
 - Update both `package.json` and CLAUDE.md version before committing
 - Use conventional commit messages (feat:, fix:, BREAKING CHANGE:)
 - Always run `npm run lint`, `npm run typecheck`, `npm run build`, `npm test` after major changes
@@ -58,7 +60,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Run Tests**: `npm test` (all), `npm test -- --watch` (watch mode), `npm test -- --coverage` (coverage report)
 - **When to Test**: After implementing critical features, fixing bugs, or adding complex logic
 - **Test Structure**: Describe blocks for grouping, clear test names, mock external dependencies
-- **Current Coverage**: 33 tests across auth-provider (11), use-realtime-data (16), error boundaries (9)
+- **Current Coverage**: 75 tests across auth-provider (11), use-realtime-data (16), error boundaries (9), invitation API routes (39)
 
 ## Project Structure
 
@@ -68,10 +70,16 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `tasks/page.tsx` - Task management (Kanban + table)
 - `notes/page.tsx` - Collaborative notes
 - `login/page.tsx` - Authentication
+- `accept-invite/page.tsx` - Public invitation acceptance page
+- `admin/invitations/page.tsx` - Admin invitation management with URL display
 - `api/users/route.ts` - Users API endpoint (secure auth.users fetching)
 - `api/admin/items/[id]/route.ts` - Admin-only item deletion endpoint
 - `api/admin/tasks/[id]/route.ts` - Admin-only task deletion endpoint
 - `api/admin/notes/[id]/route.ts` - Admin-only note deletion endpoint
+- `api/admin/invitations/create/route.ts` - Admin-only invitation creation
+- `api/admin/invitations/[id]/route.ts` - Admin-only invitation revocation
+- `api/invitations/validate/route.ts` - Public invitation token validation
+- `api/invitations/accept/route.ts` - Public invitation acceptance + user creation
 
 ### Components (`src/components/`)
 - `auth/` - Authentication (AuthProvider, LoginForm, ProtectedRoute)
@@ -103,12 +111,14 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Task ranking**: INTEGER with 1000-unit spacing. Sort by priority → status → ranking
 - **Multi-select**: cmdk/Command with grid layout (2/3 cols). Search via `value={label}`, select via ID
 - **Admin system**: App-level security (no RLS). Client checks for UI, server validation in API routes
+- **Invitation system**: Token-based (64-char hex), 7-day expiry, single-use, app-level security. Admin creates → URL displayed → user accepts with display name. Authorization header pattern for API auth
 - **Real-time**: Generic `useRealtimeData` hook with retry logic. Character data transformation for items. Uses ref pattern for callback stability
 - **Error boundaries**: Next.js 14 error.tsx files for each route with German UI, retry functionality, proper error logging
 - **Color system**: Hex in DB → RGBA utilities. Category backgrounds (5% opacity), character badges
 - **Dark theme**: Context + localStorage ("back2stage-theme"). Manual toggle, logo switching
 - **Mobile**: Icon-only buttons, burger menu, responsive layouts, editor viewport scrolling
 - **Database schema**: ALWAYS update both SQL schema AND TypeScript types in `src/types/database.ts`
+- **Supabase client**: Use singleton `supabase` instance from lib/supabase.ts to avoid multiple client warnings
 - **Supabase typing**: Use `(supabase as any)` for insert/update when inference fails
 - **Testing**: Jest + React Testing Library. Mock Supabase client, use renderHook for hooks, waitFor for async assertions
 
@@ -120,6 +130,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 5. Offline capabilities research
 
 ## Recent Changes
+- **v0.13.0**: Invite-only authentication system - token-based user registration (7-day expiry, single-use), admin invitation management UI with URL display/copy, public acceptance page with display name, Authorization header pattern for admin routes, 39 comprehensive tests (97.97% coverage)
 - **v0.12.5**: Code quality improvements - enhanced error logging for version save failures, added localStorage error handling in theme provider, removed unused exports (~50 lines) from utility files
 - **v0.12.4**: UI refinements - moved Requisiten to /props route, improved table views with subtitles, updated search placeholders, fixed dark mode badge brightness, reordered items table columns
 - **v0.12.3**: Sortable columns and comprehensive filtering for items table

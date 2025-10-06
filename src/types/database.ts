@@ -385,6 +385,38 @@ export interface Database {
           created_at?: string
         }
       }
+      invitations: {
+        Row: {
+          id: string
+          email: string
+          token: string
+          invited_by: string | null
+          invited_at: string
+          accepted_at: string | null
+          expires_at: string
+          status: 'pending' | 'accepted' | 'expired' | 'revoked'
+        }
+        Insert: {
+          id?: string
+          email: string
+          token?: string
+          invited_by?: string | null
+          invited_at?: string
+          accepted_at?: string | null
+          expires_at?: string
+          status?: 'pending' | 'accepted' | 'expired' | 'revoked'
+        }
+        Update: {
+          id?: string
+          email?: string
+          token?: string
+          invited_by?: string | null
+          invited_at?: string
+          accepted_at?: string | null
+          expires_at?: string
+          status?: 'pending' | 'accepted' | 'expired' | 'revoked'
+        }
+      }
     }
     Views: {
       [_ in never]: never

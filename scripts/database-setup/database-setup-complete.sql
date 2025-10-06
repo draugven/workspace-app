@@ -140,6 +140,18 @@ CREATE TABLE user_roles (
   UNIQUE(user_id)
 );
 
+-- Invitations table for invite-only authentication
+CREATE TABLE invitations (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  token TEXT NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(32), 'hex'),
+  invited_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  invited_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  accepted_at TIMESTAMP WITH TIME ZONE,
+  expires_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() + INTERVAL '7 days'),
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'expired', 'revoked'))
+);
+
 -- Step 2: Create Indexes
 CREATE INDEX idx_items_type ON items(type);
 CREATE INDEX idx_items_status ON items(status);
@@ -153,6 +165,10 @@ CREATE INDEX idx_tasks_priority_ranking ON tasks(priority, ranking);
 CREATE INDEX idx_notes_department ON notes(department_id);
 CREATE INDEX idx_notes_updated_at ON notes(updated_at);
 CREATE INDEX idx_user_roles_user_id ON user_roles(user_id);
+CREATE INDEX idx_invitations_token ON invitations(token);
+CREATE INDEX idx_invitations_email ON invitations(email);
+CREATE INDEX idx_invitations_status ON invitations(status) WHERE status = 'pending';
+CREATE INDEX idx_invitations_invited_by ON invitations(invited_by);
 
 -- Step 3: Create Triggers
 CREATE OR REPLACE FUNCTION update_updated_at_column()

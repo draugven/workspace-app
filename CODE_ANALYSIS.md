@@ -1,7 +1,7 @@
 # Static Code Analysis Report
 **Project:** Back2Stage - Theater Production Collaboration Tool
-**Analysis Date:** 2025-10-05
-**Version:** v0.12.4
+**Analysis Date:** 2025-10-06
+**Version:** v0.13.0
 **Analysis Type:** Comprehensive static code analysis
 
 ---
@@ -461,9 +461,9 @@ const filteredItems = useMemo(() => {
 ## Test Coverage
 
 ### Current Test Suite Status
-**Total Tests:** 33 passing across 5 test suites
+**Total Tests:** 75 passing across 9 test suites
 **Test Framework:** Jest + React Testing Library
-**Coverage Areas:** Authentication, hooks, error boundaries
+**Coverage Areas:** Authentication, hooks, error boundaries, API routes (invitation system with 97.97% coverage)
 
 ### Test Files and Coverage
 
@@ -537,18 +537,81 @@ it('uses latest callbacks without recreating subscription', async () => {
 
 ---
 
+#### 4. Invitation System API Routes (4 test files, 36 total tests)
+**Files:**
+- `src/app/api/admin/invitations/create/__tests__/route.test.ts` (11 tests)
+- `src/app/api/admin/invitations/[id]/__tests__/route.test.ts` (9 tests)
+- `src/app/api/invitations/validate/__tests__/route.test.ts` (6 tests)
+- `src/app/api/invitations/accept/__tests__/route.test.ts` (10 tests)
+
+**Status:** ✅ All passing
+**Implementation:** Invite-only authentication system
+
+**Coverage:**
+
+**4.1 Create Invitation API (11 tests):**
+- ✅ Returns 401 when user is not authenticated
+- ✅ Returns 401 when auth error occurs
+- ✅ Returns 403 when user is not an admin
+- ✅ Returns 400 when email is missing
+- ✅ Returns 400 when email is invalid format
+- ✅ Creates invitation successfully with correct data
+- ✅ Returns 409 when email already has pending invitation
+- ✅ Returns 500 when database operation fails
+- ✅ Includes invited_by field in insert
+- ✅ Handles unexpected errors gracefully
+
+**4.2 Revoke Invitation API (9 tests):**
+- ✅ Returns 401 when user is not authenticated
+- ✅ Returns 401 when auth error occurs
+- ✅ Returns 403 when user is not an admin
+- ✅ Revokes invitation successfully
+- ✅ Updates status to 'revoked'
+- ✅ Handles revocation with different invitation IDs
+- ✅ Returns 500 when database operation fails
+- ✅ Does not revoke if auth check fails before database call
+
+**4.3 Validate Invitation API (6 tests):**
+- ✅ Returns 400 when token is missing
+- ✅ Returns 400 when invitation does not exist
+- ✅ Validates pending invitation successfully
+- ✅ Returns 400 when invitation is already accepted
+- ✅ Marks invitation as expired when past expiry date
+- ✅ Returns 500 when unexpected error occurs
+
+**4.4 Accept Invitation API (10 tests):**
+- ✅ Returns 500 when NEXT_PUBLIC_SUPABASE_URL is missing
+- ✅ Returns 400 when token is missing
+- ✅ Returns 400 when email is missing
+- ✅ Returns 400 when password is missing
+- ✅ Returns 400 when invitation does not exist
+- ✅ Returns 400 when invitation is expired
+- ✅ Creates user with email and password
+- ✅ Creates default user role
+- ✅ Returns 409 when user already exists
+- ✅ Returns 200 with success and user data
+
+**Test Infrastructure:**
+- Created `src/test-utils/api-route-helpers.ts` with `createMockNextRequest()` helper
+- Enhanced `jest.setup.js` with Next.js server component mocks and Edge runtime polyfills
+- Comprehensive mocking of Supabase client, auth utilities, and environment variables
+
+---
+
 ### Testing Infrastructure
 
 **Configuration:**
 - `jest.config.js` - Next.js integration with jsdom environment
-- `jest.setup.js` - Global test-dom matchers
+- `jest.setup.js` - Global test-dom matchers, Next.js server component mocks, Edge runtime polyfills
 - `src/types/jest-dom.d.ts` - TypeScript type definitions
+- `src/test-utils/api-route-helpers.ts` - Helper utilities for testing API routes
 
 **Test Commands:**
 ```bash
 npm test              # Run all tests
 npm test -- --watch   # Watch mode
 npm test -- --coverage # Generate coverage report
+npm test -- --testPathPatterns=invitations # Run specific test suite
 ```
 
 ---
@@ -556,9 +619,9 @@ npm test -- --coverage # Generate coverage report
 ### Areas Not Yet Tested
 
 **High Priority for Testing:**
-1. API routes (requires Next.js server environment setup)
+1. ~~API routes~~ ✅ Invitation API routes fully tested (36 tests)
 2. use-realtime-notes-v2.tsx hook
-3. Page components (props, tasks, notes)
+3. Page components (props, tasks, notes, admin/invitations, accept-invite)
 4. Form components (ItemForm, TaskForm, NoteForm)
 
 **Medium Priority:**
@@ -574,13 +637,20 @@ npm test -- --coverage # Generate coverage report
 
 ## Testing Results
 
-### After Critical Fixes
+### After Critical Fixes & Invitation System Implementation
 ```bash
 ✅ npm run lint       # No warnings or errors
 ✅ npm run typecheck  # No TypeScript errors
 ✅ npm run build      # Successful compilation
-✅ npm test           # 33/33 tests passing
+✅ npm test           # 75/75 tests passing (39 tests for invitation system + 7 new for displayName)
 ```
+
+**Test Suite Summary:**
+- Test Suites: 9 passed, 9 total
+- Tests: 75 passed, 75 total
+- Snapshots: 0 total
+- Time: ~1.6 seconds
+- Invitation System Coverage: 97.97%
 
 ### Build Output
 ```

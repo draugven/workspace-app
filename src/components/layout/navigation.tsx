@@ -8,7 +8,9 @@ import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { useTheme } from '@/components/theme/theme-provider'
 import { supabase } from '@/lib/supabase'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, UserPlus } from 'lucide-react'
+import { useAuth } from '../auth/auth-provider'
+import { useAdminCheck } from '@/hooks/use-admin-check'
 
 const navItems = [
   { name: 'Requisiten', href: '/props' },
@@ -16,11 +18,10 @@ const navItems = [
   { name: 'Notizen', href: '/notes' },
 ]
 
-import { useAuth } from '../auth/auth-provider'
-
 export function Navigation() {
   const { user } = useAuth()
   const { theme } = useTheme()
+  const { isAdmin } = useAdminCheck()
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -64,6 +65,19 @@ export function Navigation() {
                 {item.name}
               </Link>
             ))}
+            {isAdmin && (
+              <Link
+                href="/admin/invitations"
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
+                  pathname === '/admin/invitations'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                }`}
+              >
+                <UserPlus className="h-4 w-4" />
+                <span className="hidden lg:inline">Einladungen</span>
+              </Link>
+            )}
           </div>
 
           {/* Desktop User Menu */}
@@ -117,6 +131,20 @@ export function Navigation() {
                   {item.name}
                 </Link>
               ))}
+              {isAdmin && (
+                <Link
+                  href="/admin/invitations"
+                  className={`flex items-center gap-2 px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                    pathname === '/admin/invitations'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                  }`}
+                  onClick={closeMobileMenu}
+                >
+                  <UserPlus className="h-4 w-4" />
+                  Einladungen
+                </Link>
+              )}
               <div className="border-t pt-4 mt-4">
                 <div className="px-3 py-2 text-sm text-muted-foreground">
                   {user.user_metadata?.full_name || user.email}
