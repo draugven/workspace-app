@@ -12,7 +12,7 @@ import { VersionHistoryDialog } from './version-history-dialog'
 import { VersionViewerDialog } from './version-viewer-dialog'
 import type { Note, Department, User, NoteVersion } from "@/types"
 import { Edit, Lock, History, Save, Users, AlertTriangle, Eye, EyeOff, Trash2, X } from 'lucide-react'
-import { useAdminCheck } from '@/hooks/use-admin-check'
+import { useAuth } from '@/components/auth/auth-provider'
 
 interface NoteCardProps {
   note: Note & {
@@ -51,7 +51,7 @@ export function NoteCard({
   const [showVersionHistory, setShowVersionHistory] = useState(false)
   const [selectedVersion, setSelectedVersion] = useState<NoteVersion | null>(null)
   const [showVersionViewer, setShowVersionViewer] = useState(false)
-  const { isAdmin } = useAdminCheck()
+  const { isAdmin } = useAuth()
 
   const isLocked = note.is_locked && note.locked_by !== currentUser?.id
   const lockedByCurrentUser = note.is_locked && note.locked_by === currentUser?.id

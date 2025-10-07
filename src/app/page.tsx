@@ -2,12 +2,10 @@ import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ProtectedRoute } from '@/components/auth/protected-route'
-import { Navigation } from '@/components/layout/navigation'
 
 export default function HomePage() {
   return (
     <ProtectedRoute>
-      <Navigation />
       <main className="container mx-auto py-10">
         <div className="flex flex-col items-center justify-center space-y-4">
           <h1 className="text-h1">

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
-import { Navigation } from '@/components/layout/navigation'
 import { TaskBoard } from '@/components/tasks/task-board'
 import { TasksTable } from '@/components/tasks/tasks-table'
 import { TaskAddDialog } from '@/components/tasks/task-add-dialog'
@@ -266,7 +265,6 @@ export default function TasksPage() {
 
   return (
     <ProtectedRoute>
-      <Navigation />
       <div className="container mx-auto py-4 space-y-4">
         <PageHeader
           title="Aufgaben"

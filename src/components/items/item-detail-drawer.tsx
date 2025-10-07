@@ -26,7 +26,7 @@ import {
   Edit,
   Trash2
 } from 'lucide-react'
-import { useAdminCheck } from '@/hooks/use-admin-check'
+import { useAuth } from '@/components/auth/auth-provider'
 import { getBadgeStyle } from '@/lib/color-utils'
 import type { Item, ItemFile } from '@/types'
 
@@ -42,7 +42,7 @@ export function ItemDetailDrawer({ item, open, onClose, onEdit, onDelete }: Item
   const [files, setFiles] = useState<ItemFile[]>([])
   const [loading, setLoading] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const { isAdmin } = useAdminCheck()
+  const { isAdmin } = useAuth()
 
   const loadFiles = useCallback(async () => {
     if (!item) return

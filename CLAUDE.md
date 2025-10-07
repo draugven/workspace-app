@@ -25,7 +25,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `invitations` - Invite-only authentication system with token-based user registration
 - `auth.users` - Supabase authentication with admin role system (no RLS, app-level security)
 
-## Current Status (v0.13.0)
+## Current Status (v0.15.0)
 - **Routes**: /props (Requisiten), /tasks (Kanban + table), /notes (collaborative editing), /admin/invitations (admin-only), /accept-invite (public)
 - **Features**: Invite-only authentication, admin system (app-level), German UI, mobile-responsive
 - **Authentication**: Token-based invitation system with 7-day expiry, single-use tokens, admin-controlled user creation
@@ -34,7 +34,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Dev Server**: Port 3000
 
 ## Development Guidelines
-- Current version: 0.14.0 (SemVer: MAJOR.MINOR.PATCH)
+- Current version: 0.15.0 (SemVer: MAJOR.MINOR.PATCH)
 - Update both `package.json` and CLAUDE.md version before committing
 - Use conventional commit messages (feat:, fix:, BREAKING CHANGE:)
 - Always run `npm run lint`, `npm run typecheck`, `npm run build`, `npm test` after major changes
@@ -153,10 +153,11 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
      - SSR hydration with localStorage values (complex, may not be possible with current setup)
      - Add loading spinner/skeleton during initial load (simpler, covers the "jump")
      - Optimize by reading localStorage synchronously during component initialization (may already be doing this)
-8. **Persist current route/page across browser refresh**
-   - Current behavior: Refreshing on `/notes` redirects to `/` (dashboard)
-   - Expected: User stays on `/notes` after refresh
-   - Investigation needed: Is this Next.js App Router behavior, routing config issue, or auth redirect logic?
+8. ~~**Persist current route/page across browser refresh**~~ ✅ COMPLETED (v0.15.0)
+   - Implemented URL query parameter redirect logic
+   - Protected routes save destination URL when redirecting to login
+   - After login, user is redirected to original destination with validation
+   - Security: getSafeRedirectPath() prevents open redirect vulnerabilities
 9. **Improve filter UX - allow collapsing active filters**
    - Current: Filters auto-expand when active and cannot be collapsed (poor UX with persisted filters)
    - Proposed logic:
@@ -164,8 +165,18 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
      - Active filters: collapsed by default, show active filter badges with "x" buttons in same row as Filter header
      - Expanded/collapsed state: NOT persisted to localStorage (always defaults to collapsed on page load)
      - User can expand/collapse freely regardless of filter state
+10. **Restructure project root directory - reduce clutter**
+   - Current: Root directory contains many files (configs, docs, scripts, etc.) making it hard to navigate
+   - Goal: Organize files into logical subdirectories while maintaining developer-friendly structure
+   - Proposed structure should:
+     - Keep essential files in root (package.json, README.md, .env files, .gitignore)
+     - Group configuration files (eslint, jest, typescript, tailwind, next, postcss)
+     - Consolidate documentation files (CLAUDE.md, PERFORMANCE_ANALYSIS.md, CODE_ANALYSIS.md, TEST_COVERAGE.md)
+     - Consider developer experience - another dev should understand structure immediately
+   - Reference: See `PERFORMANCE_ANALYSIS.md` for current issues
 
 ## Recent Changes
+- **v0.15.0**: Auth & navigation optimizations - URL redirect preservation after login (fixes TODO #8), admin status moved to AuthProvider context (75% reduction in DB queries), navigation moved to root layout (eliminates re-mounts), open redirect vulnerability fixed with getSafeRedirectPath() validation, USER_UPDATED event handler for dynamic admin role changes, 40 new security tests added (205 total, 100% pass), deleted unused useAdminCheck hook (35 lines), comprehensive manual testing guide added to PERFORMANCE_ANALYSIS.md
 - **v0.14.0**: Filter persistence & system theme support - all filters (search, category, status, tags, etc.) and table sort state persist to localStorage across sessions, system theme preference (light/dark/system) with OS-level detection, custom `usePersistedState` hook with SSR safety and error handling, fixed critical array persistence bug, 52 new tests added (129 total, 100% pass)
 - **v0.13.0**: Invite-only authentication system - token-based user registration (7-day expiry, single-use), admin invitation management UI with URL display/copy, public acceptance page with display name, Authorization header pattern for admin routes, 39 comprehensive tests (97.97% coverage)
 - **v0.12.5**: Code quality improvements - enhanced error logging for version save failures, added localStorage error handling in theme provider, removed unused exports (~50 lines) from utility files

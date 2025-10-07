@@ -10,7 +10,6 @@ import { useTheme } from '@/components/theme/theme-provider'
 import { supabase } from '@/lib/supabase'
 import { Menu, X, UserPlus } from 'lucide-react'
 import { useAuth } from '../auth/auth-provider'
-import { useAdminCheck } from '@/hooks/use-admin-check'
 
 const navItems = [
   { name: 'Requisiten', href: '/props' },
@@ -19,9 +18,8 @@ const navItems = [
 ]
 
 export function Navigation() {
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const { theme } = useTheme()
-  const { isAdmin } = useAdminCheck()
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 

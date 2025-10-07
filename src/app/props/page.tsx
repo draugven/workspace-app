@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
-import { Navigation } from '@/components/layout/navigation'
 import { ItemsTable } from '@/components/items/items-table'
 import { ItemForm } from '@/components/items/item-form'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -238,7 +237,6 @@ export default function ItemsPage() {
 
   return (
     <ProtectedRoute>
-      <Navigation />
       <div className="container mx-auto py-4 space-y-4">
         <PageHeader
           title="Requisiten"

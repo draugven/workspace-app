@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
-import { Navigation } from '@/components/layout/navigation'
 import { NoteCard } from '@/components/notes/note-card'
 import { NoteAddDialog } from '@/components/notes/note-add-dialog'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -144,7 +143,6 @@ export default function NotesPage() {
 
   return (
     <ProtectedRoute>
-      <Navigation />
       <div className="container mx-auto py-4 space-y-4">
         <PageHeader
           title="Notizen"

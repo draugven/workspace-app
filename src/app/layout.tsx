@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Lexend, Roboto } from 'next/font/google'
 import { AuthProvider } from '@/components/auth/auth-provider'
 import { ThemeProvider } from '@/components/theme/theme-provider'
+import { ConditionalNavigation } from '@/components/layout/conditional-navigation'
 import { Footer } from '@/components/layout/footer'
 import './globals.css'
 
@@ -51,6 +52,7 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <div className="min-h-screen bg-background flex flex-col">
+              <ConditionalNavigation />
               <div className="flex-1">
                 {children}
               </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { useAdminCheck } from '@/hooks/use-admin-check'
+import { useAuth } from '@/components/auth/auth-provider'
 import { useRealtimeData } from '@/hooks/use-realtime-data'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,7 +27,7 @@ interface Invitation {
 
 export default function InvitationsPage() {
   const router = useRouter()
-  const { isAdmin, loading: adminLoading } = useAdminCheck()
+  const { isAdmin, adminLoading } = useAuth()
 
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)

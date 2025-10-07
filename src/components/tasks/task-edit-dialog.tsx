@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
 import { Calendar, Save, X, Tag, Trash2 } from 'lucide-react'
-import { useAdminCheck } from '@/hooks/use-admin-check'
+import { useAuth } from '@/components/auth/auth-provider'
 import type { Task, Department, TaskTag, User } from '@/types'
 
 interface TaskEditDialogProps {
@@ -43,7 +43,7 @@ export function TaskEditDialog({
   const [editedTask, setEditedTask] = useState<Task | null>(null)
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const { isAdmin } = useAdminCheck()
+  const { isAdmin } = useAuth()
 
   // Initialize edited task when dialog opens
   if (task && !editedTask && open) {
