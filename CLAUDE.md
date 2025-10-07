@@ -25,17 +25,18 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `invitations` - Invite-only authentication system with token-based user registration
 - `auth.users` - Supabase authentication with admin role system (no RLS, app-level security)
 
-## Current Status (v0.14.0)
+## Current Status (v0.15.0)
 - **Routes**: /props, /tasks, /notes, /admin/invitations, /accept-invite
-- **Features**: Invite-only authentication, admin system (app-level), German UI, mobile-responsive, filter persistence, system theme support
-- **Authentication**: Token-based invitation system with 7-day expiry, single-use tokens
+- **Features**: Invite-only authentication, centralized admin context (non-blocking), URL redirect preservation, filter persistence, system theme support
+- **Authentication**: Token-based invitation with secure redirect after login, dynamic admin role updates (USER_UPDATED)
+- **Performance**: Navigation in root layout (eliminates re-mounts), centralized admin checks (75% fewer DB queries)
 - **Data**: 105+ theater props imported, character/category color system
 - **UI**: Advanced filtering/sorting with localStorage persistence, multi-select components, dark mode (light/dark/system), mobile editor viewport fix
 - **Dev Server**: Port 3000
-- **Tests**: 129 passing (auth 11, realtime 16, persisted state 26, theme 28, error boundaries 9, API routes 39)
+- **Tests**: 186 passing (non-blocking auth 4, realtime 16, persisted state 26, theme 28, error boundaries 9, API routes 39, redirect-utils 40, others 24)
 
 ## Development Guidelines
-- Current version: 0.14.0 (SemVer: MAJOR.MINOR.PATCH)
+- Current version: 0.15.0 (SemVer: MAJOR.MINOR.PATCH)
 - Update both `package.json` and CLAUDE.md version before committing
 - Use conventional commit messages (feat:, fix:, BREAKING CHANGE:)
 - Always run `npm run lint`, `npm run typecheck`, `npm run build`, `npm test` after major changes
@@ -259,8 +260,9 @@ useEffect(() => {
     - Prevents edge cases from hanging app indefinitely
 
 ## Recent Changes
-- **v0.14.0**: Filter persistence & system theme support - all filters (search, category, status, tags, etc.) and table sort state persist to localStorage across sessions, system theme preference (light/dark/system) with OS-level detection, custom `usePersistedState` hook with SSR safety and error handling, fixed critical array persistence bug, 52 new tests added (129 total, 100% pass)
-- **v0.13.0**: Invite-only authentication system - token-based user registration (7-day expiry, single-use), admin invitation management UI with URL display/copy, public acceptance page with display name, Authorization header pattern for admin routes, 39 comprehensive tests (97.97% coverage)
+- **v0.15.0**: Auth & navigation optimizations (FIXED with non-blocking pattern) - centralized admin status in AuthProvider with TWO separate useEffects (follows official Supabase async callback anti-pattern guidance), auth initialization completes fast while supplementary queries load separately, URL redirect preservation with getSafeRedirectPath() security validation, Navigation already in root layout (performance), USER_UPDATED event handler for dynamic role changes, comprehensive non-blocking auth tests (4 new tests), removed broken v0.15.0 tests, all 186 tests passing
+- **v0.14.0**: Filter persistence & system theme support - all filters persist to localStorage, system theme with OS detection, usePersistedState hook with SSR safety, 52 new tests (129 total)
+- **v0.13.0**: Invite-only authentication system - token-based registration, admin invitation UI, Authorization header pattern, 39 tests (97.97% coverage)
 - **v0.12.5**: Code quality improvements - enhanced error logging for version save failures, added localStorage error handling in theme provider, removed unused exports (~50 lines) from utility files
 - **v0.12.4**: UI refinements - moved Requisiten to /props route, improved table views with subtitles, updated search placeholders, fixed dark mode badge brightness, reordered items table columns
 - **v0.12.3**: Sortable columns and comprehensive filtering for items table

@@ -1,13 +1,12 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useState, useEffect, useContext } from 'react'
 import { User } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 import { isUserAdmin } from '@/lib/auth-utils'
-import { getSafeRedirectPath } from '@/lib/navigation-utils'
 
-interface AuthContextType {
+type AuthContextType = {
   user: User | null
   loading: boolean
   isAdmin: boolean
@@ -18,109 +17,100 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   isAdmin: false,
-  adminLoading: true,
+  adminLoading: false,
 })
+
+export const useAuth = () => useContext(AuthContext)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
-  const [adminLoading, setAdminLoading] = useState(true)
+  const [adminLoading, setAdminLoading] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession()
-      .then(async ({ data: { session } }) => {
-        setUser(session?.user ?? null)
+    console.log('[AuthProvider] Initializing auth')
 
-        // Check admin status once on initial load
-        if (session?.user) {
-          setAdminLoading(true)
-          try {
-            const adminStatus = await isUserAdmin(session.user.id)
-            setIsAdmin(adminStatus)
-          } catch (error) {
-            console.error('Failed to check admin status:', error)
-            setIsAdmin(false)
-          } finally {
-            setAdminLoading(false)
-          }
-        } else {
-          setAdminLoading(false)
-        }
+    // FAST PATH: Auth initialization only, NO async operations
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        console.log('[AuthProvider] Session loaded:', !!session?.user)
+        setUser(session?.user ?? null)
       })
       .catch((error) => {
-        console.error('Failed to get session:', error)
+        console.error('[AuthProvider] Error getting session:', error)
         setUser(null)
-        setIsAdmin(false)
-        setAdminLoading(false)
       })
       .finally(() => {
-        setLoading(false)
+        console.log('[AuthProvider] Auth initialization complete')
+        setLoading(false)  // Always runs - never blocked
       })
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
+    // Auth state change listener - SYNCHRONOUS ONLY
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('[AuthProvider] Auth state change:', event)
 
-      if (event === 'SIGNED_IN') {
-        // Check admin status when user signs in
-        if (session?.user) {
-          setAdminLoading(true)
-          try {
-            const adminStatus = await isUserAdmin(session.user.id)
-            setIsAdmin(adminStatus)
-          } catch (error) {
-            console.error('Failed to check admin status:', error)
-            setIsAdmin(false)
-          } finally {
-            setAdminLoading(false)
-          }
+        // ONLY synchronous state updates here
+        setUser(session?.user ?? null)
+
+        // Handle signout immediately
+        if (event === 'SIGNED_OUT') {
+          setIsAdmin(false)
+          setAdminLoading(false)
+          router.push('/login')
         }
 
-        // Redirect to saved URL or dashboard (with validation)
-        const params = new URLSearchParams(window.location.search)
-        const redirect = getSafeRedirectPath(params.get('redirect'))
-        router.push(redirect)
-      } else if (event === 'SIGNED_OUT') {
-        setIsAdmin(false)
-        setAdminLoading(false)
-        router.push('/login')
-      } else if (event === 'USER_UPDATED') {
-        // Re-check admin status when user metadata/roles are updated
-        if (session?.user) {
-          setAdminLoading(true)
-          try {
-            const adminStatus = await isUserAdmin(session.user.id)
-            setIsAdmin(adminStatus)
-          } catch (error) {
-            console.error('Failed to check admin status on user update:', error)
-            setIsAdmin(false)
-          } finally {
-            setAdminLoading(false)
-          }
+        // USER_UPDATED fires when user metadata changes
+        // This allows dynamic admin role updates without re-login
+        // The separate useEffect watching user.id will automatically re-fetch
+        if (event === 'USER_UPDATED') {
+          console.log('[AuthProvider] User updated, will refresh admin status')
+          // No need to do anything here - the useEffect below will handle it
         }
+
+        // NO ASYNC OPERATIONS HERE - will cause deadlock
       }
-    })
+    )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      console.log('[AuthProvider] Cleaning up auth subscription')
+      subscription.unsubscribe()
+    }
   }, [router])
+
+  // SEPARATE EFFECT: Non-blocking admin status fetch
+  useEffect(() => {
+    if (!user) {
+      setIsAdmin(false)
+      setAdminLoading(false)
+      return
+    }
+
+    console.log('[AuthProvider] Fetching admin status for user:', user.id)
+
+    const fetchAdminStatus = async () => {
+      setAdminLoading(true)
+      try {
+        const adminStatus = await isUserAdmin(user.id)
+        console.log('[AuthProvider] Admin status:', adminStatus)
+        setIsAdmin(adminStatus)
+      } catch (error) {
+        console.error('[AuthProvider] Failed to fetch admin status:', error)
+        // Fail gracefully - assume not admin
+        setIsAdmin(false)
+      } finally {
+        setAdminLoading(false)
+      }
+    }
+
+    fetchAdminStatus()
+  }, [user?.id])  // Only re-run when user ID changes
 
   return (
     <AuthContext.Provider value={{ user, loading, isAdmin, adminLoading }}>
       {children}
     </AuthContext.Provider>
   )
-}
-
-export const useAuth = () => {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
 }

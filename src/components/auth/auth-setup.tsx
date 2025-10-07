@@ -1,7 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/components/auth/auth-provider'
+import { getSafeRedirectPath } from '@/lib/redirect-utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,6 +15,20 @@ export function AuthSetup() {
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const { user, loading } = useAuth()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Handle redirect after successful authentication
+  useEffect(() => {
+    if (!loading && user) {
+      // Get redirect path from URL query parameter
+      const redirectParam = searchParams.get('redirect')
+      const safePath = getSafeRedirectPath(redirectParam)
+      console.log('[AuthSetup] Redirecting to:', safePath)
+      router.push(safePath)
+    }
+  }, [user, loading, router, searchParams])
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,6 +43,7 @@ export function AuthSetup() {
       if (error) {
         setMessage(`Anmeldefehler: ${error.message}`)
       }
+      // On success, the redirect is handled by the useEffect above
     } catch (err) {
       setMessage('Ein unerwarteter Fehler ist aufgetreten')
     } finally {

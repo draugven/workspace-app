@@ -2,7 +2,7 @@ import {
   getSafeRedirectPath,
   shouldHideNavigation,
   isPublicPath,
-} from '../navigation-utils'
+} from '../redirect-utils'
 
 describe('navigation-utils', () => {
   describe('getSafeRedirectPath', () => {
