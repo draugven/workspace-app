@@ -1,9 +1,10 @@
 {
   "name": "theater-production-app",
-  "version": "0.15.0",
+  "version": "0.14.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "cleandev": "rm -rf .next && npm run dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
