@@ -20,11 +20,19 @@ interface ItemsTableProps {
   items: Item[]
   onEditItem?: (item: Item) => void
   onDeleteItem?: (itemId: string) => void
+  sortField?: keyof Item
+  sortDirection?: 'asc' | 'desc'
+  onSortChange?: (field: keyof Item, direction: 'asc' | 'desc') => void
 }
 
-export function ItemsTable({ items, onEditItem, onDeleteItem }: ItemsTableProps) {
-  const [sortField, setSortField] = useState<keyof Item>('name')
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+export function ItemsTable({
+  items,
+  onEditItem,
+  onDeleteItem,
+  sortField = 'name',
+  sortDirection = 'asc',
+  onSortChange
+}: ItemsTableProps) {
   const [selectedItem, setSelectedItem] = useState<Item | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
@@ -56,11 +64,12 @@ export function ItemsTable({ items, onEditItem, onDeleteItem }: ItemsTableProps)
   })
 
   const handleSort = (field: keyof Item) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortField(field)
-      setSortDirection('asc')
+    if (onSortChange) {
+      if (sortField === field) {
+        onSortChange(field, sortDirection === 'asc' ? 'desc' : 'asc')
+      } else {
+        onSortChange(field, 'asc')
+      }
     }
   }
 

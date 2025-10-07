@@ -15,11 +15,11 @@ The codebase is **well-structured and production-ready** with strong type safety
 ### Key Metrics
 - **TypeScript Compilation:** ✅ PASSED (0 errors)
 - **ESLint Status:** ✅ CLEAN (after fixes)
-- **Total Files Analyzed:** 68
+- **Total Files Analyzed:** 70 (+2 new files)
 - **Critical Issues:** 2 (✅ Both fixed)
 - **High Priority Issues:** 8 (✅ 7 fixed, 1 remaining - requires refactoring)
-- **Medium Priority Issues:** 12 (✅ 5 fixed, 7 remaining)
-- **Low Priority Issues:** 6 (0 fixed, 6 remaining)
+- **Medium Priority Issues:** 15 (✅ 5 fixed, 10 remaining - includes 3 new from filter persistence review)
+- **Low Priority Issues:** 9 (0 fixed, 9 remaining - includes 3 new from filter/theme review)
 
 ---
 
@@ -525,5 +525,274 @@ When continuing this work, prioritize in this order:
 
 ---
 
-**Last Updated:** 2025-10-05
-**Next Review:** After extracting large page components or adding performance optimizations
+---
+
+## Filter Persistence & System Theme Review (2025-10-07)
+
+### New Features Implemented (v0.14.0 - unreleased)
+
+#### ✅ Filter Persistence to localStorage
+**Files:**
+- `src/hooks/use-persisted-state.ts` (NEW - 48 lines)
+- `src/lib/settings.ts` (NEW - 149 lines, UNUSED)
+- `src/app/props/page.tsx:38-44` (7 persisted filters)
+- `src/app/tasks/page.tsx:39-48` (9 persisted filters)
+- `src/app/notes/page.tsx:22-23` (2 persisted filters)
+
+**Implementation Quality:** High (Grade: A-)
+- Proper SSR safety checks (`typeof window !== 'undefined'`)
+- Graceful error handling for localStorage failures
+- Type-safe generic implementation
+- Default value merging for schema evolution
+
+#### ✅ System Theme Support
+**Files:**
+- `src/components/theme/theme-provider.tsx` (Enhanced)
+- `src/components/theme/theme-toggle.tsx` (Enhanced)
+
+**Implementation Quality:** Excellent (Grade: A)
+- `matchMedia` listener for OS theme changes
+- Three-way toggle: light → dark → system → light
+- Proper cleanup on unmount
+- Resolved theme calculation for UI
+
+---
+
+### Issues Found in Filter Persistence Implementation
+
+#### 10. Unused File - settings.ts
+**File:** `src/lib/settings.ts` (149 lines)
+**Severity:** Medium (Code Maintenance)
+**Status:** ⏳ NOT FIXED
+
+**Issue:**
+Complete settings management system created but never imported or used. All pages use `usePersistedState` hook directly instead.
+
+**Recommended Fix:**
+```bash
+# Remove unused file
+rm src/lib/settings.ts
+```
+
+**Impact:**
+- 149 lines of dead code in bundle
+- Maintenance confusion about which approach is standard
+- Duplicate functionality
+
+---
+
+#### 11. Multiple localStorage Keys Per Page
+**Files:**
+- `src/app/props/page.tsx:38-44` - 7 separate keys
+- `src/app/tasks/page.tsx:39-48` - 9 separate keys
+- `src/app/notes/page.tsx:22-23` - 2 separate keys
+
+**Severity:** Medium (Performance & Data Management)
+**Status:** ⏳ NOT FIXED
+
+**Current Implementation:**
+```typescript
+// 7 separate localStorage operations
+const [searchTerm, setSearchTerm] = usePersistedState('back2stage-props-search', '')
+const [selectedCategory, setSelectedCategory] = usePersistedState('back2stage-props-category', null)
+// ... 5 more separate keys
+```
+
+**Issues:**
+1. **Performance:** Each state change = separate localStorage write (7 writes when resetting filters)
+2. **localStorage Overhead:** 21+ keys total across 3 pages
+3. **Atomicity:** Filter resets are not atomic - partial failures leave inconsistent state
+4. **Storage Quota Risk:** Higher risk of hitting localStorage limits
+
+**Recommended Fix:**
+```typescript
+// Single settings object per page
+const [filters, setFilters] = usePersistedState('back2stage-props-filters', {
+  searchTerm: '',
+  selectedCategory: null,
+  selectedSource: null,
+  selectedCharacters: [],
+  selectedStatus: null,
+  sortField: 'name' as keyof Item,
+  sortDirection: 'asc' as 'asc' | 'desc'
+})
+
+// Update single filter
+setFilters(prev => ({ ...prev, searchTerm: 'new value' }))
+
+// Atomic reset
+setFilters(defaultPropsFilters)
+```
+
+**Benefits:**
+- Single localStorage write per update
+- Atomic operations
+- Reduced overhead
+- Easier versioning/migration
+
+---
+
+#### 12. Missing localStorage Key Versioning
+**Files:** All pages using `usePersistedState`
+**Severity:** Low (Data Migration)
+**Status:** ⏳ NOT FIXED
+
+**Issue:**
+Keys lack version suffix, making schema migrations difficult:
+```typescript
+'back2stage-props-search'  // ❌ No version
+'back2stage-props-filters-v1'  // ✅ Versioned
+```
+
+**Recommended Fix:**
+```typescript
+const STORAGE_KEYS = {
+  PROPS_FILTERS: 'back2stage-props-filters-v1',
+  TASKS_FILTERS: 'back2stage-tasks-filters-v1',
+  NOTES_FILTERS: 'back2stage-notes-filters-v1',
+} as const
+```
+
+**Impact:**
+- Enables clean data migration when filter structure changes
+- Avoids conflicts between old and new data schemas
+
+---
+
+#### 13. Missing Schema Validation
+**File:** `src/hooks/use-persisted-state.ts:24-27`
+**Severity:** Low (Data Integrity)
+**Status:** ⏳ NOT FIXED
+
+**Issue:**
+Persisted data merged without validation. Schema changes could cause runtime errors.
+
+**Current Code:**
+```typescript
+const parsed = JSON.parse(stored)
+return typeof defaultValue === 'object' && defaultValue !== null
+  ? { ...defaultValue, ...parsed }  // ❌ No validation
+  : parsed
+```
+
+**Recommended Fix (Zod):**
+```typescript
+import { z } from 'zod'
+
+const PropsFiltersSchema = z.object({
+  searchTerm: z.string(),
+  selectedCategory: z.string().nullable(),
+  sortField: z.enum(['name', 'status', 'category']),
+  sortDirection: z.enum(['asc', 'desc'])
+})
+
+try {
+  const parsed = JSON.parse(stored)
+  const validated = PropsFiltersSchema.parse(parsed)
+  return { ...defaultValue, ...validated }
+} catch (error) {
+  console.warn('Invalid persisted state, using defaults:', error)
+  return defaultValue
+}
+```
+
+---
+
+#### 14. Theme Toggle Animation Issue
+**File:** `src/components/theme/theme-toggle.tsx:42-48`
+**Severity:** Low (UX Polish)
+**Status:** ⏳ NOT FIXED
+
+**Issue:**
+When theme is 'system', toggle shows static Monitor icon instead of animating Sun/Moon based on resolved theme. Creates visual disconnect.
+
+**Recommended Fix:**
+```typescript
+<>
+  <Sun className="... dark:scale-0" />
+  <Moon className="... dark:scale-100" />
+  {theme === 'system' && (
+    <Monitor className="absolute top-0 right-0 h-2 w-2" title="Following system" />
+  )}
+</>
+```
+
+---
+
+#### 15. Missing Tests for New Features
+**Files:** None exist
+**Severity:** Low (Test Coverage)
+**Status:** ⏳ NOT FIXED
+
+**Recommendation:**
+Create test files:
+- `src/hooks/__tests__/use-persisted-state.test.ts`
+- `src/components/theme/__tests__/theme-provider.test.tsx`
+
+**Test Coverage Needed:**
+- localStorage interaction (read/write/error handling)
+- SSR safety (window undefined)
+- Default value merging
+- System theme detection and changes
+- Theme toggle cycling
+
+---
+
+### Positive Highlights for New Features ✅
+
+1. **✅ SSR Safety** - All localStorage access properly guarded
+2. **✅ Error Handling** - Graceful fallbacks for localStorage failures
+3. **✅ Type Safety** - Strong TypeScript typing, proper generics
+4. **✅ System Theme Integration** - Proper `matchMedia` listener with cleanup
+5. **✅ User Experience** - Smart auto-expand for filters, clear feedback
+6. **✅ Code Organization** - Clear separation of persisted vs transient state
+7. **✅ Accessibility** - Proper ARIA labels on theme toggle
+8. **✅ Consistency** - Unified storage key naming pattern
+
+---
+
+### Edge Cases Handled Well ✅
+
+1. **localStorage disabled** - Graceful fallback to in-memory state
+2. **Storage quota exceeded** - Try-catch prevents crashes
+3. **SSR/hydration** - Proper server vs client handling
+4. **Component unmount** - useEffect cleanup implemented
+5. **System theme changes** - MediaQuery listener cleanup
+6. **Default merging** - Object defaults handle schema evolution
+
+---
+
+### Security Review: Passed ✅
+
+- No XSS risks (JSON serialization)
+- No sensitive data in localStorage (only UI preferences)
+- No auth tokens persisted (session storage used correctly)
+- Safe type coercion (null checks, default merging)
+
+---
+
+### Browser Compatibility: Excellent ✅
+
+- `localStorage` API (IE8+, all modern browsers)
+- `matchMedia` (all modern browsers)
+- Graceful degradation if unavailable
+- No experimental APIs
+
+---
+
+### Performance Analysis
+
+**Current Performance:** Good
+- Proper useEffect dependencies
+- SSR-safe initialization
+- Single context for theme state
+
+**Optimization Opportunities:**
+1. Debounce localStorage writes for rapid changes (search input)
+2. Use single settings object vs multiple keys (Issue #11)
+3. Add useMemo for filter operations (existing issue #7)
+
+---
+
+**Last Updated:** 2025-10-07
+**Next Review:** After refactoring filter persistence to single settings object or adding tests

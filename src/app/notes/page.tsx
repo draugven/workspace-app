@@ -12,13 +12,17 @@ import { Input } from '@/components/ui/input'
 import { PageHeader } from '@/components/ui/page-header'
 import { StatsBar } from '@/components/ui/stats-bar'
 import { useRealtimeNotesV2 } from '@/hooks/use-realtime-notes-v2'
+import { usePersistedState } from '@/hooks/use-persisted-state'
 import { supabase } from '@/lib/supabase'
 import { Plus, Search, Users, ChevronDown, ChevronUp, X, Filter } from 'lucide-react'
 import type { Note, Department, User } from '@/types'
 
 export default function NotesPage() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterDepartment, setFilterDepartment] = useState<string | null>(null)
+  // Persisted filter states
+  const [searchTerm, setSearchTerm] = usePersistedState('back2stage-notes-search', '')
+  const [filterDepartment, setFilterDepartment] = usePersistedState<string | null>('back2stage-notes-department', null)
+
+  // Non-persisted UI state
   const [filtersExpanded, setFiltersExpanded] = useState(false)
   const [departments, setDepartments] = useState<Department[]>([])
   const [currentUser, setCurrentUser] = useState<User | null>(null)

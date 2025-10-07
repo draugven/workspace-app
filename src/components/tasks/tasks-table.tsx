@@ -25,6 +25,9 @@ interface TasksTableProps {
   tags?: TaskTag[]
   users?: User[]
   currentUser?: User | null
+  sortField?: keyof Task
+  sortDirection?: 'asc' | 'desc'
+  onSortChange?: (field: keyof Task, direction: 'asc' | 'desc') => void
 }
 
 export function TasksTable({
@@ -34,10 +37,11 @@ export function TasksTable({
   departments = [],
   tags = [],
   users = [],
-  currentUser
+  currentUser,
+  sortField = 'priority',
+  sortDirection = 'desc',
+  onSortChange
 }: TasksTableProps) {
-  const [sortField, setSortField] = useState<keyof Task>('priority')
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
 
@@ -97,11 +101,12 @@ export function TasksTable({
   })
 
   const handleSort = (field: keyof Task) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortField(field)
-      setSortDirection('desc')
+    if (onSortChange) {
+      if (sortField === field) {
+        onSortChange(field, sortDirection === 'asc' ? 'desc' : 'asc')
+      } else {
+        onSortChange(field, 'desc')
+      }
     }
   }
 

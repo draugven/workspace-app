@@ -13,6 +13,7 @@ import { StatsBar } from '@/components/ui/stats-bar'
 import { Combobox } from '@/components/ui/combobox'
 import { MultiSelect } from '@/components/ui/multi-select'
 import { useRealtimeItems } from '@/hooks/use-realtime-items'
+import { usePersistedState } from '@/hooks/use-persisted-state'
 import { supabase } from '@/lib/supabase'
 import { Plus, RefreshCw, Filter, X, ChevronDown, ChevronUp } from 'lucide-react'
 import type { Item, Category, Character } from '@/types'
@@ -32,16 +33,22 @@ export default function ItemsPage() {
 
   const [formOpen, setFormOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Item | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
 
-  // Filter states
+  // Persisted filter states
+  const [searchTerm, setSearchTerm] = usePersistedState('back2stage-props-search', '')
+  const [selectedCategory, setSelectedCategory] = usePersistedState<string | null>('back2stage-props-category', null)
+  const [selectedSource, setSelectedSource] = usePersistedState<string | null>('back2stage-props-source', null)
+  const [selectedCharacters, setSelectedCharacters] = usePersistedState<string[]>('back2stage-props-characters', [])
+  const [selectedStatus, setSelectedStatus] = usePersistedState<string | null>('back2stage-props-status', null)
+  const [sortField, setSortField] = usePersistedState<keyof Item>('back2stage-props-sortField', 'name')
+  const [sortDirection, setSortDirection] = usePersistedState<'asc' | 'desc'>('back2stage-props-sortDirection', 'asc')
+
+  // Non-persisted UI state
+  const [filtersExpanded, setFiltersExpanded] = useState(false)
+
+  // Filter data from database
   const [categories, setCategories] = useState<Category[]>([])
   const [characters, setCharacters] = useState<Character[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [selectedSource, setSelectedSource] = useState<string | null>(null)
-  const [selectedCharacters, setSelectedCharacters] = useState<string[]>([])
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
-  const [filtersExpanded, setFiltersExpanded] = useState(false)
 
   // Fetch categories and characters for filters
   useEffect(() => {
@@ -557,7 +564,17 @@ export default function ItemsPage() {
             </CardHeader>
             <CardContent>
               {filteredItems.length > 0 ? (
-                <ItemsTable items={filteredItems} onEditItem={openEditForm} onDeleteItem={handleDeleteItem} />
+                <ItemsTable
+                  items={filteredItems}
+                  onEditItem={openEditForm}
+                  onDeleteItem={handleDeleteItem}
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSortChange={(field, direction) => {
+                    setSortField(field)
+                    setSortDirection(direction)
+                  }}
+                />
               ) : items.length === 0 ? (
                 <div className="text-center py-6">
                   <div className="text-muted-foreground mb-4">

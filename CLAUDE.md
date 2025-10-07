@@ -34,7 +34,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Dev Server**: Port 3000
 
 ## Development Guidelines
-- Current version: 0.13.0 (SemVer: MAJOR.MINOR.PATCH)
+- Current version: 0.14.0 (SemVer: MAJOR.MINOR.PATCH)
 - Update both `package.json` and CLAUDE.md version before committing
 - Use conventional commit messages (feat:, fix:, BREAKING CHANGE:)
 - Always run `npm run lint`, `npm run typecheck`, `npm run build`, `npm test` after major changes
@@ -93,15 +93,17 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 
 ### Core Services (`src/`)
 - `lib/supabase.ts`, `lib/auth-utils.ts`, `lib/utils.ts`, `lib/color-utils.ts`
-- `hooks/use-admin-check.tsx`, `hooks/use-realtime-*.tsx` (items, tasks, notes-v2, generic)
+- `hooks/use-admin-check.tsx`, `hooks/use-realtime-*.tsx` (items, tasks, notes-v2, generic), `hooks/use-persisted-state.ts` (localStorage persistence)
 - `types/database.ts`, `types/index.ts`, `types/jest-dom.d.ts`
 
 ### Testing Infrastructure
 - `jest.config.js` - Jest configuration for Next.js integration
 - `jest.setup.js` - Global test setup (jest-dom matchers)
 - `src/components/auth/__tests__/` - Auth provider tests (11 tests)
-- `src/hooks/__tests__/` - Real-time hook tests (16 tests)
+- `src/hooks/__tests__/` - Real-time hook tests (16 tests), persisted state hook tests (26 tests)
+- `src/components/theme/__tests__/` - Theme provider tests (28 tests)
 - `src/app/{route}/__tests__/` - Error boundary tests (9 tests total)
+- `src/app/api/*/___tests__/` - API route tests (39 tests for invitation system)
 
 ### Database Scripts (`scripts/database-setup/`)
 - Complete setup, storage config, admin role assignment, schema reference
@@ -115,21 +117,56 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Real-time**: Generic `useRealtimeData` hook with retry logic. Character data transformation for items. Uses ref pattern for callback stability
 - **Error boundaries**: Next.js 14 error.tsx files for each route with German UI, retry functionality, proper error logging
 - **Color system**: Hex in DB → RGBA utilities. Category backgrounds (5% opacity), character badges
-- **Dark theme**: Context + localStorage ("back2stage-theme"). Manual toggle, logo switching
+- **Theme system**: Context + localStorage ("back2stage-theme"). Three modes: light, dark, system (OS preference detection via matchMedia). Theme toggle cycles through all three. Logo switching per theme.
 - **Mobile**: Icon-only buttons, burger menu, responsive layouts, editor viewport scrolling
 - **Database schema**: ALWAYS update both SQL schema AND TypeScript types in `src/types/database.ts`
 - **Supabase client**: Use singleton `supabase` instance from lib/supabase.ts to avoid multiple client warnings
 - **Supabase typing**: Use `(supabase as any)` for insert/update when inference fails
 - **Testing**: Jest + React Testing Library. Mock Supabase client, use renderHook for hooks, waitFor for async assertions
+- **Filter persistence**: `usePersistedState` hook persists all page filters and table sort state to localStorage (automatic save/restore across sessions). SSR-safe with error handling. Arrays, nulls, and objects handled correctly.
+
+## Page-Specific Filter States
+
+**Props Page** (`/props/page.tsx`):
+- Page filters: `searchTerm`, `selectedCategory`, `selectedSource`, `selectedCharacters[]`, `selectedStatus`, `filtersExpanded`
+- Table sorting (items-table.tsx): `sortField` (default: 'name'), `sortDirection` (default: 'asc')
+
+**Tasks Page** (`/tasks/page.tsx`):
+- Page filters: `viewMode` ('board'|'table'), `searchTerm`, `selectedDepartment`, `selectedTags[]`, `selectedStatus`, `selectedPriority`, `selectedAssignee`, `showCompleted` (default: true), `filtersExpanded`
+- Table sorting (tasks-table.tsx): `sortField` (default: 'priority'), `sortDirection` (default: 'desc')
+
+**Notes Page** (`/notes/page.tsx`):
+- Page filters: `searchTerm`, `filterDepartment`, `filtersExpanded`
+- No table sorting (grid view only)
 
 ## TODO Backlog
 1. Auto-archive completed tasks (14-day threshold, `completed_at` + `archived` fields)
-2. Persist filter settings to localStorage
-3. Fix version history dialog mobile responsiveness
-4. Enhance mobile drag-and-drop UX
-5. Offline capabilities research
+2. ~~Persist filter settings to localStorage~~ ✅ COMPLETED (v0.14.0)
+3. Consider consolidating localStorage keys per page (optional performance optimization - single object vs multiple keys per filter)
+4. Fix version history dialog mobile responsiveness
+5. Enhance mobile drag-and-drop UX
+6. Offline capabilities research
+7. **Mitigate localStorage loading "flash" / Add loading states for better UX**
+   - Symptoms: Theme flashes light before dark loads, filters show defaults before localStorage values, admin navigation items appear delayed
+   - Root cause: Default values render first, then localStorage is read and state updates (causing re-render)
+   - Solutions to investigate:
+     - SSR hydration with localStorage values (complex, may not be possible with current setup)
+     - Add loading spinner/skeleton during initial load (simpler, covers the "jump")
+     - Optimize by reading localStorage synchronously during component initialization (may already be doing this)
+8. **Persist current route/page across browser refresh**
+   - Current behavior: Refreshing on `/notes` redirects to `/` (dashboard)
+   - Expected: User stays on `/notes` after refresh
+   - Investigation needed: Is this Next.js App Router behavior, routing config issue, or auth redirect logic?
+9. **Improve filter UX - allow collapsing active filters**
+   - Current: Filters auto-expand when active and cannot be collapsed (poor UX with persisted filters)
+   - Proposed logic:
+     - Inactive filters: collapsed by default, positioned right of search field (current behavior)
+     - Active filters: collapsed by default, show active filter badges with "x" buttons in same row as Filter header
+     - Expanded/collapsed state: NOT persisted to localStorage (always defaults to collapsed on page load)
+     - User can expand/collapse freely regardless of filter state
 
 ## Recent Changes
+- **v0.14.0**: Filter persistence & system theme support - all filters (search, category, status, tags, etc.) and table sort state persist to localStorage across sessions, system theme preference (light/dark/system) with OS-level detection, custom `usePersistedState` hook with SSR safety and error handling, fixed critical array persistence bug, 52 new tests added (129 total, 100% pass)
 - **v0.13.0**: Invite-only authentication system - token-based user registration (7-day expiry, single-use), admin invitation management UI with URL display/copy, public acceptance page with display name, Authorization header pattern for admin routes, 39 comprehensive tests (97.97% coverage)
 - **v0.12.5**: Code quality improvements - enhanced error logging for version save failures, added localStorage error handling in theme provider, removed unused exports (~50 lines) from utility files
 - **v0.12.4**: UI refinements - moved Requisiten to /props route, improved table views with subtitles, updated search placeholders, fixed dark mode badge brightness, reordered items table columns

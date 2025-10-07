@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Combobox } from '@/components/ui/combobox'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { useRealtimeTasks } from '@/hooks/use-realtime-tasks'
+import { usePersistedState } from '@/hooks/use-persisted-state'
 import { supabase } from '@/lib/supabase'
 import { RefreshCw, Plus, Users, Filter, X, Search, ChevronDown, ChevronUp, Wifi, WifiOff, LayoutGrid, Table } from 'lucide-react'
 import type { Task, Department, TaskTag, User } from '@/types'
@@ -34,14 +35,19 @@ export default function TasksPage() {
     remove: deleteTask
   } = useRealtimeTasks(false) // Disable verbose logging
 
-  const [viewMode, setViewMode] = useState<'board' | 'table'>('board')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null)
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null)
-  const [selectedPriority, setSelectedPriority] = useState<string | null>(null)
-  const [selectedAssignee, setSelectedAssignee] = useState<string | null>(null)
-  const [showCompleted, setShowCompleted] = useState(true)
+  // Persisted filter states
+  const [viewMode, setViewMode] = usePersistedState<'board' | 'table'>('back2stage-tasks-viewMode', 'board')
+  const [searchTerm, setSearchTerm] = usePersistedState('back2stage-tasks-search', '')
+  const [selectedDepartment, setSelectedDepartment] = usePersistedState<string | null>('back2stage-tasks-department', null)
+  const [selectedTags, setSelectedTags] = usePersistedState<string[]>('back2stage-tasks-tags', [])
+  const [selectedStatus, setSelectedStatus] = usePersistedState<string | null>('back2stage-tasks-status', null)
+  const [selectedPriority, setSelectedPriority] = usePersistedState<string | null>('back2stage-tasks-priority', null)
+  const [selectedAssignee, setSelectedAssignee] = usePersistedState<string | null>('back2stage-tasks-assignee', null)
+  const [showCompleted, setShowCompleted] = usePersistedState('back2stage-tasks-showCompleted', true)
+  const [sortField, setSortField] = usePersistedState<keyof Task>('back2stage-tasks-sortField', 'priority')
+  const [sortDirection, setSortDirection] = usePersistedState<'asc' | 'desc'>('back2stage-tasks-sortDirection', 'desc')
+
+  // Non-persisted UI state
   const [filtersExpanded, setFiltersExpanded] = useState(false)
   const [departments, setDepartments] = useState<Department[]>([])
   const [tags, setTags] = useState<TaskTag[]>([])
@@ -771,14 +777,20 @@ export default function TasksPage() {
                     </CardHeader>
                     <CardContent>
                       <TasksTable
-                      tasks={filteredTasks}
-                      onTaskUpdate={handleTaskUpdate}
-                      onTaskDelete={handleTaskDelete}
-                      departments={departments}
-                      tags={tags}
-                      users={users}
-                      currentUser={currentUser}
-                    />
+                        tasks={filteredTasks}
+                        onTaskUpdate={handleTaskUpdate}
+                        onTaskDelete={handleTaskDelete}
+                        departments={departments}
+                        tags={tags}
+                        users={users}
+                        currentUser={currentUser}
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                        onSortChange={(field, direction) => {
+                          setSortField(field)
+                          setSortDirection(direction)
+                        }}
+                      />
                     </CardContent>
                   </Card>
                 )}

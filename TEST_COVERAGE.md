@@ -1,6 +1,6 @@
 # Test Coverage Report
 **Project:** Back2Stage - Theater Production Collaboration Tool
-**Last Updated:** 2025-10-06
+**Last Updated:** 2025-10-07
 **Version:** v0.13.0
 
 ---
@@ -8,9 +8,9 @@
 ## Test Coverage
 
 ### Current Test Suite Status
-**Total Tests:** 75 passing across 9 test suites
+**Total Tests:** 127 passing across 11 test suites
 **Test Framework:** Jest + React Testing Library
-**Coverage Areas:** Authentication, hooks, error boundaries, API routes (invitation system with 97.97% coverage)
+**Coverage Areas:** Authentication, hooks (real-time, persisted state), theme management, error boundaries, API routes (invitation system with 97.97% coverage)
 
 ### Test Files and Coverage
 
@@ -68,7 +68,92 @@ it('uses latest callbacks without recreating subscription', async () => {
 
 ---
 
-#### 3. Error Boundaries (3 test files, 9 total tests)
+#### 3. Persisted State Hook (`src/hooks/__tests__/use-persisted-state.test.tsx`)
+**Tests:** 24
+**Status:** ✅ All passing
+**Commit:** `c149875` (current session)
+
+**Coverage:**
+- ✅ Initialization from localStorage or default values
+- ✅ Schema migration (merging stored values with new defaults)
+- ✅ State updates and persistence to localStorage
+- ✅ Functional state updates (prev => newState)
+- ✅ SSR safety (typeof window checks)
+- ✅ Error handling for JSON.parse failures
+- ✅ Error handling for localStorage.getItem errors
+- ✅ Error handling for localStorage.setItem errors (quota exceeded)
+- ✅ Multiple hook instances with different keys
+- ✅ Multiple hook instances sharing same key
+- ✅ Edge cases (empty keys, long keys, null/undefined values, complex nested objects)
+
+**Key Tests:**
+```typescript
+it('merges stored values with default object to handle schema changes', () => {
+  localStorage.setItem(TEST_KEY, JSON.stringify({ count: 10 }))
+  const newDefaultValue = { count: 0, name: 'test', newField: 'default' }
+  const { result } = renderHook(() => usePersistedState(TEST_KEY, newDefaultValue))
+  // Should merge: keep existing count, add new fields from default
+  expect(result.current[0]).toEqual({ count: 10, name: 'test', newField: 'default' })
+})
+
+it('handles localStorage.setItem errors gracefully', () => {
+  jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    throw new Error('QuotaExceededError')
+  })
+  act(() => { result.current[1]({ count: 999, name: 'test' }) })
+  // State should still update even if persistence fails
+  expect(result.current[0]).toEqual({ count: 999, name: 'test' })
+})
+```
+
+---
+
+#### 4. Theme Provider (`src/components/theme/__tests__/theme-provider.test.tsx`)
+**Tests:** 28
+**Status:** ✅ All passing
+**Commit:** `c149875` (current session)
+
+**Coverage:**
+- ✅ Initialization with default theme (light/dark/system)
+- ✅ Loading theme preference from localStorage
+- ✅ Custom storage key support
+- ✅ System theme detection (prefers-color-scheme)
+- ✅ System theme change listener setup and cleanup
+- ✅ Resolved theme calculation (system → light/dark)
+- ✅ Theme persistence to localStorage
+- ✅ DOM updates (applying/removing theme classes)
+- ✅ Theme toggle cycling (light → dark → system → light)
+- ✅ useTheme hook context validation
+- ✅ SSR safety (typeof window checks)
+- ✅ Error handling for localStorage read/write failures
+- ✅ Integration tests (persistence across provider instances)
+
+**Key Tests:**
+```typescript
+it('listens for system theme changes', async () => {
+  const wrapper = ({ children }) => (
+    <ThemeProvider defaultTheme="system">{children}</ThemeProvider>
+  )
+  const { result } = renderHook(() => useTheme(), { wrapper })
+  expect(result.current.resolvedTheme).toBe('light')
+  // Simulate system theme change to dark
+  act(() => { mediaListener({ matches: true }) })
+  await waitFor(() => expect(result.current.resolvedTheme).toBe('dark'))
+})
+
+it('cycles through all themes correctly', () => {
+  act(() => { result.current.toggleTheme() }) // light -> dark
+  expect(result.current.theme).toBe('dark')
+  act(() => { result.current.toggleTheme() }) // dark -> system
+  expect(result.current.theme).toBe('system')
+  act(() => { result.current.toggleTheme() }) // system -> light
+  expect(result.current.theme).toBe('light')
+})
+```
+
+---
+
+#### 5. Error Boundaries (3 test files, 9 total tests)
 **Files:**
 - `src/app/props/__tests__/error.test.tsx` (3 tests)
 - `src/app/tasks/__tests__/error.test.tsx` (3 tests)
@@ -84,7 +169,7 @@ it('uses latest callbacks without recreating subscription', async () => {
 
 ---
 
-#### 4. Invitation System API Routes (4 test files, 39 total tests)
+#### 6. Invitation System API Routes (4 test files, 39 total tests)
 **Files:**
 - `src/app/api/admin/invitations/create/__tests__/route.test.ts` (11 tests)
 - `src/app/api/admin/invitations/[id]/__tests__/route.test.ts` (9 tests)
@@ -96,7 +181,7 @@ it('uses latest callbacks without recreating subscription', async () => {
 
 **Coverage:**
 
-**4.1 Create Invitation API (11 tests):**
+**6.1 Create Invitation API (11 tests):**
 - ✅ Returns 401 when user is not authenticated
 - ✅ Returns 401 when auth error occurs
 - ✅ Returns 403 when user is not an admin
@@ -108,7 +193,7 @@ it('uses latest callbacks without recreating subscription', async () => {
 - ✅ Includes invited_by field in insert
 - ✅ Handles unexpected errors gracefully
 
-**4.2 Revoke Invitation API (9 tests):**
+**6.2 Revoke Invitation API (9 tests):**
 - ✅ Returns 401 when user is not authenticated
 - ✅ Returns 401 when auth error occurs
 - ✅ Returns 403 when user is not an admin
@@ -118,7 +203,7 @@ it('uses latest callbacks without recreating subscription', async () => {
 - ✅ Returns 500 when database operation fails
 - ✅ Does not revoke if auth check fails before database call
 
-**4.3 Validate Invitation API (6 tests):**
+**6.3 Validate Invitation API (6 tests):**
 - ✅ Returns 400 when token is missing
 - ✅ Returns 400 when invitation does not exist
 - ✅ Validates pending invitation successfully
@@ -126,7 +211,7 @@ it('uses latest callbacks without recreating subscription', async () => {
 - ✅ Marks invitation as expired when past expiry date
 - ✅ Returns 500 when unexpected error occurs
 
-**4.4 Accept Invitation API (10 tests):**
+**6.4 Accept Invitation API (10 tests):**
 - ✅ Returns 500 when NEXT_PUBLIC_SUPABASE_URL is missing
 - ✅ Returns 400 when token is missing
 - ✅ Returns 400 when email is missing
@@ -167,37 +252,39 @@ npm test -- --testPathPatterns=invitations # Run specific test suite
 
 **High Priority for Testing:**
 1. ~~API routes~~ ✅ Invitation API routes fully tested (39 tests)
-2. use-realtime-notes-v2.tsx hook
-3. Page components (props, tasks, notes, admin/invitations, accept-invite)
-4. Form components (ItemForm, TaskForm, NoteForm)
+2. ~~use-persisted-state hook~~ ✅ Fully tested (24 tests)
+3. ~~Theme provider~~ ✅ Fully tested (28 tests)
+4. use-realtime-notes-v2.tsx hook
+5. Page components (props, tasks, notes, admin/invitations, accept-invite)
+6. Form components (ItemForm, TaskForm, NoteForm)
 
 **Medium Priority:**
-5. UI components (multi-select, command palette)
-6. Utility functions (color-utils, auth-utils)
-7. Theme provider
+7. UI components (multi-select, command palette)
+8. Utility functions (color-utils, auth-utils)
 
 **Low Priority:**
-8. Layout components (Navigation, Footer)
-9. Badge components (StatusBadge, PriorityBadge)
+9. Layout components (Navigation, Footer)
+10. Badge components (StatusBadge, PriorityBadge)
 
 ---
 
 ## Testing Results
 
-### After Critical Fixes & Invitation System Implementation
+### After Filter Persistence & System Theme Implementation
 ```bash
 ✅ npm run lint       # No warnings or errors
 ✅ npm run typecheck  # No TypeScript errors
 ✅ npm run build      # Successful compilation
-✅ npm test           # 75/75 tests passing (39 tests for invitation system + 7 new for displayName)
+✅ npm test           # 127/127 tests passing (+52 new tests: 24 use-persisted-state, 28 theme-provider)
 ```
 
 **Test Suite Summary:**
-- Test Suites: 9 passed, 9 total
-- Tests: 75 passed, 75 total
+- Test Suites: 11 passed, 11 total
+- Tests: 127 passed, 127 total
 - Snapshots: 0 total
-- Time: ~1.6 seconds
+- Time: ~1.7 seconds
 - Invitation System Coverage: 97.97%
+- New Features Coverage: 100% (use-persisted-state, theme-provider)
 
 ### Build Output
 ```
@@ -217,6 +304,8 @@ Route (app)                              Size     First Load JS
 When continuing test coverage work, prioritize in this order:
 
 1. **High Priority Tests:**
+   - [x] ~~Add tests for use-persisted-state hook~~ ✅ Completed (24 tests)
+   - [x] ~~Add tests for theme provider~~ ✅ Completed (28 tests)
    - [ ] Add tests for use-realtime-notes-v2.tsx hook
    - [ ] Add tests for page components (props, tasks, notes)
    - [ ] Add tests for form components (ItemForm, TaskForm, NoteForm)
@@ -226,7 +315,7 @@ When continuing test coverage work, prioritize in this order:
 2. **Medium Priority Tests:**
    - [ ] Add tests for UI components (multi-select, command palette)
    - [ ] Add tests for utility functions (color-utils, auth-utils)
-   - [ ] Add tests for theme provider
+   - [ ] Test filter persistence integration in actual page components
 
 3. **Low Priority Tests:**
    - [ ] Add tests for layout components (Navigation, Footer)
@@ -234,5 +323,5 @@ When continuing test coverage work, prioritize in this order:
 
 ---
 
-**Last Updated:** 2025-10-06
+**Last Updated:** 2025-10-07
 **Next Review:** After adding tests for use-realtime-notes-v2.tsx or page components
