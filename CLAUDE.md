@@ -210,8 +210,6 @@ useEffect(() => {
 
 ## TODO Backlog
 
-**🚨 ACTIVE REFACTOR**: See `.REFACTOR-START-HERE.md` and `.SUPABASE-AUTH-REFACTOR-PLAN.md` for v0.15.0 implementation with correct auth patterns.
-
 1. Auto-archive completed tasks (14-day threshold, `completed_at` + `archived` fields)
 2. ~~Persist filter settings to localStorage~~ ✅ COMPLETED (v0.14.0)
 3. Consider consolidating localStorage keys per page (optional performance optimization - single object vs multiple keys per filter)
@@ -222,39 +220,38 @@ useEffect(() => {
    - Symptoms: Theme flashes light before dark loads, filters show defaults before localStorage values, admin navigation items appear delayed
    - Root cause: Default values render first, then localStorage is read and state updates (causing re-render)
    - Solutions to investigate: SSR hydration with localStorage values, loading spinner/skeleton, synchronous localStorage reads
-8. ~~**Persist current route/page across browser refresh**~~ ✅ COMPLETED (v0.15.0) - REVERTED DUE TO BUG, RE-IMPLEMENT
-9. **Improve filter UX - allow collapsing active filters**
+8. **Improve filter UX - allow collapsing active filters**
    - Current: Filters auto-expand when active and cannot be collapsed (poor UX with persisted filters)
    - Proposed: Collapsed by default with active filter badges, user can expand/collapse freely, state not persisted
-10. **Restructure project root directory** - reduce clutter (see PERFORMANCE_ANALYSIS.md for current issues)
-11. **Admin status in AuthProvider context (non-blocking pattern)** - RE-IMPLEMENT v0.15.0 FEATURE
+9. **Restructure project root directory** - reduce clutter (see PERFORMANCE_ANALYSIS.md for current issues)
+10. ~~**Admin status in AuthProvider context (non-blocking pattern)**~~ ✅ COMPLETED (v0.15.0)
     - Move admin checks from individual components (useAdminCheck hook) to centralized context
     - CRITICAL: Use separate useEffect, never block auth initialization
     - Reduces database queries by ~75% (single check vs per-component)
     - Must follow official Supabase async callback anti-pattern guidance
-12. **Navigation in root layout** - RE-IMPLEMENT v0.15.0 FEATURE
+11. ~~**Navigation in root layout**~~ ✅ COMPLETED (v0.15.0)
     - Eliminates Navigation re-mounting on route changes
     - Performance improvement (less re-renders)
-13. **URL redirect preservation after login** - RE-IMPLEMENT v0.15.0 FEATURE
+12. ~~**URL redirect preservation after login**~~ ✅ COMPLETED (v0.15.0)
     - Save destination URL when redirecting to login
     - Redirect to original page after successful authentication
     - Include getSafeRedirectPath() validation to prevent open redirect vulnerabilities
-14. **USER_UPDATED event handler for admin role changes** - RE-IMPLEMENT v0.15.0 FEATURE
+13. ~~**USER_UPDATED event handler for admin role changes**~~ ✅ COMPLETED (v0.15.0)
     - Listen for user metadata changes
     - Dynamically update admin status without requiring re-login
-15. **Consider Supabase client pattern migration** (low priority optimization)
+14. **Consider Supabase client pattern migration** (low priority optimization)
     - Current: Singleton pattern `export const supabase = createClient(...)`
     - Official: Lazy initialization with functions (create on-demand)
     - Singleton works but not official best practice
-16. **Consider app_metadata for admin roles** (future optimization)
+15. **Consider app_metadata for admin roles** (future optimization)
     - Current: Database query to `user_roles` table
     - Alternative: Store role in `app_metadata` (set server-side via Auth Admin API)
     - Eliminates database query, reduces latency
-17. **Consider JWT claims for roles** (future optimization, most performant)
+16. **Consider JWT claims for roles** (future optimization, most performant)
     - Embed role in JWT via Postgres function hook
     - No database query needed (role in token)
     - Requires custom access token hook in Supabase
-18. **Add timeout protection for auth operations** (production resilience)
+17. **Add timeout protection for auth operations** (production resilience)
     - Wrap critical auth calls with Promise.race pattern
     - Recommended: 5s for auth, 10s for profiles, 30s for other queries
     - Prevents edge cases from hanging app indefinitely

@@ -19,7 +19,7 @@ const navItems = [
 
 export function Navigation() {
   const { user, isAdmin } = useAuth()
-  const { theme } = useTheme()
+  const { resolvedTheme } = useTheme()
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -37,7 +37,7 @@ export function Navigation() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center" onClick={closeMobileMenu}>
               <Image
-                src={theme === 'dark' ? "/back2stage_logo_dark.svg" : "/back2stage_logo.svg"}
+                src={resolvedTheme === 'dark' ? "/back2stage_logo_dark.svg" : "/back2stage_logo.svg"}
                 alt="Back2Stage"
                 width={150}
                 height={28}
