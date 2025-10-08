@@ -181,18 +181,20 @@ useEffect(() => {
 - **Tiptap SSR**: Dynamic imports with `ssr: false` and `immediatelyRender: false`. Mobile viewport fix: `scrollIntoView()` on focus/click
 - **Task ranking**: INTEGER with 1000-unit spacing. Sort by priority → status → ranking
 - **Multi-select**: cmdk/Command with grid layout (2/3 cols). Search via `value={label}`, select via ID
-- **Admin system**: App-level security (no RLS). Client checks for UI, server validation in API routes
+- **Admin system**: App-level security (no RLS). Client checks for UI, server validation in API routes. Centralized in AuthProvider context (non-blocking pattern with separate useEffect)
 - **Invitation system**: Token-based (64-char hex), 7-day expiry, single-use, app-level security. Admin creates → URL displayed → user accepts with display name. Authorization header pattern for API auth
 - **Real-time**: Generic `useRealtimeData` hook with retry logic. Character data transformation for items. Uses ref pattern for callback stability
 - **Error boundaries**: Next.js 14 error.tsx files for each route with German UI, retry functionality, proper error logging
 - **Color system**: Hex in DB → RGBA utilities. Category backgrounds (5% opacity), character badges
-- **Theme system**: Context + localStorage ("back2stage-theme"). Three modes: light, dark, system (OS preference detection via matchMedia). Theme toggle cycles through all three. Logo switching per theme.
+- **Theme system**: Context + localStorage ("back2stage-theme"). Three modes: light, dark, system (OS preference detection via matchMedia). Theme toggle cycles through all three. Logo uses `resolvedTheme` with mounted state to prevent SSR hydration mismatch
 - **Mobile**: Icon-only buttons, burger menu, responsive layouts, editor viewport scrolling
 - **Database schema**: ALWAYS update both SQL schema AND TypeScript types in `src/types/database.ts`
 - **Supabase client**: Use singleton `supabase` instance from lib/supabase.ts to avoid multiple client warnings
 - **Supabase typing**: Use `(supabase as any)` for insert/update when inference fails
+- **Supabase auth**: CRITICAL - Never use async operations in auth callbacks (onAuthStateChange, getSession().then()). Auth initialization and supplementary queries (admin status, profiles) MUST be in separate useEffects. See "Supabase Auth Anti-Patterns & Best Practices" section for complete patterns
 - **Testing**: Jest + React Testing Library. Mock Supabase client, use renderHook for hooks, waitFor for async assertions
-- **Filter persistence**: `usePersistedState` hook persists all page filters and table sort state to localStorage (automatic save/restore across sessions). SSR-safe with error handling. Arrays, nulls, and objects handled correctly.
+- **Filter persistence**: `usePersistedState` hook persists all page filters and table sort state to localStorage (automatic save/restore across sessions). SSR-safe with error handling. Arrays, nulls, and objects handled correctly
+- **SSR hydration**: Use mounted state for client-only values (theme, localStorage) to prevent server/client mismatch. Server renders safe defaults, client updates after mount
 
 ## Page-Specific Filter States
 
@@ -257,7 +259,7 @@ useEffect(() => {
     - Prevents edge cases from hanging app indefinitely
 
 ## Recent Changes
-- **v0.15.0**: Auth & navigation optimizations (FIXED with non-blocking pattern) - centralized admin status in AuthProvider with TWO separate useEffects (follows official Supabase async callback anti-pattern guidance), auth initialization completes fast while supplementary queries load separately, URL redirect preservation with getSafeRedirectPath() security validation, Navigation already in root layout (performance), USER_UPDATED event handler for dynamic role changes, comprehensive non-blocking auth tests (4 new tests), removed broken v0.15.0 tests, all 186 tests passing
+- **v0.15.0**: Auth & navigation optimizations (FIXED with non-blocking pattern) - centralized admin status in AuthProvider with TWO separate useEffects (follows official Supabase async callback anti-pattern guidance), auth initialization completes fast while supplementary queries load separately, URL redirect preservation with getSafeRedirectPath() security validation, Navigation already in root layout (performance), USER_UPDATED event handler for dynamic role changes, fixed logo SSR hydration mismatch (mounted state prevents server/client mismatch), comprehensive non-blocking auth tests (4 new tests), removed broken v0.15.0 tests, all 186 tests passing
 - **v0.14.0**: Filter persistence & system theme support - all filters persist to localStorage, system theme with OS detection, usePersistedState hook with SSR safety, 52 new tests (129 total)
 - **v0.13.0**: Invite-only authentication system - token-based registration, admin invitation UI, Authorization header pattern, 39 tests (97.97% coverage)
 - **v0.12.5**: Code quality improvements - enhanced error logging for version save failures, added localStorage error handling in theme provider, removed unused exports (~50 lines) from utility files
