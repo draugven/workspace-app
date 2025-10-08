@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { useTheme } from '@/components/theme/theme-provider'
@@ -22,6 +22,12 @@ export function Navigation() {
   const { resolvedTheme } = useTheme()
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // Prevent SSR hydration mismatch for theme-dependent logo
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -37,7 +43,7 @@ export function Navigation() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center" onClick={closeMobileMenu}>
               <Image
-                src={resolvedTheme === 'dark' ? "/back2stage_logo_dark.svg" : "/back2stage_logo.svg"}
+                src={mounted && resolvedTheme === 'dark' ? "/back2stage_logo_dark.svg" : "/back2stage_logo.svg"}
                 alt="Back2Stage"
                 width={150}
                 height={28}
