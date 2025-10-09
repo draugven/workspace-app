@@ -96,11 +96,19 @@ A Next.js web application for small theater production teams to manage props, co
 │   └── types/                 # TypeScript definitions
 │       ├── database.ts        # Database schema types
 │       └── index.ts           # Extended types with colors
+├── docs/                      # Documentation
+│   ├── lessons-learned/       # Postmortems and technical learnings
+│   ├── CODE_ANALYSIS.md       # Code review findings
+│   ├── PERFORMANCE_ANALYSIS.md    # Performance analysis
+│   ├── TEST_COVERAGE.md       # Test coverage reports
+│   ├── TESTING.md             # Testing guidelines
+│   └── supabase-invite-only-implementation.md
 ├── scripts/
 │   └── database-setup/        # SQL schema and setup scripts
 ├── docker/                    # Docker configuration
 ├── .github/workflows/         # GitHub Actions CI/CD
 ├── public/                    # Static assets (logos, favicons)
+├── CLAUDE.md                  # Project instructions for AI
 └── README.md
 ```
 
