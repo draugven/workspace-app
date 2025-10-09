@@ -33,7 +33,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Tests**: 186 passing (auth 55, real-time 16, theme 28, API 39, others 48)
 
 ## Development Guidelines
-- Current version: 0.15.0 (SemVer: MAJOR.MINOR.PATCH)
+- Current version: 0.15.1 (SemVer: MAJOR.MINOR.PATCH)
 - Update both `package.json` and CLAUDE.md version before committing
 - Use conventional commit messages (feat:, fix:, BREAKING CHANGE:)
 - Always run `npm run lint`, `npm run typecheck`, `npm run build`, `npm test` after major changes
@@ -140,10 +140,10 @@ useEffect(() => {
 **Features:**
 - **Admin**: App-level security (no RLS), centralized in AuthProvider (non-blocking), server validates API routes
 - **Invitations**: Token-based (64-char hex), 7-day expiry, single-use, Authorization header for API auth
-- **Real-time**: Generic `useRealtimeData` hook with retry logic, ref pattern for callback stability
+- **Real-time**: Generic `useRealtimeData` hook with retry logic, ref pattern for callback stability, `useRealtimeTasks` transforms nested tag structure
 - **Filters**: `usePersistedState` hook for localStorage persistence (SSR-safe, handles arrays/nulls/objects)
 - **Theme**: Context + localStorage, 3 modes (light/dark/system), matchMedia for OS detection
-- **Tasks**: INTEGER ranking (1000-unit spacing), sort by priority → status → ranking
+- **Tasks**: INTEGER ranking (1000-unit spacing), sort by priority → status → ranking, tags displayed in kanban/table/dialog
 - **Multi-select**: cmdk/Command grid layout (2/3 cols), search via `value={label}`, select via ID
 - **Colors**: Hex in DB → RGBA utils, category backgrounds (5% opacity), character badges
 - **Error boundaries**: Next.js 14 error.tsx per route, German UI, retry functionality
@@ -182,6 +182,7 @@ useEffect(() => {
 11. Offline capabilities research
 
 ## Recent Changes
+- **v0.15.1**: Fix task tags display by transforming nested `task_tag_assignments` structure in `useRealtimeTasks` hook
 - **v0.15.0**: Centralized admin (non-blocking pattern with separate useEffects), URL redirect preservation, USER_UPDATED handler, logo SSR fix, 186 tests
 - **v0.14.0**: Filter persistence (usePersistedState hook), system theme support, 52 new tests
 - **v0.13.0**: Invite-only auth system, token-based registration, 39 tests

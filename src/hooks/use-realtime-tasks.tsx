@@ -4,6 +4,19 @@ import { useCallback } from 'react'
 import { useRealtimeData } from './use-realtime-data'
 import type { Task } from '@/types'
 
+// Transform function to flatten nested tag structure from Supabase
+const transformTaskData = (rawTask: any): Task => {
+  const { task_tag_assignments, ...taskData } = rawTask
+
+  // Transform nested task_tag_assignments structure to flat tags array
+  const tags = task_tag_assignments?.map((assignment: any) => assignment.task_tags).filter(Boolean) || []
+
+  return {
+    ...taskData,
+    tags
+  } as Task
+}
+
 export function useRealtimeTasks(enableLogs = false) {
   // Stable filter function to prevent infinite re-renders
   const tasksFilter = useCallback((user: any) =>
@@ -28,7 +41,12 @@ export function useRealtimeTasks(enableLogs = false) {
     }
   }, [enableLogs])
 
-  return useRealtimeData<Task>({
+  // Type for raw task data from Supabase (before transformation)
+  type RawTask = Omit<Task, 'tags'> & {
+    task_tag_assignments?: Array<{ task_tags: any }>
+  }
+
+  const result = useRealtimeData<RawTask>({
     tableName: 'tasks',
     selectQuery: `
       *,
@@ -44,4 +62,10 @@ export function useRealtimeTasks(enableLogs = false) {
     onUpdate: onUpdateCallback,
     onDelete: onDeleteCallback
   })
+
+  // Transform the data to flatten nested tags structure
+  return {
+    ...result,
+    data: result.data.map(transformTaskData) as Task[]
+  }
 }
