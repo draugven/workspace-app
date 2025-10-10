@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import Image from 'next/image'
 import { AuthSetup } from '@/components/auth/auth-setup'
 
@@ -18,7 +19,9 @@ export default function LoginPage() {
             />
           </div>
         </div>
-        <AuthSetup />
+        <Suspense fallback={<div className="text-center text-muted-foreground">Lädt...</div>}>
+          <AuthSetup />
+        </Suspense>
       </div>
     </div>
   )
