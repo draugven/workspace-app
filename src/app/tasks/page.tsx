@@ -225,15 +225,8 @@ export default function TasksPage() {
     }
   }
 
-  // Check if any filters are active (for smart expand/collapse)
-  const hasActiveFilters = searchTerm || selectedDepartment || selectedStatus || selectedPriority || selectedTags.length > 0 || selectedAssignee
-
-  // Auto-expand filters when filters become active
-  useEffect(() => {
-    if (hasActiveFilters && !filtersExpanded) {
-      setFiltersExpanded(true)
-    }
-  }, [hasActiveFilters, filtersExpanded])
+  // Check if any filters are active (excluding search term)
+  const hasActiveFilters = selectedDepartment || selectedStatus || selectedPriority || selectedTags.length > 0 || selectedAssignee
 
   // Filter tasks based on search term, department, tags, status, priority, assignee, and completion
   const filteredTasks = tasks.filter(task => {
@@ -274,7 +267,7 @@ export default function TasksPage() {
           searchPlaceholder="Aufgaben durchsuchen..."
           actions={
             <>
-              {!filtersExpanded && (
+              {!filtersExpanded && !hasActiveFilters && (
                 <Button
                   variant="outline"
                   onClick={() => setFiltersExpanded(true)}
@@ -283,13 +276,6 @@ export default function TasksPage() {
                 >
                   <Filter className="h-4 w-4" />
                   <span className="hidden sm:inline">Filter</span>
-                  {hasActiveFilters && (
-                    <Badge variant="secondary" className="ml-1">
-                      {[selectedDepartment && 'Abteilung', selectedStatus && 'Status',
-                        selectedPriority && 'Priorität', selectedTags.length && 'Tags', selectedAssignee && 'Zugewiesen']
-                        .filter(Boolean).length}
-                    </Badge>
-                  )}
                 </Button>
               )}
               <Button
@@ -340,6 +326,96 @@ export default function TasksPage() {
                       'border-gray-200 text-gray-700'
           }))}
         />
+
+        {/* Active Filters Summary (shown when collapsed and filters active) */}
+        {!filtersExpanded && hasActiveFilters && (
+          <div className="flex flex-wrap items-center gap-2 py-2">
+            <Button
+              variant="outline"
+              onClick={() => setFiltersExpanded(true)}
+              className="gap-2"
+              title="Filter"
+            >
+              <Filter className="h-4 w-4" />
+              <span className="hidden sm:inline">Filter</span>
+              <Badge variant="secondary" className="ml-1">
+                {[selectedDepartment && 'Abteilung', selectedStatus && 'Status',
+                  selectedPriority && 'Priorität', selectedTags.length && 'Tags', selectedAssignee && 'Zugewiesen']
+                  .filter(Boolean).length}
+              </Badge>
+            </Button>
+            {selectedDepartment && (
+              <Badge variant="secondary" className="gap-1">
+                {departments.find(d => d.id === selectedDepartment)?.name}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setSelectedDepartment(null)}
+                />
+              </Badge>
+            )}
+            {selectedStatus && (
+              <Badge variant="secondary" className="gap-1">
+                {selectedStatus === 'not_started' ? 'Zu erledigen' :
+                 selectedStatus === 'in_progress' ? 'In Bearbeitung' :
+                 selectedStatus === 'done' ? 'Erledigt' :
+                 selectedStatus === 'blocked' ? 'Blockiert' : selectedStatus}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setSelectedStatus(null)}
+                />
+              </Badge>
+            )}
+            {selectedPriority && (
+              <Badge variant="secondary" className="gap-1">
+                {selectedPriority === 'urgent' ? 'Dringend' :
+                 selectedPriority === 'high' ? 'Hoch' :
+                 selectedPriority === 'medium' ? 'Mittel' :
+                 selectedPriority === 'low' ? 'Niedrig' : selectedPriority}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setSelectedPriority(null)}
+                />
+              </Badge>
+            )}
+            {selectedTags.map(tagId => {
+              const tag = tags.find(t => t.id === tagId)
+              return tag ? (
+                <Badge key={tagId} variant="secondary" className="gap-1">
+                  {tag.name}
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={() => setSelectedTags(selectedTags.filter(id => id !== tagId))}
+                  />
+                </Badge>
+              ) : null
+            })}
+            {selectedAssignee && (
+              <Badge variant="secondary" className="gap-1">
+                {selectedAssignee === 'unassigned'
+                  ? 'Nicht zugewiesen'
+                  : users.find(u => u.id === selectedAssignee)?.full_name || 'Unbekannt'}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setSelectedAssignee(null)}
+                />
+              </Badge>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedDepartment(null)
+                setSelectedStatus(null)
+                setSelectedPriority(null)
+                setSelectedTags([])
+                setSelectedAssignee(null)
+              }}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Alle löschen
+            </Button>
+          </div>
+        )}
 
         {/* Filter Controls - only show when expanded */}
         {filtersExpanded && (
@@ -602,93 +678,6 @@ export default function TasksPage() {
               )}
             </CardContent>
           </Card>
-        )}
-
-        {/* Active Filters Summary (shown when collapsed) */}
-        {!filtersExpanded && hasActiveFilters && (
-          <div className="flex flex-wrap items-center gap-2 py-1">
-            <span className="text-sm text-muted-foreground">Aktive Filter:</span>
-            {searchTerm && (
-              <Badge variant="secondary" className="gap-1">
-                Suche: {searchTerm}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => setSearchTerm('')}
-                />
-              </Badge>
-            )}
-            {selectedDepartment && (
-              <Badge variant="secondary" className="gap-1">
-                {departments.find(d => d.id === selectedDepartment)?.name}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => setSelectedDepartment(null)}
-                />
-              </Badge>
-            )}
-            {selectedStatus && (
-              <Badge variant="secondary" className="gap-1">
-                {selectedStatus === 'not_started' ? 'Zu erledigen' :
-                 selectedStatus === 'in_progress' ? 'In Bearbeitung' :
-                 selectedStatus === 'done' ? 'Erledigt' :
-                 selectedStatus === 'blocked' ? 'Blockiert' : selectedStatus}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => setSelectedStatus(null)}
-                />
-              </Badge>
-            )}
-            {selectedPriority && (
-              <Badge variant="secondary" className="gap-1">
-                {selectedPriority === 'urgent' ? 'Dringend' :
-                 selectedPriority === 'high' ? 'Hoch' :
-                 selectedPriority === 'medium' ? 'Mittel' :
-                 selectedPriority === 'low' ? 'Niedrig' : selectedPriority}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => setSelectedPriority(null)}
-                />
-              </Badge>
-            )}
-            {selectedTags.map(tagId => {
-              const tag = tags.find(t => t.id === tagId)
-              return tag ? (
-                <Badge key={tagId} variant="secondary" className="gap-1">
-                  {tag.name}
-                  <X
-                    className="h-3 w-3 cursor-pointer"
-                    onClick={() => setSelectedTags(selectedTags.filter(id => id !== tagId))}
-                  />
-                </Badge>
-              ) : null
-            })}
-            {selectedAssignee && (
-              <Badge variant="secondary" className="gap-1">
-                {selectedAssignee === 'unassigned'
-                  ? 'Nicht zugewiesen'
-                  : users.find(u => u.id === selectedAssignee)?.full_name || 'Unbekannt'}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => setSelectedAssignee(null)}
-                />
-              </Badge>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setSearchTerm('')
-                setSelectedDepartment(null)
-                setSelectedStatus(null)
-                setSelectedPriority(null)
-                setSelectedTags([])
-                setSelectedAssignee(null)
-              }}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Alle löschen
-            </Button>
-          </div>
         )}
 
         {/* Loading and Error States */}

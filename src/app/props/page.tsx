@@ -64,15 +64,8 @@ export default function ItemsPage() {
     fetchFilterData()
   }, [])
 
-  // Check if any filters are active
-  const hasActiveFilters = searchTerm || selectedCategory || selectedSource || selectedCharacters.length > 0 || selectedStatus
-
-  // Auto-expand filters when filters become active
-  useEffect(() => {
-    if (hasActiveFilters && !filtersExpanded) {
-      setFiltersExpanded(true)
-    }
-  }, [hasActiveFilters, filtersExpanded])
+  // Check if any filters are active (excluding search term)
+  const hasActiveFilters = selectedCategory || selectedSource || selectedCharacters.length > 0 || selectedStatus
 
   const handleCreateItem = async (itemData: Partial<Item> & { character_ids?: string[] }) => {
     try {
@@ -246,7 +239,7 @@ export default function ItemsPage() {
           searchPlaceholder="Requisiten durchsuchen..."
           actions={
             <>
-              {!filtersExpanded && (
+              {!filtersExpanded && !hasActiveFilters && (
                 <Button
                   variant="outline"
                   onClick={() => setFiltersExpanded(true)}
@@ -255,13 +248,6 @@ export default function ItemsPage() {
                 >
                   <Filter className="h-4 w-4" />
                   <span className="hidden sm:inline">Filter</span>
-                  {hasActiveFilters && (
-                    <Badge variant="secondary" className="ml-1">
-                      {[selectedCategory && 'Kategorie', selectedSource && 'Quelle',
-                        selectedCharacters.length && 'Charaktere', selectedStatus && 'Status']
-                        .filter(Boolean).length}
-                    </Badge>
-                  )}
                 </Button>
               )}
               <Button
@@ -299,6 +285,78 @@ export default function ItemsPage() {
             text: `${status}: ${count}`
           }))}
         />
+
+        {/* Active Filters Summary (shown when collapsed and filters active) */}
+        {!filtersExpanded && hasActiveFilters && (
+          <div className="flex flex-wrap items-center gap-2 py-2">
+            <Button
+              variant="outline"
+              onClick={() => setFiltersExpanded(true)}
+              className="gap-2"
+              title="Filter"
+            >
+              <Filter className="h-4 w-4" />
+              <span className="hidden sm:inline">Filter</span>
+              <Badge variant="secondary" className="ml-1">
+                {[selectedCategory && 'Kategorie', selectedSource && 'Quelle',
+                  selectedCharacters.length && 'Charaktere', selectedStatus && 'Status']
+                  .filter(Boolean).length}
+              </Badge>
+            </Button>
+            {selectedCategory && (
+              <Badge variant="secondary" className="gap-1">
+                {categories.find(c => c.id === selectedCategory)?.name}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setSelectedCategory(null)}
+                />
+              </Badge>
+            )}
+            {selectedSource && (
+              <Badge variant="secondary" className="gap-1">
+                {selectedSource}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setSelectedSource(null)}
+                />
+              </Badge>
+            )}
+            {selectedCharacters.map(charId => {
+              const char = characters.find(c => c.id === charId)
+              return char ? (
+                <Badge key={charId} variant="secondary" className="gap-1">
+                  {char.name}
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={() => setSelectedCharacters(selectedCharacters.filter(id => id !== charId))}
+                  />
+                </Badge>
+              ) : null
+            })}
+            {selectedStatus && (
+              <Badge variant="secondary" className="gap-1">
+                {selectedStatus}
+                <X
+                  className="h-3 w-3 cursor-pointer"
+                  onClick={() => setSelectedStatus(null)}
+                />
+              </Badge>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSelectedCategory(null)
+                setSelectedSource(null)
+                setSelectedCharacters([])
+                setSelectedStatus(null)
+              }}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Alle löschen
+            </Button>
+          </div>
+        )}
 
         {/* Filter Controls - only show when expanded */}
         {filtersExpanded && (
@@ -458,67 +516,6 @@ export default function ItemsPage() {
               )}
             </CardContent>
           </Card>
-        )}
-
-        {/* Active Filters Summary (shown when collapsed) */}
-        {!filtersExpanded && hasActiveFilters && (
-          <div className="flex flex-wrap items-center gap-2 py-1">
-            <span className="text-sm text-muted-foreground">Aktive Filter:</span>
-            {selectedCategory && (
-              <Badge variant="secondary" className="gap-1">
-                {categories.find(c => c.id === selectedCategory)?.name}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => setSelectedCategory(null)}
-                />
-              </Badge>
-            )}
-            {selectedSource && (
-              <Badge variant="secondary" className="gap-1">
-                {selectedSource}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => setSelectedSource(null)}
-                />
-              </Badge>
-            )}
-            {selectedStatus && (
-              <Badge variant="secondary" className="gap-1">
-                {selectedStatus}
-                <X
-                  className="h-3 w-3 cursor-pointer"
-                  onClick={() => setSelectedStatus(null)}
-                />
-              </Badge>
-            )}
-            {selectedCharacters.map(charId => {
-              const char = characters.find(c => c.id === charId)
-              return char ? (
-                <Badge key={charId} variant="secondary" className="gap-1">
-                  {char.name}
-                  <X
-                    className="h-3 w-3 cursor-pointer"
-                    onClick={() => setSelectedCharacters(prev => prev.filter(id => id !== charId))}
-                  />
-                </Badge>
-              ) : null
-            })}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setSearchTerm('')
-                setSelectedCategory(null)
-                setSelectedSource(null)
-                setSelectedCharacters([])
-                setSelectedStatus(null)
-              }}
-              className="gap-2 h-6 text-xs"
-            >
-              <X className="h-3 w-3" />
-              Alle zurücksetzen
-            </Button>
-          </div>
         )}
 
         {/* Loading and Error States */}

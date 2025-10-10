@@ -33,7 +33,7 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - **Tests**: 186 passing (auth 55, real-time 16, theme 28, API 39, others 48)
 
 ## Development Guidelines
-- Current version: 0.15.1 (SemVer: MAJOR.MINOR.PATCH)
+- Current version: 0.15.2 (SemVer: MAJOR.MINOR.PATCH)
 - Update both `package.json` and CLAUDE.md version before committing
 - Use conventional commit messages (feat:, fix:, BREAKING CHANGE:)
 - Always run `npm run lint`, `npm run typecheck`, `npm run build`, `npm test` after major changes
@@ -166,8 +166,7 @@ useEffect(() => {
 
 **High Priority:**
 1. Mitigate localStorage loading "flash" (theme/filters flash defaults before persisted values load)
-2. Improve filter UX - collapsible with active filter badges
-3. Auto-archive completed tasks (14-day threshold)
+2. Auto-archive completed tasks (14-day threshold)
 
 **Medium Priority:**
 4. Fix version history dialog mobile responsiveness
@@ -182,7 +181,8 @@ useEffect(() => {
 11. Offline capabilities research
 
 ## Recent Changes
-- **v0.15.1**: Fix task tags display by transforming nested `task_tag_assignments` structure in `useRealtimeTasks` hook
+- **v0.15.2**: Improve filter UX - removed auto-expand logic, collapsed filters show badges under stats, better persisted filter handling
+- **v0.15.1**: Fix task tags display by transforming nested `task_tag_assignments` structure in `useRealtimeTasks` hook, fix deployment build errors
 - **v0.15.0**: Centralized admin (non-blocking pattern with separate useEffects), URL redirect preservation, USER_UPDATED handler, logo SSR fix, 186 tests
 - **v0.14.0**: Filter persistence (usePersistedState hook), system theme support, 52 new tests
 - **v0.13.0**: Invite-only auth system, token-based registration, 39 tests
