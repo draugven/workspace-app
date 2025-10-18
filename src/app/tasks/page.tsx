@@ -65,6 +65,9 @@ export default function TasksPage() {
       if (!user) throw new Error('Not authenticated')
 
       // Load supporting data in parallel (tasks are handled by real-time hook)
+      // Get current session for auth token
+      const { data: { session } } = await supabase.auth.getSession()
+
       const [departmentsResponse, tagsResponse, usersResponse] = await Promise.all([
         supabase
           .from('departments')
@@ -76,8 +79,12 @@ export default function TasksPage() {
           .select('*')
           .order('name'),
 
-        // Fetch all users from our API route
-        fetch('/api/users').then(res => res.json())
+        // Fetch all users from our API route with auth header
+        fetch('/api/users', {
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`
+          }
+        }).then(res => res.json())
       ])
 
       if (departmentsResponse.error) throw departmentsResponse.error
