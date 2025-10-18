@@ -89,7 +89,7 @@ export function Navigation() {
             <div className="hidden md:flex items-center space-x-4">
               <ThemeToggle />
               <span className="text-sm text-muted-foreground hidden lg:block">
-                {user.user_metadata?.full_name || user.email}
+                {user.user_metadata?.display_name || user.email}
               </span>
               <Button variant="outline" size="sm" onClick={handleSignOut}>
                 Abmelden
