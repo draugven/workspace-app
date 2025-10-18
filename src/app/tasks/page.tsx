@@ -400,7 +400,7 @@ export default function TasksPage() {
               <Badge variant="secondary" className="gap-1">
                 {selectedAssignee === 'unassigned'
                   ? 'Nicht zugewiesen'
-                  : users.find(u => u.id === selectedAssignee)?.full_name || 'Unbekannt'}
+                  : users.find(u => u.id === selectedAssignee)?.display_name || 'Unbekannt'}
                 <X
                   className="h-3 w-3 cursor-pointer"
                   onClick={() => setSelectedAssignee(null)}
@@ -562,7 +562,7 @@ export default function TasksPage() {
                     options={[
                       { value: "all", label: "Alle" },
                       { value: "unassigned", label: "Unassigned" },
-                      ...users.map(user => ({ value: user.id, label: user.full_name }))
+                      ...users.map(user => ({ value: user.id, label: user.display_name }))
                     ]}
                     value={selectedAssignee || 'all'}
                     onValueChange={(value) => setSelectedAssignee(value === 'all' ? null : value)}
@@ -658,7 +658,7 @@ export default function TasksPage() {
                     <Badge variant="secondary" className="gap-1">
                       {selectedAssignee === 'unassigned'
                         ? 'Nicht zugewiesen'
-                        : users.find(u => u.id === selectedAssignee)?.full_name || 'Unbekannt'}
+                        : users.find(u => u.id === selectedAssignee)?.display_name || 'Unbekannt'}
                       <X
                         className="h-3 w-3 cursor-pointer"
                         onClick={() => setSelectedAssignee(null)}

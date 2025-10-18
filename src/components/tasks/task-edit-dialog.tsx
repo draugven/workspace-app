@@ -204,7 +204,7 @@ export function TaskEditDialog({
             <Combobox
               options={[
                 { value: "none", label: "Niemandem zugewiesen" },
-                ...users.map(user => ({ value: user.id, label: `${user.full_name} (${user.email})` }))
+                ...users.map(user => ({ value: user.id, label: `${user.display_name} (${user.email})` }))
               ]}
               value={editedTask.assigned_to || 'none'}
               onValueChange={(value) => setEditedTask({ ...editedTask, assigned_to: value === 'none' ? undefined : value })}

@@ -332,7 +332,7 @@ describe('POST /api/invitations/accept', () => {
         email_confirm: true,
         user_metadata: {
           invited_by: 'admin-123',
-          full_name: 'Test User',
+          display_name: 'Test User',
         },
       })
     })
@@ -361,7 +361,7 @@ describe('POST /api/invitations/accept', () => {
         email_confirm: true,
         user_metadata: {
           invited_by: 'admin-123',
-          full_name: 'Test User',
+          display_name: 'Test User',
         },
       })
     })
@@ -398,7 +398,7 @@ describe('POST /api/invitations/accept', () => {
           email_confirm: true,
           user_metadata: {
             invited_by: 'admin-123',
-            full_name: name,
+            display_name: name,
           },
         })
       }

@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       email_confirm: true, // Auto-confirm since they used valid invite
       user_metadata: {
         invited_by: invitation.invited_by,
-        full_name: displayName.trim()
+        display_name: displayName.trim()
       }
     })
 

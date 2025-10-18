@@ -89,8 +89,8 @@ export function TasksTable({
     if (sortField === 'assigned_to') {
       const aAssignee = users.find(u => u.id === a.assigned_to)
       const bAssignee = users.find(u => u.id === b.assigned_to)
-      aVal = aAssignee?.full_name || ''
-      bVal = bAssignee?.full_name || ''
+      aVal = aAssignee?.display_name || ''
+      bVal = bAssignee?.display_name || ''
     }
 
     if (sortDirection === 'asc') {
@@ -246,7 +246,7 @@ export function TasksTable({
                 {task.assigned_to ? (
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground">👤</span>
-                    <span>{users.find(u => u.id === task.assigned_to)?.full_name || 'Unknown User'}</span>
+                    <span>{users.find(u => u.id === task.assigned_to)?.display_name || 'Unknown User'}</span>
                   </div>
                 ) : (
                   <span className="text-muted-foreground">—</span>

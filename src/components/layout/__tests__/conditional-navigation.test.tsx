@@ -30,7 +30,7 @@ describe('ConditionalNavigation', () => {
 
     // Default auth state: authenticated non-admin user
     ;(useAuth as jest.Mock).mockReturnValue({
-      user: { id: 'user-123', email: 'test@example.com', user_metadata: { full_name: 'Test User' } },
+      user: { id: 'user-123', email: 'test@example.com', user_metadata: { display_name: 'Test User' } },
       loading: false,
       isAdmin: false,
     })
@@ -95,7 +95,7 @@ describe('ConditionalNavigation', () => {
     it('shows navigation on /admin/invitations page', () => {
       ;(usePathname as jest.Mock).mockReturnValue('/admin/invitations')
       ;(useAuth as jest.Mock).mockReturnValue({
-        user: { id: 'admin-123', email: 'admin@example.com', user_metadata: { full_name: 'Admin User' } },
+        user: { id: 'admin-123', email: 'admin@example.com', user_metadata: { display_name: 'Admin User' } },
         loading: false,
         isAdmin: true,
       })
@@ -110,7 +110,7 @@ describe('ConditionalNavigation', () => {
     it('shows invitations link for admin users', () => {
       ;(usePathname as jest.Mock).mockReturnValue('/props')
       ;(useAuth as jest.Mock).mockReturnValue({
-        user: { id: 'admin-123', email: 'admin@example.com', user_metadata: { full_name: 'Admin User' } },
+        user: { id: 'admin-123', email: 'admin@example.com', user_metadata: { display_name: 'Admin User' } },
         loading: false,
         isAdmin: true,
       })
@@ -123,7 +123,7 @@ describe('ConditionalNavigation', () => {
     it('does not show invitations link for non-admin users', () => {
       ;(usePathname as jest.Mock).mockReturnValue('/props')
       ;(useAuth as jest.Mock).mockReturnValue({
-        user: { id: 'user-123', email: 'user@example.com', user_metadata: { full_name: 'Test User' } },
+        user: { id: 'user-123', email: 'user@example.com', user_metadata: { display_name: 'Test User' } },
         loading: false,
         isAdmin: false,
       })
@@ -172,7 +172,7 @@ describe('ConditionalNavigation', () => {
         user: {
           id: 'user-123',
           email: 'test@example.com',
-          user_metadata: { full_name: 'Test User' }
+          user_metadata: { display_name: 'Test User' }
         },
         loading: false,
         isAdmin: false,

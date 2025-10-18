@@ -151,7 +151,7 @@ export function Navigation() {
               )}
               <div className="border-t pt-4 mt-4">
                 <div className="px-3 py-2 text-sm text-muted-foreground">
-                  {user.user_metadata?.full_name || user.email}
+                  {user.user_metadata?.display_name || user.email}
                 </div>
                 <Button
                   variant="outline"

@@ -49,7 +49,7 @@ export default function NotesPage() {
         setCurrentUser({
           id: user.id,
           email: user.email || '',
-          full_name: user.user_metadata?.full_name || user.email || '',
+          display_name: user.user_metadata?.display_name || user.email || '',
           created_at: user.created_at || ''
         })
       }

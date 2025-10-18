@@ -24,16 +24,16 @@ Theater Production Collaboration Tool: Custom web app for small theater producti
 - `invitations` - Invite-only authentication system with token-based user registration
 - `auth.users` - Supabase authentication with admin role system (no RLS, app-level security)
 
-## Current Status (v0.15.3)
+## Current Status (v0.15.4)
 - **Routes**: /props, /tasks, /notes, /admin/invitations, /accept-invite, API routes for admin operations
 - **Auth**: Token-based invitations, centralized admin context (non-blocking pattern), URL redirect preservation, USER_UPDATED event handler, authenticated /api/users endpoint
-- **Data**: 105+ props, character/category color system, app-level security (no RLS)
+- **Data**: 105+ props, character/category color system, app-level security (no RLS), user display names via `display_name` field
 - **UI**: Filter persistence (localStorage), multi-select, dark mode (light/dark/system), mobile-responsive
 - **Performance**: Navigation in root layout, 75% fewer admin DB queries
 - **Tests**: 186 passing (auth 55, real-time 16, theme 28, API 39, others 48)
 
 ## Development Guidelines
-- Current version: 0.15.3 (SemVer: MAJOR.MINOR.PATCH)
+- Current version: 0.15.4 (SemVer: MAJOR.MINOR.PATCH)
 - Update both `package.json` and CLAUDE.md version before committing
 - Use conventional commit messages (feat:, fix:, BREAKING CHANGE:)
 - Always run `npm run lint`, `npm run typecheck`, `npm run build`, `npm test` after major changes
@@ -181,6 +181,7 @@ useEffect(() => {
 11. Offline capabilities research
 
 ## Recent Changes
+- **v0.15.4**: Migrate user field from `full_name` to `display_name` - updated all components, types, API routes, and tests (186 tests passing)
 - **v0.15.3**: Fix /api/users authentication - added Authorization header to fetch call, enabling task private toggle visibility
 - **v0.15.2**: Improve filter UX - removed auto-expand logic, collapsed filters show badges under stats, better persisted filter handling
 - **v0.15.1**: Fix task tags display by transforming nested `task_tag_assignments` structure in `useRealtimeTasks` hook, fix deployment build errors

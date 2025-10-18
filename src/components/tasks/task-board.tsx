@@ -207,7 +207,7 @@ function DraggableTaskCard({ task, onClick, users = [], isOverlay = false }: Dra
             )}
             {task.assigned_to && (
               <div className="text-xs text-muted-foreground flex items-center gap-1">
-                👤 {users.find(u => u.id === task.assigned_to)?.full_name || 'Unknown User'}
+                👤 {users.find(u => u.id === task.assigned_to)?.display_name || 'Unknown User'}
               </div>
             )}
             {task.due_date && (

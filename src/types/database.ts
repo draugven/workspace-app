@@ -14,7 +14,7 @@ export interface Database {
           id: string
           email: string
           password_hash: string
-          full_name: string
+          display_name: string
           created_at: string
           updated_at: string
         }
@@ -22,7 +22,7 @@ export interface Database {
           id?: string
           email: string
           password_hash: string
-          full_name: string
+          display_name: string
           created_at?: string
           updated_at?: string
         }
