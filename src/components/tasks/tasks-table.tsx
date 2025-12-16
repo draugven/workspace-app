@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { EyeOff } from 'lucide-react'
 import { TaskStatusBadge } from './task-status-badge'
 import { PriorityBadge } from './priority-badge'
-import { TaskEditDialog } from './task-edit-dialog'
+import { TaskDialog } from './task-dialog'
 import { getDepartmentRowStyle } from "@/lib/utils"
 import type { Task, Department, TaskTag, User } from "@/types"
 
@@ -115,9 +115,10 @@ export function TasksTable({
     setEditDialogOpen(true)
   }
 
-  const handleTaskSave = (updatedTask: Task) => {
-    if (onTaskUpdate) {
-      onTaskUpdate(updatedTask)
+  const handleTaskSave = (updatedTask: Partial<Task>) => {
+    if (onTaskUpdate && updatedTask.id) {
+      // In edit mode, we always have an id
+      onTaskUpdate(updatedTask as Task)
     }
   }
 
@@ -257,7 +258,8 @@ export function TasksTable({
         </TableBody>
       </Table>
 
-      <TaskEditDialog
+      <TaskDialog
+        mode="edit"
         task={selectedTask}
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}

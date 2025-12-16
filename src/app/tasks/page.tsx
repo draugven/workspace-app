@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { TaskBoard } from '@/components/tasks/task-board'
 import { TasksTable } from '@/components/tasks/tasks-table'
-import { TaskAddDialog } from '@/components/tasks/task-add-dialog'
+import { TaskDialog } from '@/components/tasks/task-dialog'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -794,13 +794,15 @@ export default function TasksPage() {
         )}
 
         {/* Add Task Dialog */}
-        <TaskAddDialog
+        <TaskDialog
+          mode="add"
           open={addDialogOpen}
           onOpenChange={setAddDialogOpen}
           onSave={handleTaskCreate}
           departments={departments}
           tags={tags}
           users={users}
+          currentUser={currentUser}
         />
       </div>
     </ProtectedRoute>
